@@ -1,0 +1,83 @@
+﻿body {
+}
+/* =========================
+   Department Page Styles
+========================= */
+
+.department-card {
+    border-radius: 18px;
+    border: none;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+    animation: fadeUp .4s ease;
+}
+
+/* Animation */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Table */
+.department-table {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+    .department-table thead {
+        background: linear-gradient(90deg, #0d6efd, #4e8ef7);
+        color: #fff;
+    }
+
+        .department-table thead th {
+            border: none;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+    .department-table tbody tr {
+        transition: background-color .2s ease, transform .2s ease;
+    }
+
+        .department-table tbody tr:hover {
+            background-color: #f5f8ff;
+            transform: scale(1.002);
+        }
+
+/* Action Buttons */
+.action-btn {
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 3px;
+    transition: all .2s ease;
+}
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+/* Datatable Controls */
+.dataTable-input {
+    border-radius: 20px;
+    padding: 6px 14px;
+    border: 1px solid #dee2e6;
+}
+
+.dataTable-pagination a {
+    border-radius: 8px !important;
+}
+
+.dataTable-pagination .active a {
+    background-color: #0d6efd;
+    color: #fff;
+}

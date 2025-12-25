@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Add / Edit Staff";
+}
+
+<div class="pagetitle">
+    <h1>Add / Edit Staff</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+            </li>
+            <li class="breadcrumb-item">Master</li>
+            <li class="breadcrumb-item active">Staff</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+
+            <div class="card department-card">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        <i class="bi bi-person-badge text-primary me-1"></i>
+                        Staff Information
+                    </h5>
+
+                    <p class="text-muted">
+                        This page will allow administrators to add or update staff members
+                        and assign them to departments for meeting participation.
+                    </p>
+
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item">
+                            <strong>Staff Name:</strong> Required full name of staff member
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Department:</strong> Assigned department
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Mobile Number:</strong> Contact number
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Email Address:</strong> Official email ID
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Remarks:</strong> Optional additional notes
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4 mb-0">
+                        Staff add/edit form will be implemented in the next phase.
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

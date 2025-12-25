@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Add / Edit Meeting Member";
+}
+
+<div class="pagetitle">
+    <h1>Add / Edit Meeting Member</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+            </li>
+            <li class="breadcrumb-item">Meetings</li>
+            <li class="breadcrumb-item active">Meeting Member</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+
+            <div class="card department-card">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        <i class="bi bi-people text-primary me-1"></i>
+                        Meeting Member Information
+                    </h5>
+
+                    <p class="text-muted">
+                        This page will manage meeting participants and track
+                        their attendance for each scheduled meeting.
+                    </p>
+
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item">
+                            <strong>Meeting:</strong> Select the scheduled meeting
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Staff Member:</strong> Assign staff to meeting
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Presence:</strong> Mark attendance (Present / Absent)
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Remarks:</strong> Optional attendance notes
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4 mb-0">
+                        Meeting member add/edit form will be implemented in the next phase.
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

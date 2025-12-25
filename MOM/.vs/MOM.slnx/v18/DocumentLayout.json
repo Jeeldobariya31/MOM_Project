@@ -1,0 +1,531 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\staff\\stafflist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\staff\\stafflist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meetingvenue\\meetingvenuelist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meetingvenue\\meetingvenuelist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meetingtype\\meetingtypelist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meetingtype\\meetingtypelist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meetingmembers\\meetingmemberlist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meetingmembers\\meetingmemberlist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meeting\\meetinglist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meeting\\meetinglist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\department\\departmentlist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\department\\departmentlist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\department\\departmentaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\department\\departmentaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meetingtype\\meetingtypeaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meetingtype\\meetingtypeaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\meetingmemberscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\meetingmemberscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meetingmembers\\meetingmemberaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meetingmembers\\meetingmemberaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\staff\\staffaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\staff\\staffaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meeting\\meetingaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meeting\\meetingaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\meetingvenue\\meetingvenueaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\meetingvenue\\meetingvenueaddedit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\wwwroot\\assets\\css\\custome.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:wwwroot\\assets\\css\\custome.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\wwwroot\\assets\\css\\department.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:wwwroot\\assets\\css\\department.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\wwwroot\\assets\\css\\custome.css||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:wwwroot\\assets\\css\\custome.css||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\home\\terms.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\home\\terms.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\home\\privacy.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\home\\contact.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\home\\contact.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\home\\about.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\home\\about.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\meetingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\meetingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\staffcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\staffcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\meetingvenuecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\meetingvenuecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\meetingtypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\meetingtypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\departmentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\departmentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\auth\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\auth\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|c:\\users\\lenovo\\onedrive\\desktop\\mom_project\\mom\\views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{024A250D-CD60-7AB2-AA71-578DE7663F07}|MOM.csproj|solutionrelative:views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 9,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MeetingMemberList.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingMembers\\MeetingMemberList.cshtml",
+              "RelativeDocumentMoniker": "Views\\MeetingMembers\\MeetingMemberList.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingMembers\\MeetingMemberList.cshtml",
+              "RelativeToolTip": "Views\\MeetingMembers\\MeetingMemberList.cshtml",
+              "ViewState": "AgIAAOAAAAAAAAAAAAA4wPkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:53:48.827Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "DepartmentList.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Department\\DepartmentList.cshtml",
+              "RelativeDocumentMoniker": "Views\\Department\\DepartmentList.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Department\\DepartmentList.cshtml",
+              "RelativeToolTip": "Views\\Department\\DepartmentList.cshtml",
+              "ViewState": "AgIAAMoAAAAAAAAAAAA4wOMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:25:44.811Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:41:20.27Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "MeetingList.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Meeting\\MeetingList.cshtml",
+              "RelativeDocumentMoniker": "Views\\Meeting\\MeetingList.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Meeting\\MeetingList.cshtml",
+              "RelativeToolTip": "Views\\Meeting\\MeetingList.cshtml",
+              "ViewState": "AgIAAOAAAAAAAAAAAAA4wPkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:50:07.172Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MeetingTypeList.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingType\\MeetingTypeList.cshtml",
+              "RelativeDocumentMoniker": "Views\\MeetingType\\MeetingTypeList.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingType\\MeetingTypeList.cshtml",
+              "RelativeToolTip": "Views\\MeetingType\\MeetingTypeList.cshtml",
+              "ViewState": "AgIAAMAAAAAAAAAAAAA4wNkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:29:33.189Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "MeetingMembersController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingMembersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MeetingMembersController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingMembersController.cs",
+              "RelativeToolTip": "Controllers\\MeetingMembersController.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:51:47.787Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MeetingVenueList.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingVenue\\MeetingVenueList.cshtml",
+              "RelativeDocumentMoniker": "Views\\MeetingVenue\\MeetingVenueList.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingVenue\\MeetingVenueList.cshtml",
+              "RelativeToolTip": "Views\\MeetingVenue\\MeetingVenueList.cshtml",
+              "ViewState": "AgIAAM4AAAAAAAAAAAA4wOcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:34:21.874Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "StaffList.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Staff\\StaffList.cshtml",
+              "RelativeDocumentMoniker": "Views\\Staff\\StaffList.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Staff\\StaffList.cshtml",
+              "RelativeToolTip": "Views\\Staff\\StaffList.cshtml",
+              "ViewState": "AgIAANYAAAAAAAAAAAA4wOgAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:47:19.678Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "MeetingTypeAddEdit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingType\\MeetingTypeAddEdit.cshtml",
+              "RelativeDocumentMoniker": "Views\\MeetingType\\MeetingTypeAddEdit.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingType\\MeetingTypeAddEdit.cshtml",
+              "RelativeToolTip": "Views\\MeetingType\\MeetingTypeAddEdit.cshtml",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAkwDkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:31:11.499Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "DepartmentAddEdit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Department\\DepartmentAddEdit.cshtml",
+              "RelativeDocumentMoniker": "Views\\Department\\DepartmentAddEdit.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Department\\DepartmentAddEdit.cshtml",
+              "RelativeToolTip": "Views\\Department\\DepartmentAddEdit.cshtml",
+              "ViewState": "AgIAADEAAAAAAAAAAAAkwDwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:23:09.959Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "MeetingMemberAddEdit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingMembers\\MeetingMemberAddEdit.cshtml",
+              "RelativeDocumentMoniker": "Views\\MeetingMembers\\MeetingMemberAddEdit.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingMembers\\MeetingMemberAddEdit.cshtml",
+              "RelativeToolTip": "Views\\MeetingMembers\\MeetingMemberAddEdit.cshtml",
+              "ViewState": "AgIAADsAAAAAAAAAAAAAADsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:54:11.809Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "StaffAddEdit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Staff\\StaffAddEdit.cshtml",
+              "RelativeDocumentMoniker": "Views\\Staff\\StaffAddEdit.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Staff\\StaffAddEdit.cshtml",
+              "RelativeToolTip": "Views\\Staff\\StaffAddEdit.cshtml",
+              "ViewState": "AgIAADMAAAAAAAAAAAAkwD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:47:44.765Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MeetingAddEdit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Meeting\\MeetingAddEdit.cshtml",
+              "RelativeDocumentMoniker": "Views\\Meeting\\MeetingAddEdit.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Meeting\\MeetingAddEdit.cshtml",
+              "RelativeToolTip": "Views\\Meeting\\MeetingAddEdit.cshtml",
+              "ViewState": "AgIAADcAAAAAAAAAAAAkwEIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:50:23.778Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "MeetingVenueAddEdit.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingVenue\\MeetingVenueAddEdit.cshtml",
+              "RelativeDocumentMoniker": "Views\\MeetingVenue\\MeetingVenueAddEdit.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\MeetingVenue\\MeetingVenueAddEdit.cshtml",
+              "RelativeToolTip": "Views\\MeetingVenue\\MeetingVenueAddEdit.cshtml",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAkwBkAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:34:39.481Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAALkAAAAAAAAAAAAkwMIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:09:11.808Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "custome.css",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\wwwroot\\assets\\css\\custome.css",
+              "RelativeDocumentMoniker": "wwwroot\\assets\\css\\custome.css",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\wwwroot\\assets\\css\\custome.css",
+              "RelativeToolTip": "wwwroot\\assets\\css\\custome.css",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-25T07:00:06.34Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "department.css",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\wwwroot\\assets\\css\\department.css",
+              "RelativeDocumentMoniker": "wwwroot\\assets\\css\\department.css",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\wwwroot\\assets\\css\\department.css",
+              "RelativeToolTip": "wwwroot\\assets\\css\\department.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-25T06:56:52.983Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "custome.css",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\wwwroot\\assets\\css\\custome.css",
+              "RelativeDocumentMoniker": "wwwroot\\assets\\css\\custome.css",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\wwwroot\\assets\\css\\custome.css",
+              "RelativeToolTip": "wwwroot\\assets\\css\\custome.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-25T06:46:46.322Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Terms.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Terms.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Terms.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Terms.cshtml",
+              "RelativeToolTip": "Views\\Home\\Terms.cshtml",
+              "ViewState": "AgIAAHkAAAAAAAAAAAAswI0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T06:29:34.301Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Privacy.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Privacy.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Privacy.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Privacy.cshtml",
+              "RelativeToolTip": "Views\\Home\\Privacy.cshtml",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAswIEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T06:29:12.174Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Contact.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Contact.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Contact.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\Contact.cshtml",
+              "RelativeToolTip": "Views\\Home\\Contact.cshtml",
+              "ViewState": "AgIAACcAAAAAAAAAAAAswGgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T06:28:52.163Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "About.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\About.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\About.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Home\\About.cshtml",
+              "RelativeToolTip": "Views\\Home\\About.cshtml",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAswH0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T06:28:29.838Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "MeetingController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MeetingController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingController.cs",
+              "RelativeToolTip": "Controllers\\MeetingController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:48:50.696Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Controllers\\HomeController.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAqwBAAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:57:55.905Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "StaffController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\StaffController.cs",
+              "RelativeDocumentMoniker": "Controllers\\StaffController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\StaffController.cs",
+              "RelativeToolTip": "Controllers\\StaffController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:46:08.731Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "MeetingVenueController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingVenueController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MeetingVenueController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingVenueController.cs",
+              "RelativeToolTip": "Controllers\\MeetingVenueController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:32:52.509Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "MeetingTypeController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingTypeController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MeetingTypeController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\MeetingTypeController.cs",
+              "RelativeToolTip": "Controllers\\MeetingTypeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:27:17.382Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "DepartmentController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\DepartmentController.cs",
+              "RelativeDocumentMoniker": "Controllers\\DepartmentController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\DepartmentController.cs",
+              "RelativeToolTip": "Controllers\\DepartmentController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:21:29.928Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-25T05:40:24.657Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Auth\\Login.cshtml",
+              "RelativeDocumentMoniker": "Views\\Auth\\Login.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Auth\\Login.cshtml",
+              "RelativeToolTip": "Views\\Auth\\Login.cshtml",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAAwAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:31:32.556Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "_ValidationScriptsPartial.cshtml",
+              "DocumentMoniker": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "ToolTip": "C:\\Users\\Lenovo\\OneDrive\\Desktop\\MOM_Project\\MOM\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-25T05:09:09.814Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

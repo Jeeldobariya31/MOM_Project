@@ -1,0 +1,70 @@
+﻿/* ================================
+   Global Layout Improvements
+================================ */
+
+body {
+    background-color: #f5f7fb;
+}
+
+/* Main content padding fix */
+#main {
+    padding: 24px;
+    min-height: calc(100vh - 140px);
+    transition: all 0.3s ease;
+}
+
+/* Sidebar toggle spacing */
+@media (min-width: 1200px) {
+    #main {
+        margin-left: 300px;
+    }
+
+    body.toggle-sidebar #main {
+        margin-left: 0;
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+/* Cards modern look */
+.card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+/* Tables */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* Footer */
+.footer-modern {
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.footer-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+/* Sidebar smooth animation */
+.sidebar {
+    transition: all 0.3s ease;
+}

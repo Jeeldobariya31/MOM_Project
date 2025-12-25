@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Add / Edit Meeting";
+}
+
+<div class="pagetitle">
+    <h1>Add / Edit Meeting</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+            </li>
+            <li class="breadcrumb-item">Master</li>
+            <li class="breadcrumb-item active">Meeting</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+
+            <div class="card department-card">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        <i class="bi bi-calendar-event text-primary me-1"></i>
+                        Meeting Information
+                    </h5>
+
+                    <p class="text-muted">
+                        This page will allow administrators to schedule, update,
+                        or cancel meetings across departments with assigned
+                        venues and meeting types.
+                    </p>
+
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item">
+                            <strong>Meeting Date & Time:</strong> Mandatory scheduling time
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Meeting Venue:</strong> Selected from available rooms
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Meeting Type:</strong> Board, Client, Training, etc.
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Department:</strong> Hosting department
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Description:</strong> Optional meeting agenda
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Cancellation:</strong> Date & reason if cancelled
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info mt-4 mb-0">
+                        Meeting scheduling form will be implemented in the next phase.
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
