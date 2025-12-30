@@ -1,9 +1,23 @@
 ﻿@{
     ViewData["Title"] = "Add / Edit Meeting";
+
+    /* UI-only flags */
+    bool isEdit = false;   // false = Add, true = Edit
+
+    /* Old values (shown only when Edit) */
+    string meetingDate = "2025-02-15T10:30";
+    string department = "IT";
+    string venue = "Conference Room A";
+    string meetingType = "Board Meeting";
+    string description = "Monthly planning discussion";
+    string documentPath = "/docs/meeting-agenda.pdf";
+    bool isCancelled = false;
+    string cancelDate = "";
+    string cancelReason = "";
 }
 
 <div class="pagetitle">
-    <h1>Add / Edit Meeting</h1>
+    <h1>@(isEdit ? "Edit Meeting" : "Add Meeting")</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -17,46 +31,135 @@
 
 <section class="section">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-9">
 
-            <div class="card department-card">
+            <div class="card">
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        <i class="bi bi-calendar-event text-primary me-1"></i>
-                        Meeting Information
+                        @(isEdit ? "Edit Meeting Details" : "Schedule New Meeting")
                     </h5>
 
-                    <p class="text-muted">
-                        This page will allow administrators to schedule, update,
-                        or cancel meetings across departments with assigned
-                        venues and meeting types.
-                    </p>
+                    <!-- ===== ONLY USER INPUT FIELDS ===== -->
+                    <form class="row g-3">
 
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item">
-                            <strong>Meeting Date & Time:</strong> Mandatory scheduling time
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Meeting Venue:</strong> Selected from available rooms
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Meeting Type:</strong> Board, Client, Training, etc.
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Department:</strong> Hosting department
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Description:</strong> Optional meeting agenda
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Cancellation:</strong> Date & reason if cancelled
-                        </li>
-                    </ul>
+                        <!-- Meeting Date -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                Meeting Date & Time <span class="text-danger">*</span>
+                            </label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   value="@(isEdit? meetingDate : "")" />
+                        </div>
 
-                    <div class="alert alert-info mt-4 mb-0">
-                        Meeting scheduling form will be implemented in the next phase.
-                    </div>
+                        <!-- Department -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                Department <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select">
+                                <option disabled>Select Department</option>
+                                <option selected="@(department == "HR")">HR</option>
+                                <option selected="@(department == "Finance")">Finance</option>
+                                <option selected="@(department == "IT")">IT</option>
+                            </select>
+                        </div>
+
+                        <!-- Meeting Type -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">
+                                Meeting Type <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select">
+                                <option disabled>Select Type</option>
+                                <option selected="@(meetingType == "Board Meeting")">Board Meeting</option>
+                                <option selected="@(meetingType == "Client Meeting")">Client Meeting</option>
+                                <option selected="@(meetingType == "Training")">Training</option>
+                            </select>
+                        </div>
+
+                        <!-- Meeting Venue -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                Meeting Venue <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select">
+                                <option disabled>Select Venue</option>
+                                <option selected="@(venue == "Conference Room A")">Conference Room A</option>
+                                <option selected="@(venue == "Conference Room B")">Conference Room B</option>
+                            </select>
+                        </div>
+
+                        <!-- Document Upload -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Meeting Document</label>
+
+                            @if (isEdit && !string.IsNullOrEmpty(documentPath))
+                            {
+                                <div class="mb-2">
+                                    <a href="@documentPath" target="_blank" class="text-primary">
+                                        View Existing Document
+                                    </a>
+                                </div>
+                            }
+
+                            <input type="file"
+                                   class="form-control"
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx" />
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Meeting Description</label>
+                            <textarea class="form-control"
+                                      rows="3"
+                                      maxlength="250"
+                                      placeholder="Optional agenda or notes">@(
+                                isEdit ? description : ""
+                            )</textarea>
+                        </div>
+
+                        <!-- Is Cancelled -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Is Cancelled</label>
+                            <select class="form-select">
+                                <option selected="@(!isCancelled)">No</option>
+                                <option selected="@(isCancelled)">Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Cancellation Date -->
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold">Cancellation Date & Time</label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   value="@(isEdit? cancelDate : "")" />
+                        </div>
+
+                        <!-- Cancellation Reason -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Cancellation Reason</label>
+                            <input type="text"
+                                   maxlength="250"
+                                   class="form-control"
+                                   placeholder="Optional reason"
+                                   value="@(isEdit? cancelReason : "")" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-12 text-end mt-4">
+                            <button type="button" class="btn btn-secondary me-2">
+                                Cancel
+                            </button>
+
+                            <button type="button" class="btn btn-primary">
+                                @(isEdit ? "Update Meeting" : "Save Meeting")
+                            </button>
+                        </div>
+
+                    </form>
+                    <!-- ===== END FORM ===== -->
 
                 </div>
             </div>

@@ -1,9 +1,13 @@
 ﻿@{
     ViewData["Title"] = "Add / Edit Department";
+
+    /* UI-only flags */
+    bool isEdit = false;                 // false = Add, true = Edit
+    string oldDepartmentName = "HR";    // value shown when Edit
 }
 
 <div class="pagetitle">
-    <h1>Add / Edit Department</h1>
+    <h1>@(isEdit ? "Edit Department" : "Add Department")</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -17,40 +21,41 @@
 
 <section class="section">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-6">
 
-            <div class="card department-card">
+            <div class="card">
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        <i class="bi bi-building text-primary me-1"></i>
-                        Department Information
+                        @(isEdit ? "Edit Department" : "Add New Department")
                     </h5>
 
-                    <p class="text-muted">
-                        This page will be used to <strong>add</strong> or <strong>edit</strong>
-                        organizational departments such as Human Resources, Finance,
-                        Information Technology, Operations, and Administration.
-                    </p>
+                    <!-- ===== ONLY USER INPUT FIELD ===== -->
+                    <form>
 
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item">
-                            <strong>DepartmentID:</strong> Auto-generated unique identifier
-                        </li>
-                        <li class="list-group-item">
-                            <strong>DepartmentName:</strong> Required name of the department
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Created:</strong> Automatically set system date & time
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Modified:</strong> Updated whenever department details change
-                        </li>
-                    </ul>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Department Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   maxlength="100"
+                                   placeholder="Enter department name"
+                                   value="@(isEdit? oldDepartmentName : "")" />
+                        </div>
 
-                    <div class="alert alert-info mt-4 mb-0">
-                        Form UI will be added here in the next phase.
-                    </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary me-2">
+                                Cancel
+                            </button>
+
+                            <button type="button" class="btn btn-primary">
+                                @(isEdit ? "Update" : "Save")
+                            </button>
+                        </div>
+
+                    </form>
+                    <!-- ===== END FORM ===== -->
 
                 </div>
             </div>

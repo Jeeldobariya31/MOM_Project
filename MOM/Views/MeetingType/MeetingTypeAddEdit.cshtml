@@ -1,9 +1,16 @@
 ﻿@{
     ViewData["Title"] = "Add / Edit Meeting Type";
+
+    /* UI-only flags */
+    bool isEdit = false;   // false = Add, true = Edit
+
+    /* Old values (shown when Edit) */
+    string meetingTypeName = "Board Meeting";
+    string remarks = "Used for board-level discussions";
 }
 
 <div class="pagetitle">
-    <h1>Add / Edit Meeting Type</h1>
+    <h1>@(isEdit ? "Edit Meeting Type" : "Add Meeting Type")</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -17,37 +24,55 @@
 
 <section class="section">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-6">
 
-            <div class="card department-card">
+            <div class="card">
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        <i class="bi bi-tags text-primary me-1"></i>
-                        Meeting Type Information
+                        @(isEdit ? "Edit Meeting Type Details" : "Create New Meeting Type")
                     </h5>
 
-                    <p class="text-muted">
-                        This page will be used to <strong>add</strong> or <strong>edit</strong>
-                        meeting types such as Board Meetings, Client Meetings, Trainings,
-                        Reviews, and Emergency Sessions.
-                    </p>
+                    <!-- ===== ONLY USER INPUT FIELDS ===== -->
+                    <form>
 
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item">
-                            <strong>MeetingTypeID:</strong> Auto-generated unique identifier
-                        </li>
-                        <li class="list-group-item">
-                            <strong>MeetingTypeName:</strong> Required name of the meeting type
-                        </li>
-                        <li class="list-group-item">
-                            <strong>Remarks:</strong> Short description or purpose
-                        </li>
-                    </ul>
+                        <!-- Meeting Type Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Meeting Type Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   maxlength="100"
+                                   placeholder="Enter meeting type name"
+                                   value="@(isEdit? meetingTypeName : "")" />
+                        </div>
 
-                    <div class="alert alert-info mt-4 mb-0">
-                        Form UI will be added here in the next phase.
-                    </div>
+                        <!-- Remarks -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Remarks <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   maxlength="100"
+                                   placeholder="Short description or purpose"
+                                   value="@(isEdit? remarks : "")" />
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-secondary me-2">
+                                Cancel
+                            </button>
+
+                            <button type="button" class="btn btn-primary">
+                                @(isEdit ? "Update Meeting Type" : "Save Meeting Type")
+                            </button>
+                        </div>
+
+                    </form>
+                    <!-- ===== END FORM ===== -->
 
                 </div>
             </div>

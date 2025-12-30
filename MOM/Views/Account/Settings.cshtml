@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Account Settings";
+}
+
+<div class="pagetitle">
+    <h1>Account Settings</h1>
+</div>
+
+<section class="section">
+    <div class="card">
+        <div class="card-body pt-4">
+
+            <form method="post" enctype="multipart/form-data">
+
+                <!-- Avatar Upload -->
+                <div class="row mb-4">
+                    <label class="col-md-4 col-form-label fw-bold">
+                        Profile Photo
+                    </label>
+                    <div class="col-md-8">
+                        <img src="~/assets/img/profile-img.jpg"
+                             class="rounded-circle mb-2"
+                             width="100" />
+                        <input type="file" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- Full Name -->
+                <div class="row mb-3">
+                    <label class="col-md-4 col-form-label fw-bold">
+                        Full Name
+                    </label>
+                    <div class="col-md-8">
+                        <input type="text"
+                               class="form-control"
+                               value="@User.Identity?.Name" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="row mb-3">
+                    <label class="col-md-4 col-form-label fw-bold">
+                        Email
+                    </label>
+                    <div class="col-md-8">
+                        <input type="email"
+                               class="form-control"
+                               value="user@email.com" />
+                    </div>
+                </div>
+
+                <!-- Mobile -->
+                <div class="row mb-3">
+                    <label class="col-md-4 col-form-label fw-bold">
+                        Mobile Number
+                    </label>
+                    <div class="col-md-8">
+                        <input type="text"
+                               class="form-control"
+                               value="+91 9876543210" />
+                    </div>
+                </div>
+
+                <!-- Save -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</section>
