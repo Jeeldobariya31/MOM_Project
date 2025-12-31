@@ -1,4 +1,6 @@
-﻿@{
+﻿@model System.Data.DataTable
+
+@{
     ViewData["Title"] = "Meeting Type List";
 }
 
@@ -51,148 +53,29 @@
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Board Meeting</td>
-                                    <td>Quarterly board discussions</td>
-                                    <td class="text-center">
-                                        <a asp-action="MeetingTypeAddEdit" asp-route-id="1"
-                                           class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                @foreach (System.Data.DataRow row in Model.Rows)
+                                {
+                                    <tr>
+                                        <td>@row["MeetingTypeID"]</td>
+                                        <td>@row["MeetingTypeName"]</td>
+                                        <td>@row["Remarks"]</td>
+                                        <td class="text-center">
+                                            <a asp-action="MeetingTypeAddEdit"
+                                               asp-route-id="@row["MeetingTypeID"]"
+                                               class="btn btn-sm btn-outline-primary action-btn">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
 
-                                <tr>
-                                    <td>2</td>
-                                    <td>Client Meeting</td>
-                                    <td>Client requirement discussion</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>3</td>
-                                    <td>Team Stand-up</td>
-                                    <td>Daily team sync</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>4</td>
-                                    <td>Project Review</td>
-                                    <td>Milestone & progress review</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>5</td>
-                                    <td>Training Session</td>
-                                    <td>Internal knowledge sharing</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>6</td>
-                                    <td>Vendor Meeting</td>
-                                    <td>External vendor coordination</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>7</td>
-                                    <td>Audit Meeting</td>
-                                    <td>Compliance & audit review</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>8</td>
-                                    <td>Strategy Meeting</td>
-                                    <td>Business planning</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>9</td>
-                                    <td>Internal Review</td>
-                                    <td>Department performance review</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>10</td>
-                                    <td>Emergency Meeting</td>
-                                    <td>Urgent decision making</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger action-btn"
+                                                    onclick="deleteMeetingType(@row["MeetingTypeID"])">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
+
                         </table>
                     </div>
                     <!-- End Table -->
@@ -213,5 +96,12 @@
                 perPageSelect: [5, 10, 25, 50]
             });
         });
+
+        function deleteMeetingType(id) {
+            if (confirm("Are you sure you want to delete this meeting type?")) {
+                // Replace later with AJAX / POST
+                alert("Delete ID: " + id);
+            }
+        }
     </script>
 }

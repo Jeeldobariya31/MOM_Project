@@ -1,4 +1,6 @@
-﻿@{
+﻿@model System.Data.DataTable
+
+@{
     ViewData["Title"] = "Staff List";
 }
 
@@ -53,168 +55,28 @@
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Raj Patel</td>
-                                    <td>Human Resources</td>
-                                    <td>9876543210</td>
-                                    <td>raj.patel@momify.com</td>
-                                    <td class="text-center">
-                                        <a asp-action="StaffAddEdit" asp-route-id="1"
-                                           class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>2</td>
-                                    <td>Neha Sharma</td>
-                                    <td>Information Technology</td>
-                                    <td>9898989898</td>
-                                    <td>neha.sharma@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>3</td>
-                                    <td>Amit Joshi</td>
-                                    <td>Finance</td>
-                                    <td>9123456789</td>
-                                    <td>amit.joshi@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>4</td>
-                                    <td>Pooja Mehta</td>
-                                    <td>Marketing</td>
-                                    <td>9012345678</td>
-                                    <td>pooja.mehta@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>5</td>
-                                    <td>Ravi Desai</td>
-                                    <td>Operations</td>
-                                    <td>9988776655</td>
-                                    <td>ravi.desai@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>6</td>
-                                    <td>Khushi Shah</td>
-                                    <td>Administration</td>
-                                    <td>9090909090</td>
-                                    <td>khushi.shah@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>7</td>
-                                    <td>Suresh Kumar</td>
-                                    <td>Quality Assurance</td>
-                                    <td>9345678123</td>
-                                    <td>suresh.kumar@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>8</td>
-                                    <td>Priya Verma</td>
-                                    <td>Sales</td>
-                                    <td>9765432109</td>
-                                    <td>priya.verma@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>9</td>
-                                    <td>Arjun Singh</td>
-                                    <td>Procurement</td>
-                                    <td>9654321876</td>
-                                    <td>arjun.singh@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>10</td>
-                                    <td>Anjali Trivedi</td>
-                                    <td>Management</td>
-                                    <td>9876501234</td>
-                                    <td>anjali.trivedi@momify.com</td>
-                                    <td class="text-center">
-                                        <a class="btn btn-sm btn-outline-primary action-btn">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-outline-danger action-btn">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
+                                @foreach (System.Data.DataRow row in Model.Rows)
+                                {
+                                    <tr>
+                                        <td>@row["StaffID"]</td>
+                                        <td>@row["StaffName"]</td>
+                                        <td>@row["DepartmentName"]</td>
+                                        <td>@row["MobileNo"]</td>
+                                        <td>@row["EmailAddress"]</td>
+                                        <td class="text-center">
+                                            <a asp-action="StaffAddEdit"
+                                               asp-route-id="@row["StaffID"]"
+                                               class="btn btn-sm btn-outline-primary action-btn">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger action-btn">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
+
                         </table>
                     </div>
                     <!-- End Table -->
