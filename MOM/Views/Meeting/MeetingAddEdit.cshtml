@@ -1,169 +1,302 @@
-﻿@{
-    ViewData["Title"] = "Add / Edit Meeting";
+﻿@model MOM.Models.MeetingModel
 
-    /* UI-only flags */
-    bool isEdit = false;   // false = Add, true = Edit
-
-    /* Old values (shown only when Edit) */
-    string meetingDate = "2025-02-15T10:30";
-    string department = "IT";
-    string venue = "Conference Room A";
-    string meetingType = "Board Meeting";
-    string description = "Monthly planning discussion";
-    string documentPath = "/docs/meeting-agenda.pdf";
-    bool isCancelled = false;
-    string cancelDate = "";
-    string cancelReason = "";
+@{
+    bool isEdit = Model.MeetingID > 0;
+    ViewData["Title"] = isEdit ? "Edit Meeting" : "Schedule Meeting";
 }
 
 <div class="pagetitle">
-    <h1>@(isEdit ? "Edit Meeting" : "Add Meeting")</h1>
+    <h1>@(isEdit ? "Edit Meeting" : "Schedule Meeting")</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item active">Meeting</li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="MeetingList">Meetings</a></li>
+            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Schedule")</li>
         </ol>
     </nav>
 </div>
 
 <section class="section">
     <div class="row">
-        <div class="col-lg-9">
-
+        <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-
                     <h5 class="card-title">
+                        <i class="bi bi-calendar-plus me-1"></i>
                         @(isEdit ? "Edit Meeting Details" : "Schedule New Meeting")
                     </h5>
 
-                    <!-- ===== ONLY USER INPUT FIELDS ===== -->
-                    <form class="row g-3">
+                    <!-- Display validation summary -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <h6><i class="bi bi-exclamation-triangle me-1"></i>Please correct the following errors:</h6>
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
 
-                        <!-- Meeting Date -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                Meeting Date & Time <span class="text-danger">*</span>
+                    <form asp-action="MeetingAddEdit" method="post" enctype="multipart/form-data" class="row g-3" novalidate>
+                        <input type="hidden" asp-for="MeetingID" />
+                        <input type="hidden" asp-for="Created" />
+                        <input type="hidden" asp-for="DocumentPath" />
+
+                        <!-- Meeting Date & Time -->
+                        <div class="col-md-6">
+                            <label asp-for="MeetingDate" class="form-label fw-bold">
+                                <i class="bi bi-calendar-date me-1"></i>Meeting Date & Time <span class="text-danger">*</span>
                             </label>
-                            <input type="datetime-local"
-                                   class="form-control"
-                                   value="@(isEdit? meetingDate : "")" />
+                            <input asp-for="MeetingDate" type="datetime-local" class="form-control" 
+                                   min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="MeetingDate" class="text-danger"></span>
+                            <div class="form-text">Select future date and time for the meeting</div>
                         </div>
 
                         <!-- Department -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                Department <span class="text-danger">*</span>
+                        <div class="col-md-6">
+                            <label asp-for="DepartmentID" class="form-label fw-bold">
+                                <i class="bi bi-building me-1"></i>Department <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select">
-                                <option disabled>Select Department</option>
-                                <option selected="@(department == "HR")">HR</option>
-                                <option selected="@(department == "Finance")">Finance</option>
-                                <option selected="@(department == "IT")">IT</option>
+                            <select asp-for="DepartmentID" class="form-select">
+                                <option value="">-- Select Department --</option>
+                                @foreach (System.Data.DataRow dept in ViewBag.Departments.Rows)
+                                {
+                                    <option value="@dept["DepartmentID"]">@dept["DepartmentName"]</option>
+                                }
                             </select>
+                            <span asp-validation-for="DepartmentID" class="text-danger"></span>
                         </div>
 
                         <!-- Meeting Type -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                Meeting Type <span class="text-danger">*</span>
+                        <div class="col-md-6">
+                            <label asp-for="MeetingTypeID" class="form-label fw-bold">
+                                <i class="bi bi-tag me-1"></i>Meeting Type <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select">
-                                <option disabled>Select Type</option>
-                                <option selected="@(meetingType == "Board Meeting")">Board Meeting</option>
-                                <option selected="@(meetingType == "Client Meeting")">Client Meeting</option>
-                                <option selected="@(meetingType == "Training")">Training</option>
+                            <select asp-for="MeetingTypeID" class="form-select">
+                                <option value="">-- Select Meeting Type --</option>
+                                @foreach (System.Data.DataRow type in ViewBag.MeetingTypes.Rows)
+                                {
+                                    <option value="@type["MeetingTypeID"]">@type["MeetingTypeName"]</option>
+                                }
                             </select>
+                            <span asp-validation-for="MeetingTypeID" class="text-danger"></span>
                         </div>
 
-                        <!-- Meeting Venue -->
+                        <!-- Venue -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Meeting Venue <span class="text-danger">*</span>
+                            <label asp-for="MeetingVenueID" class="form-label fw-bold">
+                                <i class="bi bi-geo-alt me-1"></i>Meeting Venue <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select">
-                                <option disabled>Select Venue</option>
-                                <option selected="@(venue == "Conference Room A")">Conference Room A</option>
-                                <option selected="@(venue == "Conference Room B")">Conference Room B</option>
+                            <select asp-for="MeetingVenueID" class="form-select">
+                                <option value="">-- Select Venue --</option>
+                                @foreach (System.Data.DataRow venue in ViewBag.MeetingVenues.Rows)
+                                {
+                                    <option value="@venue["MeetingVenueID"]">@venue["MeetingVenueName"]</option>
+                                }
                             </select>
+                            <span asp-validation-for="MeetingVenueID" class="text-danger"></span>
+                        </div>
+
+                        <!-- Meeting Description -->
+                        <div class="col-12">
+                            <label asp-for="MeetingDescription" class="form-label fw-bold">
+                                <i class="bi bi-card-text me-1"></i>Meeting Description
+                            </label>
+                            <textarea asp-for="MeetingDescription" class="form-control" rows="3" 
+                                      placeholder="Enter meeting agenda, objectives, or description..." maxlength="250"></textarea>
+                            <span asp-validation-for="MeetingDescription" class="text-danger"></span>
+                            <div class="form-text">Maximum 250 characters</div>
                         </div>
 
                         <!-- Document Upload -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Meeting Document</label>
-
-                            @if (isEdit && !string.IsNullOrEmpty(documentPath))
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i>Meeting Document
+                            </label>
+                            <input type="file" name="upload" class="form-control" 
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx" />
+                            <div class="form-text">Upload agenda, presentation, or related documents (PDF, DOC, DOCX, XLS, XLSX - Max 10MB)</div>
+                            
+                            @if (isEdit && !string.IsNullOrEmpty(Model.DocumentPath))
                             {
-                                <div class="mb-2">
-                                    <a href="@documentPath" target="_blank" class="text-primary">
-                                        View Existing Document
+                                <div class="mt-2">
+                                    <a href="@Model.DocumentPath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-earmark-text me-1"></i>View Current Document
                                     </a>
                                 </div>
                             }
-
-                            <input type="file"
-                                   class="form-control"
-                                   accept=".pdf,.doc,.docx,.xls,.xlsx" />
                         </div>
 
-                        <!-- Description -->
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Meeting Description</label>
-                            <textarea class="form-control"
-                                      rows="3"
-                                      maxlength="250"
-                                      placeholder="Optional agenda or notes">@(
-                                isEdit ? description : ""
-                            )</textarea>
-                        </div>
-
-                        <!-- Is Cancelled -->
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold">Is Cancelled</label>
-                            <select class="form-select">
-                                <option selected="@(!isCancelled)">No</option>
-                                <option selected="@(isCancelled)">Yes</option>
-                            </select>
-                        </div>
-
-                        <!-- Cancellation Date -->
-                        <div class="col-md-5">
-                            <label class="form-label fw-bold">Cancellation Date & Time</label>
-                            <input type="datetime-local"
-                                   class="form-control"
-                                   value="@(isEdit? cancelDate : "")" />
-                        </div>
-
-                        <!-- Cancellation Reason -->
+                        <!-- Meeting Status -->
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">Cancellation Reason</label>
-                            <input type="text"
-                                   maxlength="250"
-                                   class="form-control"
-                                   placeholder="Optional reason"
-                                   value="@(isEdit? cancelReason : "")" />
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-check-circle me-1"></i>Meeting Status
+                            </label>
+                            <div class="form-check form-switch">
+                                <input asp-for="IsCancelled" class="form-check-input" type="checkbox" id="isCancelledSwitch">
+                                <label class="form-check-label" for="isCancelledSwitch">
+                                    Mark as Cancelled
+                                </label>
+                            </div>
                         </div>
 
-                        <!-- Buttons -->
-                        <div class="col-12 text-end mt-4">
-                            <button type="button" class="btn btn-secondary me-2">
-                                Cancel
-                            </button>
-
-                            <button type="button" class="btn btn-primary">
-                                @(isEdit ? "Update Meeting" : "Save Meeting")
-                            </button>
+                        <!-- Cancellation Details (shown when cancelled) -->
+                        <div id="cancellationDetails" class="col-12" style="display: @(Model.IsCancelled ? "block" : "none")">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning bg-opacity-10">
+                                    <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-1"></i>Cancellation Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label asp-for="CancellationDateTime" class="form-label fw-bold">Cancellation Date & Time</label>
+                                            <input asp-for="CancellationDateTime" type="datetime-local" class="form-control" />
+                                            <span asp-validation-for="CancellationDateTime" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="CancellationReason" class="form-label fw-bold">
+                                                Cancellation Reason <span class="text-danger">*</span>
+                                            </label>
+                                            <input asp-for="CancellationReason" class="form-control" 
+                                                   placeholder="Reason for cancellation..." maxlength="250" />
+                                            <span asp-validation-for="CancellationReason" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- Form Actions -->
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="MeetingList" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Back to List
+                                </a>
+                                
+                                <div>
+                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        @(isEdit ? "Update Meeting" : "Schedule Meeting")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </form>
-                    <!-- ===== END FORM ===== -->
-
                 </div>
             </div>
+        </div>
 
+        <!-- Meeting Guidelines Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle me-1"></i>Meeting Guidelines
+                    </h5>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb me-1"></i>Tips for Effective Meetings</h6>
+                        <ul class="mb-0 small">
+                            <li>Schedule meetings at least 24 hours in advance</li>
+                            <li>Provide clear agenda and objectives</li>
+                            <li>Choose appropriate venue based on attendee count</li>
+                            <li>Upload relevant documents before the meeting</li>
+                            <li>Send invitations to all required participants</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle me-1"></i>Important Notes</h6>
+                        <ul class="mb-0 small">
+                            <li>Meetings cannot be scheduled in the past</li>
+                            <li>Check venue availability before scheduling</li>
+                            <li>Maximum file size for documents: 10MB</li>
+                            <li>Supported formats: PDF, DOC, DOCX, XLS, XLSX</li>
+                        </ul>
+                    </div>
+
+                    @if (isEdit)
+                    {
+                        <div class="alert alert-secondary">
+                            <h6><i class="bi bi-clock-history me-1"></i>Meeting History</h6>
+                            <p class="mb-1 small"><strong>Created:</strong> @Model.Created.ToString("MMM dd, yyyy hh:mm tt")</p>
+                            <p class="mb-0 small"><strong>Last Modified:</strong> @Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</p>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Toggle cancellation details
+        document.getElementById('isCancelledSwitch').addEventListener('change', function() {
+            const cancellationDetails = document.getElementById('cancellationDetails');
+            const cancellationDateTime = document.querySelector('input[name="CancellationDateTime"]');
+            
+            if (this.checked) {
+                cancellationDetails.style.display = 'block';
+                // Set current date/time as default
+                if (!cancellationDateTime.value) {
+                    const now = new Date();
+                    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+                    cancellationDateTime.value = localDateTime.toISOString().slice(0, 16);
+                }
+            } else {
+                cancellationDetails.style.display = 'none';
+                // Clear cancellation fields
+                cancellationDateTime.value = '';
+                document.querySelector('input[name="CancellationReason"]').value = '';
+            }
+        });
+
+        // Character counter for description
+        const descriptionField = document.querySelector('textarea[name="MeetingDescription"]');
+        if (descriptionField) {
+            const maxLength = 250;
+            const counter = document.createElement('div');
+            counter.className = 'form-text text-end';
+            counter.innerHTML = `<span id="charCount">0</span>/${maxLength} characters`;
+            descriptionField.parentNode.appendChild(counter);
+
+            descriptionField.addEventListener('input', function() {
+                const count = this.value.length;
+                document.getElementById('charCount').textContent = count;
+                
+                if (count > maxLength * 0.9) {
+                    counter.className = 'form-text text-end text-warning';
+                } else {
+                    counter.className = 'form-text text-end';
+                }
+            });
+
+            // Initialize counter
+            descriptionField.dispatchEvent(new Event('input'));
+        }
+
+        // Form validation enhancement
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const isCancelled = document.getElementById('isCancelledSwitch').checked;
+            const cancellationReason = document.querySelector('input[name="CancellationReason"]');
+            
+            if (isCancelled && !cancellationReason.value.trim()) {
+                e.preventDefault();
+                cancellationReason.focus();
+                alert('Please provide a cancellation reason.');
+                return false;
+            }
+        });
+    </script>
+}

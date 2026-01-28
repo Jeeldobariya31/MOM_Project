@@ -1,11 +1,18 @@
-﻿@model System.Data.DataTable
+@model System.Data.DataTable
 
 @{
     ViewData["Title"] = "Staff List";
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var departmentFilter = ViewBag.DepartmentFilter as string ?? "";
+    var sortBy = ViewBag.SortBy as string ?? "StaffName";
+    var sortOrder = ViewBag.SortOrder as string ?? "asc";
+    var totalRecords = ViewBag.TotalRecords as int? ?? 0;
+    var filteredRecords = ViewBag.FilteredRecords as int? ?? 0;
+    var departments = ViewBag.Departments as List<dynamic> ?? new List<dynamic>();
 }
 
 <div class="pagetitle">
-    <h1>Staff</h1>
+    <h1>Staff Management</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -17,85 +24,405 @@
     </nav>
 </div>
 
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-
-            <div class="card department-card">
+            <div class="card">
                 <div class="card-body">
-
-                    <!-- Header -->
+                    <!-- Header with Add Button -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-person-badge text-primary me-1"></i>
-                            Staff List
-                        </h5>
-
-                        <a asp-controller="Staff"
-                           asp-action="StaffAddEdit"
-                           class="btn btn-primary btn-sm rounded-pill px-3">
+                        <div>
+                            <h5 class="card-title mb-1">
+                                <i class="bi bi-people text-primary me-2"></i>
+                                Staff Management
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                Showing @filteredRecords of @totalRecords staff members
+                            </p>
+                        </div>
+                        <a asp-action="StaffAddEdit" class="btn btn-primary">
                             <i class="bi bi-plus-lg me-1"></i>
-                            Add Staff
+                            Add Staff Member
                         </a>
                     </div>
 
-                    <!-- Table -->
+                    <!-- Search and Filter Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <form method="get" class="d-flex">
+                                <input type="hidden" name="sortBy" value="@sortBy" />
+                                <input type="hidden" name="sortOrder" value="@sortOrder" />
+                                <input type="hidden" name="departmentFilter" value="@departmentFilter" />
+                                
+                                <div class="input-group me-2">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="searchTerm" 
+                                           value="@searchTerm" 
+                                           class="form-control" 
+                                           placeholder="Search staff members..." />
+                                    <button type="submit" class="btn btn-outline-secondary">
+                                        Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <form method="get" class="d-flex">
+                                <input type="hidden" name="searchTerm" value="@searchTerm" />
+                                <input type="hidden" name="sortBy" value="@sortBy" />
+                                <input type="hidden" name="sortOrder" value="@sortOrder" />
+                                
+                                <select name="departmentFilter" class="form-select me-2" onchange="this.form.submit()">
+                                    <option value="">All Departments</option>
+                                    @foreach (var dept in departments)
+                                    {
+                                        <option value="@dept.Value" selected="@(departmentFilter == dept.Value.ToString())">
+                                            @dept.Text
+                                        </option>
+                                    }
+                                </select>
+                                
+                                @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(departmentFilter))
+                                {
+                                    <a href="@Url.Action("StaffList")" class="btn btn-outline-danger">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                }
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
                     <div class="table-responsive">
-                        <table id="staffTable"
-                               class="table table-hover align-middle department-table">
-                            <thead>
+                        <table class="table table-hover align-middle" id="staffTable">
+                            <thead class="table-light">
                                 <tr>
-                                    <th style="width:6%">ID</th>
-                                    <th>Staff Name</th>
+                                    <th>
+                                        <a href="@Url.Action("StaffList", new { searchTerm, departmentFilter, sortBy = "StaffName", sortOrder = (sortBy == "StaffName" && sortOrder == "asc") ? "desc" : "asc" })" 
+                                           class="text-decoration-none text-dark">
+                                            Staff Name
+                                            @if (sortBy == "StaffName")
+                                            {
+                                                <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
+                                            }
+                                        </a>
+                                    </th>
                                     <th>Department</th>
-                                    <th>Mobile No</th>
-                                    <th>Email Address</th>
-                                    <th style="width:15%" class="text-center">Actions</th>
+                                    <th>Contact Information</th>
+                                    <th>
+                                        <a href="@Url.Action("StaffList", new { searchTerm, departmentFilter, sortBy = "Created", sortOrder = (sortBy == "Created" && sortOrder == "asc") ? "desc" : "asc" })" 
+                                           class="text-decoration-none text-dark">
+                                            Created Date
+                                            @if (sortBy == "Created")
+                                            {
+                                                <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
+                                            }
+                                        </a>
+                                    </th>
+                                    <th class="text-center" style="width: 200px;">Actions</th>
                                 </tr>
                             </thead>
-
                             <tbody>
-                                @foreach (System.Data.DataRow row in Model.Rows)
+                                @if (Model.Rows.Count > 0)
+                                {
+                                    @foreach (System.Data.DataRow row in Model.Rows)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        <i class="bi bi-person text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">@row["StaffName"]</h6>
+                                                        <small class="text-muted">ID: @row["StaffID"]</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info-subtle text-info">
+                                                    @row["DepartmentName"]
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <i class="bi bi-envelope me-1"></i>
+                                                    <small>@row["EmailAddress"]</small>
+                                                </div>
+                                                <div>
+                                                    <i class="bi bi-phone me-1"></i>
+                                                    <small>@row["MobileNo"]</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">
+                                                    @Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    @Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")
+                                                </small>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" 
+                                                            class="btn btn-outline-info btn-sm" 
+                                                            onclick="viewStaff(@row["StaffID"])"
+                                                            title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <a asp-action="StaffAddEdit" 
+                                                       asp-route-id="@row["StaffID"]"
+                                                       class="btn btn-outline-primary btn-sm"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger btn-sm" 
+                                                            onclick="deleteStaff(@row["StaffID"], '@row["StaffName"]')"
+                                                            title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@row["StaffID"]</td>
-                                        <td>@row["StaffName"]</td>
-                                        <td>@row["DepartmentName"]</td>
-                                        <td>@row["MobileNo"]</td>
-                                        <td>@row["EmailAddress"]</td>
-                                        <td class="text-center">
-                                            <a asp-action="StaffAddEdit"
-                                               asp-route-id="@row["StaffID"]"
-                                               class="btn btn-sm btn-outline-primary action-btn">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-outline-danger action-btn">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                                @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(departmentFilter))
+                                                {
+                                                    <p>No staff members found matching your criteria</p>
+                                                    <a href="@Url.Action("StaffList")" class="btn btn-outline-primary btn-sm">
+                                                        Clear Filters
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <p>No staff members found</p>
+                                                    <a asp-action="StaffAddEdit" class="btn btn-primary btn-sm">
+                                                        Add First Staff Member
+                                                    </a>
+                                                }
+                                            </div>
                                         </td>
                                     </tr>
                                 }
                             </tbody>
-
                         </table>
                     </div>
-                    <!-- End Table -->
-
                 </div>
             </div>
-
         </div>
     </div>
 </section>
 
+<!-- Staff Details Modal -->
+<div class="modal fade" id="staffModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Staff Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="staffModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the staff member <strong id="deleteStaffName"></strong>?</p>
+                <p class="text-muted small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="bi bi-trash me-1"></i>
+                    Delete Staff Member
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            new simpleDatatables.DataTable("#staffTable", {
-                searchable: true,
-                perPage: 5,
-                perPageSelect: [5, 10, 25, 50]
+        let deleteId = 0;
+
+        function viewStaff(id) {
+            fetch(`/Staff/GetStaffDetails/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const staff = data.data;
+                        document.getElementById('staffModalBody').innerHTML = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Staff ID:</strong></div>
+                                        <div class="col-sm-8">${staff.StaffID}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Name:</strong></div>
+                                        <div class="col-sm-8">${staff.StaffName}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Department:</strong></div>
+                                        <div class="col-sm-8"><span class="badge bg-info">${staff.DepartmentName}</span></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Email:</strong></div>
+                                        <div class="col-sm-8"><a href="mailto:${staff.EmailAddress}">${staff.EmailAddress}</a></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Mobile:</strong></div>
+                                        <div class="col-sm-8"><a href="tel:${staff.MobileNo}">${staff.MobileNo}</a></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Meetings:</strong></div>
+                                        <div class="col-sm-8"><span class="badge bg-success">${staff.MeetingCount}</span></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Remarks:</strong></div>
+                                        <div class="col-sm-8">${staff.Remarks || 'No remarks'}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Created:</strong></div>
+                                        <div class="col-sm-8">${staff.Created}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-sm-4"><strong>Modified:</strong></div>
+                                        <div class="col-sm-8">${staff.Modified}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        new bootstrap.Modal(document.getElementById('staffModal')).show();
+                    } else {
+                        showToast('Error', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('Error', 'Failed to load staff details', 'error');
+                });
+        }
+
+        function deleteStaff(id, name) {
+            deleteId = id;
+            document.getElementById('deleteStaffName').textContent = name;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (deleteId > 0) {
+                fetch('/Staff/Delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: `id=${deleteId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    if (data.success) {
+                        showToast('Success', data.message, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('Error', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                    showToast('Error', 'Failed to delete staff member', 'error');
+                });
+            }
+        });
+
+        function showToast(title, message, type) {
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${title}:</strong> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
             });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
         });
     </script>
 }

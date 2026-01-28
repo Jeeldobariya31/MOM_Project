@@ -1,121 +1,402 @@
-﻿@{
-    ViewData["Title"] = "Add / Edit Staff";
+﻿@model MOM.Models.StaffModel
 
-    /* UI-only flags */
-    bool isEdit = false;   // false = Add, true = Edit
-
-    /* Old values (shown when Edit) */
-    string staffName = "John Doe";
-    string department = "IT";
-    string mobileNo = "9876543210";
-    string email = "john.doe@company.com";
-    string remarks = "Senior Software Engineer";
+@{
+    ViewData["Title"] = Model.StaffID > 0 ? "Edit Staff Member" : "Add Staff Member";
+    bool isEdit = Model.StaffID > 0;
+    var departments = ViewBag.Departments as List<dynamic> ?? new List<dynamic>();
 }
 
 <div class="pagetitle">
-    <h1>@(isEdit ? "Edit Staff" : "Add Staff")</h1>
+    <h1>@(isEdit ? "Edit Staff Member" : "Add Staff Member")</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a asp-controller="Home" asp-action="Index">Home</a>
             </li>
             <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item active">Staff</li>
+            <li class="breadcrumb-item">
+                <a asp-action="StaffList">Staff</a>
+            </li>
+            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Add")</li>
         </ol>
     </nav>
 </div>
 
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <section class="section">
-    <div class="row">
-        <div class="col-lg-7">
-
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
             <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
+                            <i class="bi bi-person text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">
+                                @(isEdit ? "Edit Staff Member" : "Add New Staff Member")
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                @(isEdit ? "Update staff member information" : "Create a new staff member")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card-body">
+                    <form asp-action="StaffAddEdit" method="post" id="staffForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- Hidden ID for Edit -->
+                        <input type="hidden" asp-for="StaffID" />
+                        <input type="hidden" asp-for="Created" />
 
-                    <h5 class="card-title">
-                        @(isEdit ? "Edit Staff Details" : "Add New Staff Member")
-                    </h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <!-- Staff Name -->
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="StaffName" class="form-label fw-bold">
+                                            <i class="bi bi-person me-1"></i>
+                                            Staff Name 
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="StaffName"
+                                               class="form-control"
+                                               maxlength="50"
+                                               placeholder="Enter staff name"
+                                               autocomplete="off" />
+                                        <span asp-validation-for="StaffName" class="text-danger small"></span>
+                                    </div>
 
-                    <!-- ===== ONLY USER INPUT FIELDS ===== -->
-                    <form class="row g-3">
+                                    <!-- Department -->
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="DepartmentID" class="form-label fw-bold">
+                                            <i class="bi bi-building me-1"></i>
+                                            Department 
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <select asp-for="DepartmentID" class="form-select">
+                                            <option value="">Select Department</option>
+                                            @foreach (var dept in departments)
+                                            {
+                                                <option value="@dept.Value">@dept.Text</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="DepartmentID" class="text-danger small"></span>
+                                    </div>
+                                </div>
 
-                        <!-- Staff Name -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Staff Name <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   maxlength="50"
-                                   placeholder="Enter staff name"
-                                   value="@(isEdit? staffName : "")" />
+                                <div class="row">
+                                    <!-- Email Address -->
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="EmailAddress" class="form-label fw-bold">
+                                            <i class="bi bi-envelope me-1"></i>
+                                            Email Address 
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="EmailAddress"
+                                               class="form-control"
+                                               type="email"
+                                               maxlength="50"
+                                               placeholder="Enter email address"
+                                               autocomplete="off" />
+                                        <span asp-validation-for="EmailAddress" class="text-danger small"></span>
+                                    </div>
+
+                                    <!-- Mobile Number -->
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="MobileNo" class="form-label fw-bold">
+                                            <i class="bi bi-phone me-1"></i>
+                                            Mobile Number 
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="MobileNo"
+                                               class="form-control"
+                                               type="tel"
+                                               maxlength="20"
+                                               placeholder="Enter mobile number"
+                                               autocomplete="off" />
+                                        <span asp-validation-for="MobileNo" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Remarks -->
+                                <div class="mb-3">
+                                    <label asp-for="Remarks" class="form-label fw-bold">
+                                        <i class="bi bi-chat-text me-1"></i>
+                                        Remarks
+                                    </label>
+                                    <textarea asp-for="Remarks"
+                                              class="form-control"
+                                              rows="3"
+                                              maxlength="250"
+                                              placeholder="Enter any additional remarks (optional)"
+                                              autocomplete="off"></textarea>
+                                    <span asp-validation-for="Remarks" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Optional field for additional information about the staff member
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (isEdit)
+                            {
+                                <div class="col-md-4">
+                                    <!-- Staff Statistics -->
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="bi bi-graph-up text-info me-1"></i>
+                                                Staff Statistics
+                                            </h6>
+                                            <div class="text-center">
+                                                <h4 class="text-success mb-0">@Model.MeetingCount</h4>
+                                                <small class="text-muted">Meeting Participations</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Current Department -->
+                                    <div class="mt-3">
+                                        <h6 class="text-muted">
+                                            <i class="bi bi-building me-1"></i>
+                                            Current Department
+                                        </h6>
+                                        <div class="p-2 bg-info-subtle rounded">
+                                            <span class="badge bg-info">@Model.DepartmentName</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Audit Information -->
+                                    <div class="mt-3">
+                                        <h6 class="text-muted">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            Audit Information
+                                        </h6>
+                                        <div class="small text-muted">
+                                            <div class="mb-1">
+                                                <strong>Created:</strong> @Model.Created.ToString("dd MMM yyyy, hh:mm tt")
+                                            </div>
+                                            <div>
+                                                <strong>Modified:</strong> @Model.Modified.ToString("dd MMM yyyy, hh:mm tt")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
 
-                        <!-- Department -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Department <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select">
-                                <option disabled>Select Department</option>
-                                <option selected="@(department == "HR")">HR</option>
-                                <option selected="@(department == "Finance")">Finance</option>
-                                <option selected="@(department == "IT")">IT</option>
-                            </select>
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a asp-action="StaffList" class="btn btn-outline-secondary">
+                                            <i class="bi bi-arrow-left me-1"></i>
+                                            Back to List
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>
+                                            Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <i class="bi bi-@(isEdit ? "check" : "plus")-lg me-1"></i>
+                                            @(isEdit ? "Update Staff Member" : "Save Staff Member")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Mobile Number -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Mobile Number <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   maxlength="20"
-                                   placeholder="Enter mobile number"
-                                   value="@(isEdit? mobileNo : "")" />
-                        </div>
-
-                        <!-- Email Address -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Email Address <span class="text-danger">*</span>
-                            </label>
-                            <input type="email"
-                                   class="form-control"
-                                   maxlength="50"
-                                   placeholder="Enter email address"
-                                   value="@(isEdit? email : "")" />
-                        </div>
-
-                        <!-- Remarks -->
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Remarks</label>
-                            <textarea class="form-control"
-                                      rows="2"
-                                      maxlength="250"
-                                      placeholder="Optional remarks">@(
-                                isEdit ? remarks : ""
-                            )</textarea>
-                        </div>
-
-                        <!-- Buttons -->
-                        <div class="col-12 text-end mt-4">
-                            <button type="button" class="btn btn-secondary me-2">
-                                Cancel
-                            </button>
-
-                            <button type="button" class="btn btn-primary">
-                                @(isEdit ? "Update Staff" : "Save Staff")
-                            </button>
-                        </div>
-
                     </form>
-                    <!-- ===== END FORM ===== -->
-
                 </div>
             </div>
 
+            @if (isEdit && Model.MeetingCount > 0)
+            {
+                <!-- Related Information -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-link-45deg text-warning me-1"></i>
+                            Related Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center p-3 bg-success-subtle rounded">
+                            <i class="bi bi-calendar-event-fill text-success fs-4 me-3"></i>
+                            <div>
+                                <h6 class="mb-0">@Model.MeetingCount Meeting Participations</h6>
+                                <small class="text-muted">This staff member has participated in meetings</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <strong>Note:</strong> This staff member cannot be deleted as they have meeting participation records.
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.getElementById('staffForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const staffNameInput = document.querySelector('input[name="StaffName"]');
+            const emailInput = document.querySelector('input[name="EmailAddress"]');
+            const mobileInput = document.querySelector('input[name="MobileNo"]');
+            const departmentSelect = document.querySelector('select[name="DepartmentID"]');
+
+            // Real-time validation
+            staffNameInput.addEventListener('input', validateStaffName);
+            emailInput.addEventListener('input', validateEmail);
+            mobileInput.addEventListener('input', validateMobile);
+            departmentSelect.addEventListener('change', validateDepartment);
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            });
+
+            function validateStaffName() {
+                const value = staffNameInput.value.trim();
+                
+                if (value.length < 2) {
+                    setValidationState(staffNameInput, false);
+                    return false;
+                } else if (value.length > 50) {
+                    setValidationState(staffNameInput, false);
+                    return false;
+                } else if (!/^[a-zA-Z\s.'-]+$/.test(value)) {
+                    setValidationState(staffNameInput, false);
+                    return false;
+                } else {
+                    setValidationState(staffNameInput, true);
+                    return true;
+                }
+            }
+
+            function validateEmail() {
+                const value = emailInput.value.trim();
+                const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                
+                if (value.length === 0) {
+                    setValidationState(emailInput, false);
+                    return false;
+                } else if (!emailRegex.test(value)) {
+                    setValidationState(emailInput, false);
+                    return false;
+                } else if (value.length > 50) {
+                    setValidationState(emailInput, false);
+                    return false;
+                } else {
+                    setValidationState(emailInput, true);
+                    return true;
+                }
+            }
+
+            function validateMobile() {
+                const value = mobileInput.value.trim();
+                
+                if (value.length < 10) {
+                    setValidationState(mobileInput, false);
+                    return false;
+                } else if (value.length > 20) {
+                    setValidationState(mobileInput, false);
+                    return false;
+                } else if (!/^[\+]?[0-9\s\-\(\)]+$/.test(value)) {
+                    setValidationState(mobileInput, false);
+                    return false;
+                } else {
+                    setValidationState(mobileInput, true);
+                    return true;
+                }
+            }
+
+            function validateDepartment() {
+                const value = departmentSelect.value;
+                
+                if (!value || value === "") {
+                    setValidationState(departmentSelect, false);
+                    return false;
+                } else {
+                    setValidationState(departmentSelect, true);
+                    return true;
+                }
+            }
+
+            function setValidationState(element, isValid) {
+                if (isValid) {
+                    element.classList.remove('is-invalid');
+                    element.classList.add('is-valid');
+                } else {
+                    element.classList.remove('is-valid');
+                    element.classList.add('is-invalid');
+                }
+            }
+
+            function validateForm() {
+                let isValid = true;
+                
+                if (!validateStaffName()) isValid = false;
+                if (!validateEmail()) isValid = false;
+                if (!validateMobile()) isValid = false;
+                if (!validateDepartment()) isValid = false;
+                
+                return isValid;
+            }
+        });
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
+                document.getElementById('staffForm').reset();
+                // Remove validation classes
+                document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                    el.classList.remove('is-valid', 'is-invalid');
+                });
+            }
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}

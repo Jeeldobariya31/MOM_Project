@@ -1,12 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Add / Edit Meeting Type";
+﻿@model MOM.Models.MeetingTypeModel
 
-    /* UI-only flags */
-    bool isEdit = false;   // false = Add, true = Edit
-
-    /* Old values (shown when Edit) */
-    string meetingTypeName = "Board Meeting";
-    string remarks = "Used for board-level discussions";
+@{
+    ViewData["Title"] = Model.MeetingTypeID > 0 ? "Edit Meeting Type" : "Add Meeting Type";
+    bool isEdit = Model.MeetingTypeID > 0;
 }
 
 <div class="pagetitle">
@@ -17,66 +13,299 @@
                 <a asp-controller="Home" asp-action="Index">Home</a>
             </li>
             <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item active">Meeting Type</li>
+            <li class="breadcrumb-item">
+                <a asp-action="MeetingTypeList">Meeting Types</a>
+            </li>
+            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Add")</li>
         </ol>
     </nav>
 </div>
 
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <section class="section">
-    <div class="row">
-        <div class="col-lg-6">
-
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
             <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-info-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
+                            <i class="bi bi-tags text-info"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">
+                                @(isEdit ? "Edit Meeting Type" : "Add New Meeting Type")
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                @(isEdit ? "Update meeting type information" : "Create a new meeting type")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card-body">
+                    <form asp-action="MeetingTypeAddEdit" method="post" id="meetingTypeForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- Hidden ID for Edit -->
+                        <input type="hidden" asp-for="MeetingTypeID" />
+                        <input type="hidden" asp-for="Created" />
 
-                    <h5 class="card-title">
-                        @(isEdit ? "Edit Meeting Type Details" : "Create New Meeting Type")
-                    </h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Meeting Type Name -->
+                                <div class="mb-4">
+                                    <label asp-for="MeetingTypeName" class="form-label fw-bold">
+                                        <i class="bi bi-tags me-1"></i>
+                                        Meeting Type Name 
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="MeetingTypeName"
+                                           class="form-control form-control-lg"
+                                           maxlength="100"
+                                           placeholder="Enter meeting type name"
+                                           autocomplete="off" />
+                                    <span asp-validation-for="MeetingTypeName" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Enter a unique meeting type name (2-100 characters)
+                                    </div>
+                                </div>
 
-                    <!-- ===== ONLY USER INPUT FIELDS ===== -->
-                    <form>
+                                <!-- Remarks -->
+                                <div class="mb-4">
+                                    <label asp-for="Remarks" class="form-label fw-bold">
+                                        <i class="bi bi-chat-text me-1"></i>
+                                        Remarks 
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea asp-for="Remarks"
+                                              class="form-control"
+                                              rows="3"
+                                              maxlength="100"
+                                              placeholder="Enter remarks or description for this meeting type"
+                                              autocomplete="off"></textarea>
+                                    <span asp-validation-for="Remarks" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Provide a brief description (5-100 characters)
+                                    </div>
+                                </div>
+                            </div>
 
-                        <!-- Meeting Type Name -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Meeting Type Name <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   maxlength="100"
-                                   placeholder="Enter meeting type name"
-                                   value="@(isEdit? meetingTypeName : "")" />
+                            @if (isEdit)
+                            {
+                                <div class="col-md-4">
+                                    <!-- Meeting Type Statistics -->
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="bi bi-graph-up text-info me-1"></i>
+                                                Type Statistics
+                                            </h6>
+                                            <div class="text-center">
+                                                <h4 class="text-success mb-0">@Model.MeetingCount</h4>
+                                                <small class="text-muted">Total Meetings</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Audit Information -->
+                                    <div class="mt-3">
+                                        <h6 class="text-muted">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            Audit Information
+                                        </h6>
+                                        <div class="small text-muted">
+                                            <div class="mb-1">
+                                                <strong>Created:</strong> @Model.Created.ToString("dd MMM yyyy, hh:mm tt")
+                                            </div>
+                                            <div>
+                                                <strong>Modified:</strong> @Model.Modified.ToString("dd MMM yyyy, hh:mm tt")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
 
-                        <!-- Remarks -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Remarks <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   maxlength="100"
-                                   placeholder="Short description or purpose"
-                                   value="@(isEdit? remarks : "")" />
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a asp-action="MeetingTypeList" class="btn btn-outline-secondary">
+                                            <i class="bi bi-arrow-left me-1"></i>
+                                            Back to List
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>
+                                            Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-info" id="submitBtn">
+                                            <i class="bi bi-@(isEdit ? "check" : "plus")-lg me-1"></i>
+                                            @(isEdit ? "Update Meeting Type" : "Save Meeting Type")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Buttons -->
-                        <div class="text-end mt-4">
-                            <button type="button" class="btn btn-secondary me-2">
-                                Cancel
-                            </button>
-
-                            <button type="button" class="btn btn-primary">
-                                @(isEdit ? "Update Meeting Type" : "Save Meeting Type")
-                            </button>
-                        </div>
-
                     </form>
-                    <!-- ===== END FORM ===== -->
-
                 </div>
             </div>
 
+            @if (isEdit && Model.MeetingCount > 0)
+            {
+                <!-- Related Information -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-link-45deg text-warning me-1"></i>
+                            Related Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center p-3 bg-success-subtle rounded">
+                            <i class="bi bi-calendar-event-fill text-success fs-4 me-3"></i>
+                            <div>
+                                <h6 class="mb-0">@Model.MeetingCount Meetings</h6>
+                                <small class="text-muted">Associated with this meeting type</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <strong>Note:</strong> This meeting type cannot be deleted as it has associated meetings.
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.getElementById('meetingTypeForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const meetingTypeNameInput = document.querySelector('input[name="MeetingTypeName"]');
+            const remarksInput = document.querySelector('textarea[name="Remarks"]');
+
+            // Real-time validation
+            meetingTypeNameInput.addEventListener('input', function() {
+                validateMeetingTypeName();
+            });
+
+            remarksInput.addEventListener('input', function() {
+                validateRemarks();
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            });
+
+            function validateMeetingTypeName() {
+                const value = meetingTypeNameInput.value.trim();
+                
+                if (value.length < 2) {
+                    meetingTypeNameInput.classList.add('is-invalid');
+                    meetingTypeNameInput.classList.remove('is-valid');
+                    return false;
+                } else if (value.length > 100) {
+                    meetingTypeNameInput.classList.add('is-invalid');
+                    meetingTypeNameInput.classList.remove('is-valid');
+                    return false;
+                } else if (!/^[a-zA-Z0-9\s&.-]+$/.test(value)) {
+                    meetingTypeNameInput.classList.add('is-invalid');
+                    meetingTypeNameInput.classList.remove('is-valid');
+                    return false;
+                } else {
+                    meetingTypeNameInput.classList.remove('is-invalid');
+                    meetingTypeNameInput.classList.add('is-valid');
+                    return true;
+                }
+            }
+
+            function validateRemarks() {
+                const value = remarksInput.value.trim();
+                
+                if (value.length < 5) {
+                    remarksInput.classList.add('is-invalid');
+                    remarksInput.classList.remove('is-valid');
+                    return false;
+                } else if (value.length > 100) {
+                    remarksInput.classList.add('is-invalid');
+                    remarksInput.classList.remove('is-valid');
+                    return false;
+                } else {
+                    remarksInput.classList.remove('is-invalid');
+                    remarksInput.classList.add('is-valid');
+                    return true;
+                }
+            }
+
+            function validateForm() {
+                let isValid = true;
+                
+                // Validate meeting type name
+                if (!validateMeetingTypeName()) {
+                    isValid = false;
+                }
+                
+                // Validate remarks
+                if (!validateRemarks()) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+        });
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
+                document.getElementById('meetingTypeForm').reset();
+                // Remove validation classes
+                document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                    el.classList.remove('is-valid', 'is-invalid');
+                });
+            }
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}

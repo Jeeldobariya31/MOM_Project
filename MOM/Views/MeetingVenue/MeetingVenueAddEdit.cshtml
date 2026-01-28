@@ -1,11 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Add / Edit Meeting Venue";
+﻿@model MOM.Models.MeetingVenueModel
 
-    /* UI-only flags */
-    bool isEdit = false;   // false = Add, true = Edit
-
-    /* Old value (shown when Edit) */
-    string meetingVenueName = "Block H - Auditorium";
+@{
+    ViewData["Title"] = Model.MeetingVenueID > 0 ? "Edit Meeting Venue" : "Add Meeting Venue";
+    bool isEdit = Model.MeetingVenueID > 0;
 }
 
 <div class="pagetitle">
@@ -16,54 +13,251 @@
                 <a asp-controller="Home" asp-action="Index">Home</a>
             </li>
             <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item active">Meeting Venue</li>
+            <li class="breadcrumb-item">
+                <a asp-action="MeetingVenueList">Meeting Venues</a>
+            </li>
+            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Add")</li>
         </ol>
     </nav>
 </div>
 
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <section class="section">
-    <div class="row">
-        <div class="col-lg-6">
-
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
             <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-success-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
+                            <i class="bi bi-geo-alt text-success"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-0">
+                                @(isEdit ? "Edit Meeting Venue" : "Add New Meeting Venue")
+                            </h5>
+                            <p class="text-muted small mb-0">
+                                @(isEdit ? "Update meeting venue information" : "Create a new meeting venue")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card-body">
+                    <form asp-action="MeetingVenueAddEdit" method="post" id="venueForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        
+                        <!-- Hidden ID for Edit -->
+                        <input type="hidden" asp-for="MeetingVenueID" />
+                        <input type="hidden" asp-for="Created" />
 
-                    <h5 class="card-title">
-                        @(isEdit ? "Edit Venue Details" : "Create New Meeting Venue")
-                    </h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Meeting Venue Name -->
+                                <div class="mb-4">
+                                    <label asp-for="MeetingVenueName" class="form-label fw-bold">
+                                        <i class="bi bi-geo-alt me-1"></i>
+                                        Meeting Venue Name 
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="MeetingVenueName"
+                                           class="form-control form-control-lg"
+                                           maxlength="100"
+                                           placeholder="Enter meeting venue name"
+                                           autocomplete="off" />
+                                    <span asp-validation-for="MeetingVenueName" class="text-danger small"></span>
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Enter a unique meeting venue name (2-100 characters)
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- ===== ONLY USER INPUT FIELD ===== -->
-                    <form>
+                            @if (isEdit)
+                            {
+                                <div class="col-md-4">
+                                    <!-- Venue Statistics -->
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="bi bi-graph-up text-info me-1"></i>
+                                                Venue Statistics
+                                            </h6>
+                                            <div class="text-center">
+                                                <h4 class="text-success mb-0">@Model.MeetingCount</h4>
+                                                <small class="text-muted">Total Meetings</small>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <!-- Meeting Venue Name -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                Meeting Venue Name <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   maxlength="100"
-                                   placeholder="Enter meeting venue name"
-                                   value="@(isEdit? meetingVenueName : "")" />
+                                    <!-- Audit Information -->
+                                    <div class="mt-3">
+                                        <h6 class="text-muted">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            Audit Information
+                                        </h6>
+                                        <div class="small text-muted">
+                                            <div class="mb-1">
+                                                <strong>Created:</strong> @Model.Created.ToString("dd MMM yyyy, hh:mm tt")
+                                            </div>
+                                            <div>
+                                                <strong>Modified:</strong> @Model.Modified.ToString("dd MMM yyyy, hh:mm tt")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
 
-                        <!-- Buttons -->
-                        <div class="text-end mt-4">
-                            <button type="button" class="btn btn-secondary me-2">
-                                Cancel
-                            </button>
-
-                            <button type="button" class="btn btn-primary">
-                                @(isEdit ? "Update Meeting Venue" : "Save Meeting Venue")
-                            </button>
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a asp-action="MeetingVenueList" class="btn btn-outline-secondary">
+                                            <i class="bi bi-arrow-left me-1"></i>
+                                            Back to List
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>
+                                            Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-success" id="submitBtn">
+                                            <i class="bi bi-@(isEdit ? "check" : "plus")-lg me-1"></i>
+                                            @(isEdit ? "Update Venue" : "Save Venue")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                     </form>
-                    <!-- ===== END FORM ===== -->
-
                 </div>
             </div>
 
+            @if (isEdit && Model.MeetingCount > 0)
+            {
+                <!-- Related Information -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-link-45deg text-warning me-1"></i>
+                            Related Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center p-3 bg-success-subtle rounded">
+                            <i class="bi bi-calendar-event-fill text-success fs-4 me-3"></i>
+                            <div>
+                                <h6 class="mb-0">@Model.MeetingCount Meetings</h6>
+                                <small class="text-muted">Associated with this venue</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <strong>Note:</strong> This venue cannot be deleted as it has associated meetings.
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            const form = document.getElementById('venueForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const venueNameInput = document.querySelector('input[name="MeetingVenueName"]');
+
+            // Real-time validation
+            venueNameInput.addEventListener('input', function() {
+                validateVenueName();
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            });
+
+            function validateVenueName() {
+                const value = venueNameInput.value.trim();
+                
+                if (value.length < 2) {
+                    venueNameInput.classList.add('is-invalid');
+                    venueNameInput.classList.remove('is-valid');
+                    return false;
+                } else if (value.length > 100) {
+                    venueNameInput.classList.add('is-invalid');
+                    venueNameInput.classList.remove('is-valid');
+                    return false;
+                } else if (!/^[a-zA-Z0-9\s&.-]+$/.test(value)) {
+                    venueNameInput.classList.add('is-invalid');
+                    venueNameInput.classList.remove('is-valid');
+                    return false;
+                } else {
+                    venueNameInput.classList.remove('is-invalid');
+                    venueNameInput.classList.add('is-valid');
+                    return true;
+                }
+            }
+
+            function validateForm() {
+                let isValid = true;
+                
+                // Validate venue name
+                if (!validateVenueName()) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+        });
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
+                document.getElementById('venueForm').reset();
+                // Remove validation classes
+                document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                    el.classList.remove('is-valid', 'is-invalid');
+                });
+            }
+        }
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}

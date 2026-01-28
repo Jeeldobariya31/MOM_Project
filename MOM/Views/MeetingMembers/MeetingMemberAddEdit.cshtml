@@ -1,110 +1,355 @@
-﻿@{
-    ViewData["Title"] = "Add / Edit Meeting Member";
+﻿@model MOM.Models.MeetingMembersModel
 
-    /* UI-only flags */
-    bool isEdit = false;   // false = Add, true = Edit
-
-    /* Old values (shown when Edit) */
-    string selectedMeeting = "Board Meeting - 10 Aug 2025";
-    string selectedStaff = "John Doe";
-    bool isPresent = true;
-    string remarks = "Joined on time";
+@{
+    bool isEdit = Model.MeetingMemberID > 0;
+    ViewData["Title"] = isEdit ? "Edit Meeting Member" : "Assign Meeting Member";
 }
 
 <div class="pagetitle">
-    <h1>@(isEdit ? "Edit Meeting Member" : "Add Meeting Member")</h1>
+    <h1>@(isEdit ? "Edit Meeting Member" : "Assign Meeting Member")</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
             <li class="breadcrumb-item">Meetings</li>
-            <li class="breadcrumb-item active">Meeting Member</li>
+            <li class="breadcrumb-item"><a asp-action="MeetingMemberList">Meeting Members</a></li>
+            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Assign")</li>
         </ol>
     </nav>
 </div>
 
 <section class="section">
     <div class="row">
-        <div class="col-lg-7">
-
+        <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-
                     <h5 class="card-title">
-                        @(isEdit ? "Edit Attendance Details" : "Assign Member to Meeting")
+                        <i class="bi bi-person-plus me-1"></i>
+                        @(isEdit ? "Edit Member Assignment" : "Assign Member to Meeting")
                     </h5>
 
-                    <!-- ===== ONLY USER INPUT FIELDS ===== -->
-                    <form class="row g-3">
+                    <!-- Display validation summary -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <h6><i class="bi bi-exclamation-triangle me-1"></i>Please correct the following errors:</h6>
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
 
-                        <!-- Meeting -->
+                    <form asp-action="MeetingMemberAddEdit" method="post" class="row g-3" novalidate>
+                        <input type="hidden" asp-for="MeetingMemberID" />
+                        <input type="hidden" asp-for="Created" />
+
+                        <!-- Meeting Selection -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Meeting <span class="text-danger">*</span>
+                            <label asp-for="MeetingID" class="form-label fw-bold">
+                                <i class="bi bi-calendar-event me-1"></i>Meeting <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select">
-                                <option disabled>Select Meeting</option>
-                                <option selected="@(selectedMeeting == "Board Meeting - 10 Aug 2025")">
-                                    Board Meeting - 10 Aug 2025
-                                </option>
-                                <option selected="@(selectedMeeting == "Department Review - 15 Aug 2025")">
-                                    Department Review - 15 Aug 2025
-                                </option>
+                            <select asp-for="MeetingID" class="form-select" onchange="loadMeetingDetails(this.value)">
+                                <option value="">-- Select Meeting --</option>
+                                @foreach (System.Data.DataRow meeting in ViewBag.Meetings)
+                                {
+                                    <option value="@meeting["MeetingID"]">
+                                        @meeting["MeetingDescription"] - @Convert.ToDateTime(meeting["MeetingDate"]).ToString("MMM dd, yyyy hh:mm tt")
+                                    </option>
+                                }
                             </select>
+                            <span asp-validation-for="MeetingID" class="text-danger"></span>
                         </div>
 
-                        <!-- Staff -->
+                        <!-- Staff Selection -->
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                Staff Member <span class="text-danger">*</span>
+                            <label asp-for="StaffID" class="form-label fw-bold">
+                                <i class="bi bi-person me-1"></i>Staff Member <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select">
-                                <option disabled>Select Staff</option>
-                                <option selected="@(selectedStaff == "John Doe")">John Doe</option>
-                                <option selected="@(selectedStaff == "Jane Smith")">Jane Smith</option>
+                            <select asp-for="StaffID" class="form-select" onchange="loadStaffDetails(this.value)">
+                                <option value="">-- Select Staff Member --</option>
+                                @foreach (System.Data.DataRow staff in ViewBag.Staff.Rows)
+                                {
+                                    <option value="@staff["StaffID"]" data-dept="@staff["DepartmentID"]">
+                                        @staff["StaffName"] (@staff["DepartmentName"])
+                                    </option>
+                                }
                             </select>
+                            <span asp-validation-for="StaffID" class="text-danger"></span>
                         </div>
 
-                        <!-- Presence -->
+                        <!-- Meeting Details (shown when meeting is selected) -->
+                        <div class="col-12" id="meetingDetails" style="display: none;">
+                            <div class="card border-info">
+                                <div class="card-header bg-info bg-opacity-10">
+                                    <h6 class="mb-0"><i class="bi bi-info-circle me-1"></i>Meeting Details</h6>
+                                </div>
+                                <div class="card-body" id="meetingInfo">
+                                    <!-- Meeting details will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Staff Details (shown when staff is selected) -->
+                        <div class="col-12" id="staffDetails" style="display: none;">
+                            <div class="card border-success">
+                                <div class="card-header bg-success bg-opacity-10">
+                                    <h6 class="mb-0"><i class="bi bi-person-check me-1"></i>Staff Details</h6>
+                                </div>
+                                <div class="card-body" id="staffInfo">
+                                    <!-- Staff details will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Status -->
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                Is Present <span class="text-danger">*</span>
+                            <label asp-for="IsPresent" class="form-label fw-bold">
+                                <i class="bi bi-check-circle me-1"></i>Attendance Status <span class="text-danger">*</span>
                             </label>
-                            <select class="form-select">
-                                <option selected="@(isPresent)">Present</option>
-                                <option selected="@(!isPresent)">Absent</option>
-                            </select>
+                            <div class="form-check form-switch">
+                                <input asp-for="IsPresent" class="form-check-input" type="checkbox" id="isPresentSwitch">
+                                <label class="form-check-label" for="isPresentSwitch">
+                                    <span id="attendanceLabel">@(Model.IsPresent ? "Present" : "Absent")</span>
+                                </label>
+                            </div>
+                            <div class="form-text">Toggle to mark attendance status</div>
                         </div>
 
                         <!-- Remarks -->
                         <div class="col-md-8">
-                            <label class="form-label fw-bold">Remarks</label>
-                            <textarea class="form-control"
-                                      rows="2"
-                                      maxlength="250"
-                                      placeholder="Optional attendance remarks">@(
-                                isEdit ? remarks : ""
-                            )</textarea>
+                            <label asp-for="Remarks" class="form-label fw-bold">
+                                <i class="bi bi-chat-text me-1"></i>Remarks
+                            </label>
+                            <textarea asp-for="Remarks" class="form-control" rows="3" 
+                                      placeholder="Optional remarks about attendance, participation, etc..." maxlength="250"></textarea>
+                            <span asp-validation-for="Remarks" class="text-danger"></span>
+                            <div class="form-text">Maximum 250 characters</div>
                         </div>
 
-                        <!-- Buttons -->
-                        <div class="col-12 text-end mt-4">
-                            <button type="button" class="btn btn-secondary me-2">
-                                Cancel
-                            </button>
-
-                            <button type="button" class="btn btn-primary">
-                                @(isEdit ? "Update Member" : "Save Member")
-                            </button>
+                        <!-- Form Actions -->
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="MeetingMemberList" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Back to List
+                                </a>
+                                
+                                <div>
+                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        @(isEdit ? "Update Assignment" : "Assign Member")
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-
                     </form>
-                    <!-- ===== END FORM ===== -->
+                </div>
+            </div>
+        </div>
 
+        <!-- Guidelines Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle me-1"></i>Assignment Guidelines
+                    </h5>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb me-1"></i>Best Practices</h6>
+                        <ul class="mb-0 small">
+                            <li>Assign members before the meeting date</li>
+                            <li>Ensure all required participants are included</li>
+                            <li>Update attendance status after the meeting</li>
+                            <li>Add relevant remarks for absent members</li>
+                            <li>Consider department relevance when assigning</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle me-1"></i>Important Notes</h6>
+                        <ul class="mb-0 small">
+                            <li>Cannot assign same member to a meeting twice</li>
+                            <li>Cannot assign members to cancelled meetings</li>
+                            <li>Attendance can be updated after assignment</li>
+                            <li>Remarks help track participation quality</li>
+                        </ul>
+                    </div>
+
+                    @if (isEdit)
+                    {
+                        <div class="alert alert-secondary">
+                            <h6><i class="bi bi-clock-history me-1"></i>Assignment History</h6>
+                            <p class="mb-1 small"><strong>Created:</strong> @Model.Created.ToString("MMM dd, yyyy hh:mm tt")</p>
+                            <p class="mb-0 small"><strong>Last Modified:</strong> @Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</p>
+                        </div>
+                    }
                 </div>
             </div>
 
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightning me-1"></i>Quick Actions
+                    </h5>
+                    
+                    <div class="d-grid gap-2">
+                        <a asp-action="MeetingMemberList" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-list me-1"></i>View All Members
+                        </a>
+                        <a asp-controller="Meeting" asp-action="MeetingList" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-calendar-event me-1"></i>View All Meetings
+                        </a>
+                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                            <i class="bi bi-people-fill me-1"></i>Bulk Assign
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Toggle attendance label
+        document.getElementById('isPresentSwitch').addEventListener('change', function() {
+            const label = document.getElementById('attendanceLabel');
+            label.textContent = this.checked ? 'Present' : 'Absent';
+        });
+
+        // Character counter for remarks
+        const remarksField = document.querySelector('textarea[name="Remarks"]');
+        if (remarksField) {
+            const maxLength = 250;
+            const counter = document.createElement('div');
+            counter.className = 'form-text text-end';
+            counter.innerHTML = `<span id="charCount">0</span>/${maxLength} characters`;
+            remarksField.parentNode.appendChild(counter);
+
+            remarksField.addEventListener('input', function() {
+                const count = this.value.length;
+                document.getElementById('charCount').textContent = count;
+                
+                if (count > maxLength * 0.9) {
+                    counter.className = 'form-text text-end text-warning';
+                } else {
+                    counter.className = 'form-text text-end';
+                }
+            });
+
+            // Initialize counter
+            remarksField.dispatchEvent(new Event('input'));
+        }
+
+        // Load meeting details
+        function loadMeetingDetails(meetingId) {
+            if (!meetingId) {
+                document.getElementById('meetingDetails').style.display = 'none';
+                return;
+            }
+
+            fetch(`/MeetingMembers/GetMeetingDetails?meetingId=${meetingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('meetingInfo').innerHTML = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Description:</strong><br>
+                                    <span class="text-muted">${data.meetingDescription}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Date & Time:</strong><br>
+                                    <span class="text-muted">${data.meetingDate}</span>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <strong>Type:</strong><br>
+                                    <span class="badge bg-info">${data.meetingTypeName}</span>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <strong>Venue:</strong><br>
+                                    <span class="text-muted">${data.venueName}</span>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <strong>Department:</strong><br>
+                                    <span class="badge bg-primary">${data.departmentName}</span>
+                                    ${data.isCancelled ? '<span class="badge bg-danger ms-2">CANCELLED</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('meetingDetails').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading meeting details:', error);
+                });
+        }
+
+        // Load staff details
+        function loadStaffDetails(staffId) {
+            if (!staffId) {
+                document.getElementById('staffDetails').style.display = 'none';
+                return;
+            }
+
+            const staffSelect = document.querySelector('select[name="StaffID"]');
+            const selectedOption = staffSelect.options[staffSelect.selectedIndex];
+            const staffName = selectedOption.text.split(' (')[0];
+            const deptName = selectedOption.text.split('(')[1]?.replace(')', '') || 'Unknown';
+
+            document.getElementById('staffInfo').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Staff Name:</strong><br>
+                        <span class="text-muted">${staffName}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Department:</strong><br>
+                        <span class="badge bg-success">${deptName}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('staffDetails').style.display = 'block';
+        }
+
+        // Initialize details if editing
+        @if (isEdit)
+        {
+            <text>
+            document.addEventListener('DOMContentLoaded', function() {
+                loadMeetingDetails(@Model.MeetingID);
+                loadStaffDetails(@Model.StaffID);
+            });
+            </text>
+        }
+
+        // Form validation enhancement
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const meetingId = document.querySelector('select[name="MeetingID"]').value;
+            const staffId = document.querySelector('select[name="StaffID"]').value;
+            
+            if (!meetingId) {
+                e.preventDefault();
+                alert('Please select a meeting.');
+                document.querySelector('select[name="MeetingID"]').focus();
+                return false;
+            }
+            
+            if (!staffId) {
+                e.preventDefault();
+                alert('Please select a staff member.');
+                document.querySelector('select[name="StaffID"]').focus();
+                return false;
+            }
+        });
+    </script>
+}

@@ -2,15 +2,37 @@
 
 @{
     ViewData["Title"] = "Meeting Members";
+
+    string GetValue(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) ? row[col]?.ToString() ?? "" : "";
+    }
+
+    bool GetBool(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) && row[col] != DBNull.Value && Convert.ToBoolean(row[col]);
+    }
+
+    DateTime GetDate(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) && row[col] != DBNull.Value
+            ? Convert.ToDateTime(row[col])
+            : DateTime.MinValue;
+    }
+
+    int GetInt(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) && row[col] != DBNull.Value
+            ? Convert.ToInt32(row[col])
+            : 0;
+    }
 }
 
 <div class="pagetitle">
     <h1>Meeting Members</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
             <li class="breadcrumb-item">Meetings</li>
             <li class="breadcrumb-item active">Meeting Members</li>
         </ol>
@@ -20,77 +42,408 @@
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-
-            <div class="card department-card">
+            <div class="card">
                 <div class="card-body">
 
                     <!-- Header -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-people text-primary me-1"></i>
                             Meeting Member List
+                            <small class="text-muted">(@ViewBag.TotalRecords records)</small>
                         </h5>
+                        
+                        <div class="btn-group">
+                            <a asp-action="MeetingMemberAddEdit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-person-plus me-1"></i>Assign Member
+                            </a>
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                                <i class="bi bi-people-fill me-1"></i>Bulk Assign
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Advanced Filter Form -->
+                    <form method="get" class="mb-4">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <!-- Search -->
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Search</label>
+                                        <input type="text" name="search" value="@ViewBag.Search" 
+                                               class="form-control" placeholder="Search members..." />
+                                    </div>
+
+                                    <!-- Meeting Filter -->
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Meeting</label>
+                                        <select name="meetingFilter" class="form-select">
+                                            <option value="">All Meetings</option>
+                                            @foreach (System.Data.DataRow meeting in ViewBag.Meetings.Rows)
+                                            {
+                                                <option value="@meeting["MeetingID"]" 
+                                                        selected="@(ViewBag.MeetingFilter.ToString() == meeting["MeetingID"].ToString())">
+                                                    @meeting["MeetingDescription"] - @Convert.ToDateTime(meeting["MeetingDate"]).ToString("MMM dd, yyyy")
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Department Filter -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Department</label>
+                                        <select name="departmentFilter" class="form-select">
+                                            <option value="">All Departments</option>
+                                            @foreach (System.Data.DataRow dept in ViewBag.Departments.Rows)
+                                            {
+                                                <option value="@dept["DepartmentID"]" 
+                                                        selected="@(ViewBag.DepartmentFilter.ToString() == dept["DepartmentID"].ToString())">
+                                                    @dept["DepartmentName"]
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Attendance Filter -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Attendance</label>
+                                        <select name="attendanceFilter" class="form-select">
+                                            <option value="">All</option>
+                                            <option value="Present" selected="@(ViewBag.AttendanceFilter == "Present")">Present</option>
+                                            <option value="Absent" selected="@(ViewBag.AttendanceFilter == "Absent")">Absent</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Page Size -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Show</label>
+                                        <select name="pageSize" class="form-select">
+                                            <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
+                                            <option value="25" selected="@(ViewBag.PageSize == 25)">25</option>
+                                            <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+                                            <option value="100" selected="@(ViewBag.PageSize == 100)">100</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Filter Buttons -->
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-search me-1"></i>Apply Filters
+                                        </button>
+                                        <a asp-action="MeetingMemberList" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
 
                     <!-- Table -->
                     <div class="table-responsive">
-                        <table id="meetingMemberTable"
-                               class="table table-hover align-middle department-table">
-                            <thead>
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th style="width:6%">ID</th>
                                     <th>Meeting</th>
-                                    <th>Staff Name</th>
+                                    <th>Staff Member</th>
                                     <th>Department</th>
-                                    <th>Presence</th>
+                                    <th>Meeting Date</th>
+                                    <th>Attendance</th>
                                     <th>Remarks</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                @foreach (System.Data.DataRow row in Model.Rows)
+                                @if (Model.Rows.Count == 0)
                                 {
-                                    bool isPresent = Convert.ToBoolean(row["IsPresent"]);
-
                                     <tr>
-                                        <td>@row["MeetingMemberID"]</td>
-                                        <td>@row["MeetingTitle"]</td>
-                                        <td>@row["StaffName"]</td>
-                                        <td>@row["DepartmentName"]</td>
-                                        <td>
-                                            @if (isPresent)
-                                            {
-                                                <span class="badge bg-success">Present</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">Absent</span>
-                                            }
+                                        <td colspan="7" class="text-center py-4">
+                                            <i class="bi bi-people text-muted" style="font-size: 2rem;"></i>
+                                            <p class="text-muted mt-2">No meeting members found matching your criteria.</p>
                                         </td>
-                                        <td>@row["Remarks"]</td>
                                     </tr>
                                 }
-                            </tbody>
+                                else
+                                {
+                                    @foreach (System.Data.DataRow row in Model.Rows)
+                                    {
+                                        bool isPresent = GetBool(row, "IsPresent");
+                                        DateTime meetingDate = GetDate(row, "MeetingDate");
+                                        string id = GetValue(row, "MeetingMemberID");
+                                        string meetingDesc = GetValue(row, "MeetingDescription");
+                                        string staffName = GetValue(row, "StaffName");
+                                        string deptName = GetValue(row, "DepartmentName");
+                                        string remarks = GetValue(row, "Remarks");
+                                        string meetingType = GetValue(row, "MeetingTypeName");
+                                        string venue = GetValue(row, "VenueName");
 
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold">@meetingDesc</div>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-tag me-1"></i>@meetingType
+                                                    @if (!string.IsNullOrEmpty(venue))
+                                                    {
+                                                        <span class="ms-2"><i class="bi bi-geo-alt me-1"></i>@venue</span>
+                                                    }
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">@staffName</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@deptName</span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">@(meetingDate == DateTime.MinValue ? "" : meetingDate.ToString("MMM dd, yyyy"))</div>
+                                                <small class="text-muted">@(meetingDate == DateTime.MinValue ? "" : meetingDate.ToString("hh:mm tt"))</small>
+                                            </td>
+                                            <td>
+                                                @if (isPresent)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle me-1"></i>Present
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="bi bi-x-circle me-1"></i>Absent
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(remarks))
+                                                {
+                                                    <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@remarks">
+                                                        @remarks
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No remarks</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="MeetingMemberAddEdit" asp-route-id="@id"
+                                                       class="btn btn-sm btn-outline-primary" title="Edit Member">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a asp-action="DeleteMeetingMember" asp-route-id="@id"
+                                                       onclick="return confirm('Are you sure you want to remove this member from the meeting?')"
+                                                       class="btn btn-sm btn-outline-danger" title="Remove Member">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
                         </table>
                     </div>
-                    <!-- End Table -->
+
+                    <!-- Pagination -->
+                    @if (ViewBag.TotalPages > 1)
+                    {
+                        <nav aria-label="Meeting members pagination">
+                            <ul class="pagination justify-content-center">
+                                @if (ViewBag.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("MeetingMemberList", new { 
+                                            page = ViewBag.CurrentPage - 1, 
+                                            search = ViewBag.Search,
+                                            meetingFilter = ViewBag.MeetingFilter,
+                                            departmentFilter = ViewBag.DepartmentFilter,
+                                            attendanceFilter = ViewBag.AttendanceFilter,
+                                            pageSize = ViewBag.PageSize
+                                        })">Previous</a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("MeetingMemberList", new { 
+                                            page = i, 
+                                            search = ViewBag.Search,
+                                            meetingFilter = ViewBag.MeetingFilter,
+                                            departmentFilter = ViewBag.DepartmentFilter,
+                                            attendanceFilter = ViewBag.AttendanceFilter,
+                                            pageSize = ViewBag.PageSize
+                                        })">@i</a>
+                                    </li>
+                                }
+
+                                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("MeetingMemberList", new { 
+                                            page = ViewBag.CurrentPage + 1, 
+                                            search = ViewBag.Search,
+                                            meetingFilter = ViewBag.MeetingFilter,
+                                            departmentFilter = ViewBag.DepartmentFilter,
+                                            attendanceFilter = ViewBag.AttendanceFilter,
+                                            pageSize = ViewBag.PageSize
+                                        })">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
 
                 </div>
             </div>
-
         </div>
     </div>
 </section>
 
+<!-- Bulk Assign Modal -->
+<div class="modal fade" id="bulkAssignModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-people-fill me-1"></i>Bulk Assign Members to Meeting
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="BulkAssignMembers">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Select Meeting <span class="text-danger">*</span></label>
+                            <select name="meetingId" class="form-select" required onchange="loadMeetingDetails(this.value)">
+                                <option value="">-- Select Meeting --</option>
+                                @foreach (System.Data.DataRow meeting in ViewBag.Meetings.Rows)
+                                {
+                                    <option value="@meeting["MeetingID"]">
+                                        @meeting["MeetingDescription"] - @Convert.ToDateTime(meeting["MeetingDate"]).ToString("MMM dd, yyyy hh:mm tt")
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-12" id="meetingDetails" style="display: none;">
+                            <div class="alert alert-info">
+                                <div id="meetingInfo"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Filter by Department</label>
+                            <select id="deptFilter" class="form-select" onchange="filterStaff()">
+                                <option value="">All Departments</option>
+                                @foreach (System.Data.DataRow dept in ViewBag.Departments.Rows)
+                                {
+                                    <option value="@dept["DepartmentID"]">@dept["DepartmentName"]</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Select All/None</label>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllStaff(true)">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAllStaff(false)">Select None</button>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Select Staff Members <span class="text-danger">*</span></label>
+                            <div id="staffList" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                <p class="text-muted">Please select a meeting first.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Assign Selected Members</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            new simpleDatatables.DataTable("#meetingMemberTable", {
-                searchable: true,
-                perPage: 5,
-                perPageSelect: [5, 10, 25, 50]
-            });
+        // Auto-submit form when page size changes
+        document.querySelector('select[name="pageSize"]').addEventListener('change', function() {
+            this.form.submit();
         });
+
+        // Staff data for bulk assign
+        const staffData = @Html.Raw(Json.Serialize(ViewBag.StaffForJs));
+        })));
+
+        function loadMeetingDetails(meetingId) {
+            if (!meetingId) {
+                document.getElementById('meetingDetails').style.display = 'none';
+                document.getElementById('staffList').innerHTML = '<p class="text-muted">Please select a meeting first.</p>';
+                return;
+            }
+
+            // Load meeting details via AJAX
+            fetch(`/MeetingMembers/GetMeetingDetails?meetingId=${meetingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('meetingInfo').innerHTML = `
+                            <strong>Meeting:</strong> ${data.meetingDescription}<br>
+                            <strong>Date:</strong> ${data.meetingDate}<br>
+                            <strong>Type:</strong> ${data.meetingTypeName}<br>
+                            <strong>Venue:</strong> ${data.venueName}<br>
+                            <strong>Department:</strong> ${data.departmentName}
+                        `;
+                        document.getElementById('meetingDetails').style.display = 'block';
+                    }
+                });
+
+            // Load staff list
+            loadStaffList();
+        }
+
+        function loadStaffList() {
+            const staffListHtml = staffData.map(staff => `
+                <div class="form-check">
+                    <input class="form-check-input staff-checkbox" type="checkbox" name="staffIds" value="${staff.StaffID}" 
+                           id="staff_${staff.StaffID}" data-dept="${staff.DepartmentID}">
+                    <label class="form-check-label" for="staff_${staff.StaffID}">
+                        ${staff.StaffName} <small class="text-muted">(${staff.DepartmentName})</small>
+                    </label>
+                </div>
+            `).join('');
+
+            document.getElementById('staffList').innerHTML = staffListHtml;
+        }
+
+        function filterStaff() {
+            const selectedDept = document.getElementById('deptFilter').value;
+            const checkboxes = document.querySelectorAll('.staff-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                const parentDiv = checkbox.closest('.form-check');
+                if (!selectedDept || checkbox.dataset.dept === selectedDept) {
+                    parentDiv.style.display = 'block';
+                } else {
+                    parentDiv.style.display = 'none';
+                    checkbox.checked = false;
+                }
+            });
+        }
+
+        function selectAllStaff(selectAll) {
+            const visibleCheckboxes = document.querySelectorAll('.staff-checkbox');
+            visibleCheckboxes.forEach(checkbox => {
+                if (checkbox.closest('.form-check').style.display !== 'none') {
+                    checkbox.checked = selectAll;
+                }
+            });
+        }
     </script>
 }

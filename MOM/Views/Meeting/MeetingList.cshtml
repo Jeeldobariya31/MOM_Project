@@ -2,16 +2,37 @@
 
 @{
     ViewData["Title"] = "Meeting List";
+
+    string GetValue(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) ? row[col]?.ToString() ?? "" : "";
+    }
+
+    bool GetBool(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) && row[col] != DBNull.Value && Convert.ToBoolean(row[col]);
+    }
+
+    DateTime GetDate(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) && row[col] != DBNull.Value
+            ? Convert.ToDateTime(row[col])
+            : DateTime.MinValue;
+    }
+
+    int GetInt(System.Data.DataRow row, string col)
+    {
+        return Model.Columns.Contains(col) && row[col] != DBNull.Value
+            ? Convert.ToInt32(row[col])
+            : 0;
+    }
 }
 
 <div class="pagetitle">
     <h1>Meetings</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="breadcrumb-item">Master</li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
             <li class="breadcrumb-item active">Meetings</li>
         </ol>
     </nav>
@@ -20,104 +41,352 @@
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-
-            <div class="card department-card">
+            <div class="card">
                 <div class="card-body">
 
                     <!-- Header -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-calendar-event text-primary me-1"></i>
-                            Meeting List
+                            <i class="bi bi-calendar-event me-1"></i> Meeting List
+                            <small class="text-muted">(@ViewBag.TotalRecords records)</small>
                         </h5>
 
-                        <a asp-controller="Meeting"
-                           asp-action="MeetingAddEdit"
-                           class="btn btn-primary btn-sm rounded-pill px-3">
-                            <i class="bi bi-plus-lg me-1"></i>
-                            Schedule Meeting
+                        <a asp-action="MeetingAddEdit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Schedule Meeting
                         </a>
                     </div>
 
-                    <!-- Table -->
+                    <!-- Advanced Filter Form -->
+                    <form method="get" class="mb-4">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <!-- Search -->
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Search</label>
+                                        <input type="text" name="search" value="@ViewBag.Search" 
+                                               class="form-control" placeholder="Search meetings..." />
+                                    </div>
+
+                                    <!-- Status Filter -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Status</label>
+                                        <select name="statusFilter" class="form-select">
+                                            <option value="">All Status</option>
+                                            <option value="Upcoming" selected="@(ViewBag.StatusFilter == "Upcoming")">Upcoming</option>
+                                            <option value="Today" selected="@(ViewBag.StatusFilter == "Today")">Today</option>
+                                            <option value="Past" selected="@(ViewBag.StatusFilter == "Past")">Past</option>
+                                            <option value="Cancelled" selected="@(ViewBag.StatusFilter == "Cancelled")">Cancelled</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Department Filter -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Department</label>
+                                        <select name="departmentFilter" class="form-select">
+                                            <option value="">All Departments</option>
+                                            @foreach (System.Data.DataRow dept in ViewBag.Departments.Rows)
+                                            {
+                                                <option value="@dept["DepartmentID"]" 
+                                                        selected="@(ViewBag.DepartmentFilter.ToString() == dept["DepartmentID"].ToString())">
+                                                    @dept["DepartmentName"]
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Type Filter -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Type</label>
+                                        <select name="typeFilter" class="form-select">
+                                            <option value="">All Types</option>
+                                            @foreach (System.Data.DataRow type in ViewBag.MeetingTypes.Rows)
+                                            {
+                                                <option value="@type["MeetingTypeID"]" 
+                                                        selected="@(ViewBag.TypeFilter.ToString() == type["MeetingTypeID"].ToString())">
+                                                    @type["MeetingTypeName"]
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Venue Filter -->
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Venue</label>
+                                        <select name="venueFilter" class="form-select">
+                                            <option value="">All Venues</option>
+                                            @foreach (System.Data.DataRow venue in ViewBag.MeetingVenues.Rows)
+                                            {
+                                                <option value="@venue["MeetingVenueID"]" 
+                                                        selected="@(ViewBag.VenueFilter.ToString() == venue["MeetingVenueID"].ToString())">
+                                                    @venue["MeetingVenueName"]
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Date Range -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">From Date</label>
+                                        <input type="date" name="dateFrom" value="@ViewBag.DateFrom" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">To Date</label>
+                                        <input type="date" name="dateTo" value="@ViewBag.DateTo" class="form-control" />
+                                    </div>
+
+                                    <!-- Page Size -->
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-bold">Show</label>
+                                        <select name="pageSize" class="form-select">
+                                            <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
+                                            <option value="25" selected="@(ViewBag.PageSize == 25)">25</option>
+                                            <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+                                            <option value="100" selected="@(ViewBag.PageSize == 100)">100</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Filter Buttons -->
+                                    <div class="col-md-6 d-flex align-items-end gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-search me-1"></i> Apply Filters
+                                        </button>
+                                        <a asp-action="MeetingList" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- TABLE -->
                     <div class="table-responsive">
-                        <table id="meetingTable"
-                               class="table table-hover align-middle department-table">
-                            <thead>
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th style="width:6%">ID</th>
-                                    <th>Date</th>
+                                    <th>Date & Time</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
                                     <th>Venue</th>
-                                    <th>Meeting Type</th>
                                     <th>Department</th>
+                                    <th>Members</th>
                                     <th>Status</th>
-                                    <th style="width:15%" class="text-center">Actions</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                @foreach (System.Data.DataRow row in Model.Rows)
+                                @if (Model.Rows.Count == 0)
                                 {
-                                    bool isCancelled = Convert.ToBoolean(row["IsCancelled"]);
-
                                     <tr>
-                                        <td>@row["MeetingID"]</td>
-                                        <td>@Convert.ToDateTime(row["MeetingDate"]).ToString("yyyy-MM-dd HH:mm")</td>
-                                        <td>@row["VenueName"]</td>
-                                        <td>@row["MeetingTypeName"]</td>
-                                        <td>@row["DepartmentName"]</td>
-                                        <td>
-                                            @if (isCancelled)
-                                            {
-                                                <span class="badge bg-danger">Cancelled</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-success">Scheduled</span>
-                                            }
-                                        </td>
-                                        <td class="text-center">
-                                            <a asp-action="MeetingAddEdit"
-                                               asp-route-id="@row["MeetingID"]"
-                                               class="btn btn-sm btn-outline-primary action-btn">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger action-btn"
-                                                    onclick="cancelMeeting(@row["MeetingID"])">
-                                                <i class="bi bi-x-circle"></i>
-                                            </button>
+                                        <td colspan="8" class="text-center py-4">
+                                            <i class="bi bi-calendar-x text-muted" style="font-size: 2rem;"></i>
+                                            <p class="text-muted mt-2">No meetings found matching your criteria.</p>
                                         </td>
                                     </tr>
                                 }
-                            </tbody>
+                                else
+                                {
+                                    @foreach (System.Data.DataRow row in Model.Rows)
+                                    {
+                                        bool isCancelled = GetBool(row, "IsCancelled");
+                                        DateTime date = GetDate(row, "MeetingDate");
+                                        int memberCount = GetInt(row, "MemberCount");
+                                        int presentCount = GetInt(row, "PresentCount");
 
+                                        string status =
+                                        isCancelled ? "Cancelled" :
+                                        date.Date == DateTime.Today ? "Today" :
+                                        date > DateTime.Now ? "Upcoming" :
+                                        "Past";
+
+                                        string id = GetValue(row, "MeetingID");
+                                        string description = GetValue(row, "MeetingDescription");
+                                        string type = GetValue(row, "MeetingTypeName");
+                                        string venue = GetValue(row, "VenueName");
+                                        string dept = GetValue(row, "DepartmentName");
+                                        string docPath = GetValue(row, "DocumentPath");
+
+                                        <tr class="@(isCancelled ? "table-secondary" : "")">
+                                            <td>
+                                                <div class="fw-bold">@(date == DateTime.MinValue ? "" : date.ToString("MMM dd, yyyy"))</div>
+                                                <small class="text-muted">@(date == DateTime.MinValue ? "" : date.ToString("hh:mm tt"))</small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">@description</div>
+                                                @if (!string.IsNullOrEmpty(docPath))
+                                                {
+                                                    <small><a href="@docPath" target="_blank" class="text-primary"><i class="bi bi-file-earmark-text me-1"></i>Document</a></small>
+                                                }
+                                            </td>
+                                            <td><span class="badge bg-info">@type</span></td>
+                                            <td>@venue</td>
+                                            <td>@dept</td>
+                                            <td>
+                                                @if (memberCount > 0)
+                                                {
+                                                    <span class="badge bg-primary">@memberCount Total</span>
+                                                    <span class="badge bg-success">@presentCount Present</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No members</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (status == "Cancelled")
+                                                {
+                                                    <span class="badge bg-danger">Cancelled</span>
+                                                }
+                                                else if (status == "Today")
+                                                {
+                                                    <span class="badge bg-warning text-dark">Today</span>
+                                                }
+                                                else if (status == "Upcoming")
+                                                {
+                                                    <span class="badge bg-success">Upcoming</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Past</span>
+                                                }
+                                            </td>
+
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="MeetingAddEdit" asp-route-id="@id"
+                                                       class="btn btn-sm btn-outline-primary" title="Edit Meeting">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+
+                                                    @if (!isCancelled && date > DateTime.Now)
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-warning" 
+                                                                onclick="cancelMeeting(@id)" title="Cancel Meeting">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    }
+
+                                                    @if (!isCancelled || memberCount == 0)
+                                                    {
+                                                        <a asp-action="DeleteMeeting" asp-route-id="@id"
+                                                           onclick="return confirm('Are you sure you want to delete this meeting?')"
+                                                           class="btn btn-sm btn-outline-danger" title="Delete Meeting">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
                         </table>
                     </div>
-                    <!-- End Table -->
+
+                    <!-- Pagination -->
+                    @if (ViewBag.TotalPages > 1)
+                    {
+                        <nav aria-label="Meeting pagination">
+                            <ul class="pagination justify-content-center">
+                                @if (ViewBag.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("MeetingList", new { 
+                                            page = ViewBag.CurrentPage - 1, 
+                                            search = ViewBag.Search,
+                                            statusFilter = ViewBag.StatusFilter,
+                                            departmentFilter = ViewBag.DepartmentFilter,
+                                            typeFilter = ViewBag.TypeFilter,
+                                            venueFilter = ViewBag.VenueFilter,
+                                            dateFrom = ViewBag.DateFrom,
+                                            dateTo = ViewBag.DateTo,
+                                            pageSize = ViewBag.PageSize
+                                        })">Previous</a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("MeetingList", new { 
+                                            page = i, 
+                                            search = ViewBag.Search,
+                                            statusFilter = ViewBag.StatusFilter,
+                                            departmentFilter = ViewBag.DepartmentFilter,
+                                            typeFilter = ViewBag.TypeFilter,
+                                            venueFilter = ViewBag.VenueFilter,
+                                            dateFrom = ViewBag.DateFrom,
+                                            dateTo = ViewBag.DateTo,
+                                            pageSize = ViewBag.PageSize
+                                        })">@i</a>
+                                    </li>
+                                }
+
+                                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("MeetingList", new { 
+                                            page = ViewBag.CurrentPage + 1, 
+                                            search = ViewBag.Search,
+                                            statusFilter = ViewBag.StatusFilter,
+                                            departmentFilter = ViewBag.DepartmentFilter,
+                                            typeFilter = ViewBag.TypeFilter,
+                                            venueFilter = ViewBag.VenueFilter,
+                                            dateFrom = ViewBag.DateFrom,
+                                            dateTo = ViewBag.DateTo,
+                                            pageSize = ViewBag.PageSize
+                                        })">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
 
                 </div>
             </div>
-
         </div>
     </div>
 </section>
 
+<!-- Cancel Meeting Modal -->
+<div class="modal fade" id="cancelMeetingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Meeting</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="cancelMeetingForm" method="post" asp-action="CancelMeeting">
+                <div class="modal-body">
+                    <input type="hidden" id="cancelMeetingId" name="id" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cancellation Reason <span class="text-danger">*</span></label>
+                        <textarea name="reason" class="form-control" rows="3" required 
+                                  placeholder="Please provide a reason for cancelling this meeting..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning">Cancel Meeting</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            new simpleDatatables.DataTable("#meetingTable", {
-                searchable: true,
-                perPage: 5,
-                perPageSelect: [5, 10, 25, 50]
-            });
-        });
-
-        function cancelMeeting(id) {
-            if (confirm("Are you sure you want to cancel this meeting?")) {
-                alert("Cancel Meeting ID: " + id);
-            }
+        function cancelMeeting(meetingId) {
+            document.getElementById('cancelMeetingId').value = meetingId;
+            new bootstrap.Modal(document.getElementById('cancelMeetingModal')).show();
         }
+
+        // Auto-submit form when page size changes
+        document.querySelector('select[name="pageSize"]').addEventListener('change', function() {
+            this.form.submit();
+        });
     </script>
 }

@@ -461,7 +461,6 @@ C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\staticwebasse
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\staticwebassets.development.json
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\swae.build.ex.cache
-C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\MOM.dll
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\refint\MOM.dll
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\MOM.pdb
@@ -470,3 +469,4 @@ C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\ref\MOM.dll
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\xra1mi5tu0-{0}-3jvvlm2uux-3jvvlm2uux.gz
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\cmfeeyo3wq-{0}-a5ewd07oap-a5ewd07oap.gz
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\MOM.sourcelink.json
+C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
