@@ -157,20 +157,70 @@ namespace MOM.Services
             Staff.Rows.Add(7, 6, "Robert Taylor", "+1-555-0107", "robert.taylor@company.com", "Sales Manager", DateTime.Now, DateTime.Now);
             Staff.Rows.Add(8, 7, "Jennifer Martinez", "+1-555-0108", "jennifer.martinez@company.com", "Customer Service Lead", DateTime.Now, DateTime.Now);
 
-            // Seed Meetings
-            Meetings.Rows.Add(1, DateTime.Now.AddDays(1), 1, 1, 1, "Monthly HR Review", "", DateTime.Now, DateTime.Now, false, DBNull.Value, "");
-            Meetings.Rows.Add(2, DateTime.Now.AddDays(2), 2, 2, 2, "Client Requirements Discussion", "", DateTime.Now, DateTime.Now, false, DBNull.Value, "");
-            Meetings.Rows.Add(3, DateTime.Now.AddDays(3), 3, 3, 2, "Daily Standup", "", DateTime.Now, DateTime.Now, false, DBNull.Value, "");
-            Meetings.Rows.Add(4, DateTime.Now.AddDays(7), 4, 5, 3, "Financial Training", "", DateTime.Now, DateTime.Now, false, DBNull.Value, "");
-            Meetings.Rows.Add(5, DateTime.Now.AddDays(-2), 1, 4, 4, "Marketing Campaign Review", "", DateTime.Now, DateTime.Now, true, DateTime.Now.AddDays(-3), "Budget constraints");
+            // Seed Meetings with more realistic historical data
+            var now = DateTime.Now;
+            
+            // Past meetings (last 6 months)
+            Meetings.Rows.Add(1, now.AddDays(-150), 1, 1, 1, "Q4 HR Strategy Meeting", "", now.AddDays(-150), now.AddDays(-150), false, DBNull.Value, "");
+            Meetings.Rows.Add(2, now.AddDays(-140), 2, 2, 2, "System Architecture Review", "", now.AddDays(-140), now.AddDays(-140), false, DBNull.Value, "");
+            Meetings.Rows.Add(3, now.AddDays(-130), 3, 3, 3, "Budget Planning Session", "", now.AddDays(-130), now.AddDays(-130), false, DBNull.Value, "");
+            Meetings.Rows.Add(4, now.AddDays(-120), 1, 4, 4, "Marketing Campaign Launch", "", now.AddDays(-120), now.AddDays(-120), false, DBNull.Value, "");
+            Meetings.Rows.Add(5, now.AddDays(-110), 2, 5, 5, "Operations Review", "", now.AddDays(-110), now.AddDays(-110), false, DBNull.Value, "");
+            
+            Meetings.Rows.Add(6, now.AddDays(-100), 3, 1, 1, "HR Policy Update", "", now.AddDays(-100), now.AddDays(-100), false, DBNull.Value, "");
+            Meetings.Rows.Add(7, now.AddDays(-90), 1, 2, 2, "Client Onboarding Process", "", now.AddDays(-90), now.AddDays(-90), false, DBNull.Value, "");
+            Meetings.Rows.Add(8, now.AddDays(-80), 2, 3, 3, "Financial Audit Preparation", "", now.AddDays(-80), now.AddDays(-80), false, DBNull.Value, "");
+            Meetings.Rows.Add(9, now.AddDays(-70), 4, 4, 4, "Product Launch Strategy", "", now.AddDays(-70), now.AddDays(-70), false, DBNull.Value, "");
+            Meetings.Rows.Add(10, now.AddDays(-60), 1, 5, 5, "Process Improvement Workshop", "", now.AddDays(-60), now.AddDays(-60), false, DBNull.Value, "");
+            
+            Meetings.Rows.Add(11, now.AddDays(-50), 2, 1, 1, "Team Building Session", "", now.AddDays(-50), now.AddDays(-50), false, DBNull.Value, "");
+            Meetings.Rows.Add(12, now.AddDays(-45), 3, 2, 2, "Technology Roadmap", "", now.AddDays(-45), now.AddDays(-45), false, DBNull.Value, "");
+            Meetings.Rows.Add(13, now.AddDays(-40), 1, 3, 3, "Quarterly Financial Review", "", now.AddDays(-40), now.AddDays(-40), false, DBNull.Value, "");
+            Meetings.Rows.Add(14, now.AddDays(-35), 2, 4, 4, "Brand Strategy Meeting", "", now.AddDays(-35), now.AddDays(-35), false, DBNull.Value, "");
+            Meetings.Rows.Add(15, now.AddDays(-30), 4, 5, 5, "Supply Chain Optimization", "", now.AddDays(-30), now.AddDays(-30), false, DBNull.Value, "");
+            
+            Meetings.Rows.Add(16, now.AddDays(-25), 1, 1, 1, "Performance Review Cycle", "", now.AddDays(-25), now.AddDays(-25), false, DBNull.Value, "");
+            Meetings.Rows.Add(17, now.AddDays(-20), 3, 2, 2, "Security Assessment", "", now.AddDays(-20), now.AddDays(-20), false, DBNull.Value, "");
+            Meetings.Rows.Add(18, now.AddDays(-15), 2, 3, 3, "Investment Planning", "", now.AddDays(-15), now.AddDays(-15), false, DBNull.Value, "");
+            Meetings.Rows.Add(19, now.AddDays(-10), 1, 4, 4, "Customer Feedback Analysis", "", now.AddDays(-10), now.AddDays(-10), false, DBNull.Value, "");
+            Meetings.Rows.Add(20, now.AddDays(-5), 4, 5, 5, "Quality Assurance Review", "", now.AddDays(-5), now.AddDays(-5), false, DBNull.Value, "");
+            
+            // Recent meetings
+            Meetings.Rows.Add(21, now.AddDays(-2), 1, 1, 1, "Weekly HR Standup", "", now.AddDays(-2), now.AddDays(-2), false, DBNull.Value, "");
+            Meetings.Rows.Add(22, now.AddDays(-1), 2, 2, 2, "Sprint Planning", "", now.AddDays(-1), now.AddDays(-1), false, DBNull.Value, "");
+            
+            // Upcoming meetings
+            Meetings.Rows.Add(23, now.AddDays(1), 1, 1, 1, "Monthly HR Review", "", now, now, false, DBNull.Value, "");
+            Meetings.Rows.Add(24, now.AddDays(2), 2, 2, 2, "Client Requirements Discussion", "", now, now, false, DBNull.Value, "");
+            Meetings.Rows.Add(25, now.AddDays(3), 3, 3, 2, "Daily Standup", "", now, now, false, DBNull.Value, "");
+            Meetings.Rows.Add(26, now.AddDays(7), 4, 5, 3, "Financial Training", "", now, now, false, DBNull.Value, "");
+            
+            // One cancelled meeting
+            Meetings.Rows.Add(27, now.AddDays(-3), 1, 4, 4, "Marketing Campaign Review", "", now.AddDays(-3), now.AddDays(-3), true, now.AddDays(-4), "Budget constraints");
 
-            // Seed Meeting Members
-            MeetingMembers.Rows.Add(1, 1, 1, true, "Attended full meeting", DateTime.Now, DateTime.Now);
-            MeetingMembers.Rows.Add(2, 1, 3, true, "Provided financial insights", DateTime.Now, DateTime.Now);
-            MeetingMembers.Rows.Add(3, 2, 2, true, "Led the discussion", DateTime.Now, DateTime.Now);
-            MeetingMembers.Rows.Add(4, 2, 6, true, "Technical input provided", DateTime.Now, DateTime.Now);
-            MeetingMembers.Rows.Add(5, 3, 2, true, "Daily update given", DateTime.Now, DateTime.Now);
-            MeetingMembers.Rows.Add(6, 3, 6, false, "On leave", DateTime.Now, DateTime.Now);
+            // Seed Meeting Members with more data
+            MeetingMembers.Rows.Add(1, 1, 1, true, "Attended full meeting", now.AddDays(-150), now.AddDays(-150));
+            MeetingMembers.Rows.Add(2, 1, 3, true, "Provided financial insights", now.AddDays(-150), now.AddDays(-150));
+            MeetingMembers.Rows.Add(3, 2, 2, true, "Led the discussion", now.AddDays(-140), now.AddDays(-140));
+            MeetingMembers.Rows.Add(4, 2, 6, true, "Technical input provided", now.AddDays(-140), now.AddDays(-140));
+            MeetingMembers.Rows.Add(5, 3, 2, true, "Daily update given", now.AddDays(-130), now.AddDays(-130));
+            MeetingMembers.Rows.Add(6, 3, 6, false, "On leave", now.AddDays(-130), now.AddDays(-130));
+            MeetingMembers.Rows.Add(7, 4, 4, true, "Marketing presentation", now.AddDays(-120), now.AddDays(-120));
+            MeetingMembers.Rows.Add(8, 4, 1, true, "HR coordination", now.AddDays(-120), now.AddDays(-120));
+            MeetingMembers.Rows.Add(9, 5, 5, true, "Operations report", now.AddDays(-110), now.AddDays(-110));
+            MeetingMembers.Rows.Add(10, 5, 2, true, "Technical support", now.AddDays(-110), now.AddDays(-110));
+            MeetingMembers.Rows.Add(11, 6, 1, true, "Policy discussion", now.AddDays(-100), now.AddDays(-100));
+            MeetingMembers.Rows.Add(12, 7, 2, true, "Client requirements", now.AddDays(-90), now.AddDays(-90));
+            MeetingMembers.Rows.Add(13, 8, 3, true, "Financial review", now.AddDays(-80), now.AddDays(-80));
+            MeetingMembers.Rows.Add(14, 9, 4, true, "Product strategy", now.AddDays(-70), now.AddDays(-70));
+            MeetingMembers.Rows.Add(15, 10, 5, true, "Process improvement", now.AddDays(-60), now.AddDays(-60));
+            MeetingMembers.Rows.Add(16, 11, 1, true, "Team building", now.AddDays(-50), now.AddDays(-50));
+            MeetingMembers.Rows.Add(17, 12, 2, true, "Technology planning", now.AddDays(-45), now.AddDays(-45));
+            MeetingMembers.Rows.Add(18, 13, 3, true, "Financial analysis", now.AddDays(-40), now.AddDays(-40));
+            MeetingMembers.Rows.Add(19, 14, 4, true, "Brand strategy", now.AddDays(-35), now.AddDays(-35));
+            MeetingMembers.Rows.Add(20, 15, 5, true, "Supply chain", now.AddDays(-30), now.AddDays(-30));
+            MeetingMembers.Rows.Add(21, 21, 1, true, "Weekly standup", now.AddDays(-2), now.AddDays(-2));
+            MeetingMembers.Rows.Add(22, 22, 2, true, "Sprint planning", now.AddDays(-1), now.AddDays(-1));
 
             // Seed Users
             Users.Rows.Add(1, "admin", "admin123", "System Administrator", "admin@company.com", true, DBNull.Value, DateTime.Now, DateTime.Now);

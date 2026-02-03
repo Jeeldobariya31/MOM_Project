@@ -158,10 +158,10 @@ namespace MOM.Controllers
                     model.MeetingTypeID = row.Field<int>("MeetingTypeID");
                     model.MeetingVenueID = row.Field<int>("MeetingVenueID");
                     model.MeetingDescription = row.Field<string>("MeetingDescription") ?? "";
-                    model.DocumentPath = row.Field<string>("DocumentPath") ?? "";
+                    model.DocumentPath = row.Field<string>("DocumentPath");
                     model.IsCancelled = row.Field<bool>("IsCancelled");
                     model.CancellationDateTime = row.Field<DateTime?>("CancellationDateTime");
-                    model.CancellationReason = row.Field<string>("CancellationReason") ?? "";
+                    model.CancellationReason = row.Field<string>("CancellationReason");
                     model.Created = row.Field<DateTime>("Created");
                     model.Modified = row.Field<DateTime>("Modified");
                 }
@@ -178,15 +178,20 @@ namespace MOM.Controllers
         [HttpPost]
         public IActionResult MeetingAddEdit(MeetingModel model, IFormFile? upload)
         {
-            // Custom validation
+            // Remove validation errors for optional fields
+            ModelState.Remove("DocumentPath");
+            ModelState.Remove("CancellationReason");
+            
+            // Ensure optional fields are handled properly
+            if (string.IsNullOrEmpty(model.DocumentPath))
+                model.DocumentPath = null;
+            if (string.IsNullOrEmpty(model.CancellationReason))
+                model.CancellationReason = null;
+
+            // Custom validation - only for new meetings
             if (model.MeetingDate <= DateTime.Now && model.MeetingID == 0)
             {
                 ModelState.AddModelError("MeetingDate", "Meeting date must be in the future for new meetings.");
-            }
-
-            if (model.IsCancelled && string.IsNullOrWhiteSpace(model.CancellationReason))
-            {
-                ModelState.AddModelError("CancellationReason", "Cancellation reason is required when meeting is cancelled.");
             }
 
             // Check for duplicate meetings
@@ -315,6 +320,37 @@ namespace MOM.Controllers
             return RedirectToAction("MeetingList");
         }
 
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                var row = _dataService.Meetings.AsEnumerable()
+                    .FirstOrDefault(x => x.Field<int>("MeetingID") == id);
+                
+                if (row == null)
+                {
+                    return Json(new { success = false, message = "Meeting not found." });
+                }
+
+                // Check if meeting has members
+                var hasMembers = _dataService.MeetingMembers.AsEnumerable()
+                    .Any(m => m.Field<int>("MeetingID") == id);
+                
+                if (hasMembers)
+                {
+                    return Json(new { success = false, message = "Cannot delete meeting with assigned members. Please remove members first." });
+                }
+
+                _dataService.Meetings.Rows.Remove(row);
+                return Json(new { success = true, message = "Meeting deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error deleting meeting: {ex.Message}" });
+            }
+        }
+
         public IActionResult DeleteMeeting(int id)
         {
             var row = _dataService.Meetings.AsEnumerable()
@@ -347,24 +383,103 @@ namespace MOM.Controllers
         [HttpPost]
         public IActionResult CancelMeeting(int id, string reason)
         {
-            var row = _dataService.Meetings.AsEnumerable()
-                .FirstOrDefault(x => x.Field<int>("MeetingID") == id);
-            
-            if (row != null)
+            try
             {
-                row["IsCancelled"] = true;
-                row["CancellationDateTime"] = DateTime.Now;
-                row["CancellationReason"] = reason ?? "";
-                row["Modified"] = DateTime.Now;
+                var row = _dataService.Meetings.AsEnumerable()
+                    .FirstOrDefault(x => x.Field<int>("MeetingID") == id);
                 
-                TempData["SuccessMessage"] = "Meeting cancelled successfully!";
+                if (row != null)
+                {
+                    row["IsCancelled"] = true;
+                    row["CancellationDateTime"] = DateTime.Now;
+                    row["CancellationReason"] = reason ?? "";
+                    row["Modified"] = DateTime.Now;
+                    
+                    return Json(new { success = true, message = "Meeting cancelled successfully!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Meeting not found." });
+                }
             }
-            else
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Meeting not found.";
+                return Json(new { success = false, message = $"Error cancelling meeting: {ex.Message}" });
             }
+        }
 
-            return RedirectToAction("MeetingList");
+        [HttpGet]
+        public IActionResult GetMeetingDetails(int id)
+        {
+            try
+            {
+                var row = _dataService.Meetings.AsEnumerable()
+                    .FirstOrDefault(r => r.Field<int>("MeetingID") == id);
+
+                if (row == null)
+                {
+                    return Json(new { success = false, message = "Meeting not found." });
+                }
+
+                // Get related data
+                var dept = _dataService.Departments.AsEnumerable()
+                    .FirstOrDefault(d => d.Field<int>("DepartmentID") == row.Field<int>("DepartmentID"));
+                
+                var type = _dataService.MeetingTypes.AsEnumerable()
+                    .FirstOrDefault(t => t.Field<int>("MeetingTypeID") == row.Field<int>("MeetingTypeID"));
+                
+                var venue = _dataService.MeetingVenues.AsEnumerable()
+                    .FirstOrDefault(v => v.Field<int>("MeetingVenueID") == row.Field<int>("MeetingVenueID"));
+
+                // Get member counts
+                int meetingId = row.Field<int>("MeetingID");
+                var members = _dataService.MeetingMembers.AsEnumerable()
+                    .Where(m => m.Field<int>("MeetingID") == meetingId);
+                var memberCount = members.Count();
+                var presentCount = members.Count(m => m.Field<bool>("IsPresent"));
+
+                // Determine status
+                bool isCancelled = row.Field<bool>("IsCancelled");
+                DateTime meetingDate = row.Field<DateTime>("MeetingDate");
+                string status = isCancelled ? "Cancelled" :
+                               meetingDate.Date == DateTime.Today ? "Today" :
+                               meetingDate > DateTime.Now ? "Upcoming" : "Past";
+
+                string statusClass = status switch
+                {
+                    "Cancelled" => "danger",
+                    "Today" => "warning",
+                    "Upcoming" => "success",
+                    _ => "secondary"
+                };
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        MeetingID = row.Field<int>("MeetingID"),
+                        MeetingDescription = row.Field<string>("MeetingDescription"),
+                        MeetingDate = row.Field<DateTime>("MeetingDate").ToString("dd/MM/yyyy hh:mm tt"),
+                        DepartmentName = dept?.Field<string>("DepartmentName") ?? "Unknown",
+                        MeetingTypeName = type?.Field<string>("MeetingTypeName") ?? "Unknown",
+                        MeetingVenueName = venue?.Field<string>("MeetingVenueName") ?? "Unknown",
+                        DocumentPath = row.Field<string>("DocumentPath"),
+                        Status = status,
+                        StatusClass = statusClass,
+                        MemberCount = memberCount,
+                        PresentCount = presentCount,
+                        IsCancelled = isCancelled,
+                        CancellationReason = row.Field<string>("CancellationReason"),
+                        Created = row.Field<DateTime>("Created").ToString("dd/MM/yyyy hh:mm tt"),
+                        Modified = row.Field<DateTime>("Modified").ToString("dd/MM/yyyy hh:mm tt")
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error getting meeting details: {ex.Message}" });
+            }
         }
     }
 }

@@ -86,130 +86,157 @@
                             <input type="hidden" name="sortOrder" value="@sortOrder" />
                             
                             <div class="col-md-6">
-                                <label class="form-label">Search</label>
+                                <label class="form-label">Search Meeting Types</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="text" name="searchTerm" value="@searchTerm" 
-                                           class="form-control" placeholder="Search meeting types..." />
-                                    <button type="submit" class="btn btn-primary">Search</button>
-                                    @if (!string.IsNullOrEmpty(searchTerm))
-                                    {
-                                        <a href="@Url.Action("MeetingTypeList")" class="btn btn-outline-secondary">
-                                            <i class="bi bi-x-lg"></i>
-                                        </a>
-                                    }
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="searchTerm" 
+                                           value="@searchTerm" 
+                                           class="form-control" 
+                                           placeholder="Search by type name or remarks..." />
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-1"></i>Search
+                                    </button>
                                 </div>
+                            </div>
+                            
+                            <div class="col-md-6 d-flex align-items-end">
+                                @if (!string.IsNullOrEmpty(searchTerm))
+                                {
+                                    <a href="@Url.Action("MeetingTypeList")" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-lg me-1"></i>Clear Search
+                                    </a>
+                                }
                             </div>
                         </form>
                     </div>
 
                     <!-- Data Table -->
-                    <div class="table-responsive">
-                        <table class="table table-modern" id="meetingTypeTable">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        <a href="@Url.Action("MeetingTypeList", new { searchTerm, sortBy = "MeetingTypeName", sortOrder = (sortBy == "MeetingTypeName" && sortOrder == "asc") ? "desc" : "asc" })" 
-                                           class="text-decoration-none">
-                                            <i class="bi bi-tags me-1"></i>Meeting Type Name
-                                            @if (sortBy == "MeetingTypeName")
-                                            {
-                                                <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
-                                            }
-                                        </a>
-                                    </th>
-                                    <th><i class="bi bi-chat-text me-1"></i>Remarks</th>
-                                    <th>
-                                        <a href="@Url.Action("MeetingTypeList", new { searchTerm, sortBy = "Created", sortOrder = (sortBy == "Created" && sortOrder == "asc") ? "desc" : "asc" })" 
-                                           class="text-decoration-none">
-                                            <i class="bi bi-calendar me-1"></i>Created Date
-                                            @if (sortBy == "Created")
-                                            {
-                                                <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
-                                            }
-                                        </a>
-                                    </th>
-                                    <th class="text-center"><i class="bi bi-gear me-1"></i>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.Rows.Count > 0)
-                                {
-                                    @foreach (System.Data.DataRow row in Model.Rows)
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="meetingTypeTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <a href="@Url.Action("MeetingTypeList", new { searchTerm, sortBy = "MeetingTypeName", sortOrder = (sortBy == "MeetingTypeName" && sortOrder == "asc") ? "desc" : "asc" })" 
+                                               class="text-decoration-none text-dark d-flex align-items-center">
+                                                Meeting Type Name
+                                                @if (sortBy == "MeetingTypeName")
+                                                {
+                                                    <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
+                                                }
+                                            </a>
+                                        </th>
+                                        <th>Remarks</th>
+                                        <th>
+                                            <a href="@Url.Action("MeetingTypeList", new { searchTerm, sortBy = "Created", sortOrder = (sortBy == "Created" && sortOrder == "asc") ? "desc" : "asc" })" 
+                                               class="text-decoration-none text-dark d-flex align-items-center">
+                                                Created Date
+                                                @if (sortBy == "Created")
+                                                {
+                                                    <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
+                                                }
+                                            </a>
+                                        </th>
+                                        <th class="text-center" style="width: 200px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Rows.Count > 0)
+                                    {
+                                        @foreach (System.Data.DataRow row in Model.Rows)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-primary me-3">
+                                                            <i class="bi bi-tags"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-semibold">@row["MeetingTypeName"]</h6>
+                                                            <small class="text-muted">ID: @row["MeetingTypeID"]</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(row["Remarks"]?.ToString()))
+                                                    {
+                                                        <div class="text-truncate" style="max-width: 200px;" title="@row["Remarks"]">
+                                                            @row["Remarks"]
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No remarks</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <span class="fw-medium">
+                                                            @Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            @Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" 
+                                                                class="btn btn-outline-info btn-sm" 
+                                                                onclick="viewMeetingType(@row["MeetingTypeID"])"
+                                                                title="View Details">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <a asp-action="MeetingTypeAddEdit" 
+                                                           asp-route-id="@row["MeetingTypeID"]"
+                                                           class="btn btn-outline-primary btn-sm"
+                                                           title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <button type="button" 
+                                                                class="btn btn-outline-danger btn-sm" 
+                                                                onclick="deleteMeetingType(@row["MeetingTypeID"], '@row["MeetingTypeName"]')"
+                                                                title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
                                     {
                                         <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar bg-info me-3">
-                                                        <i class="bi bi-tags"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="title">@row["MeetingTypeName"]</div>
-                                                        <div class="subtitle">ID: @row["MeetingTypeID"]</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="remarks-cell">@row["Remarks"]</div>
-                                            </td>
-                                            <td>
-                                                <div class="date-time-cell">
-                                                    <div class="date">@Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")</div>
-                                                    <div class="time">@Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")</div>
-                                                </div>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="action-buttons">
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-outline-primary" 
-                                                            onclick="viewMeetingType(@row["MeetingTypeID"])"
-                                                            title="View Details">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <a asp-action="MeetingTypeAddEdit" 
-                                                       asp-route-id="@row["MeetingTypeID"]"
-                                                       class="btn btn-sm btn-outline-secondary"
-                                                       title="Edit">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-outline-danger" 
-                                                            onclick="deleteMeetingType(@row["MeetingTypeID"], '@row["MeetingTypeName"]')"
-                                                            title="Delete">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+                                            <td colspan="4">
+                                                <div class="empty-state">
+                                                    <i class="bi bi-tags"></i>
+                                                    @if (!string.IsNullOrEmpty(searchTerm))
+                                                    {
+                                                        <h3>No meeting types found</h3>
+                                                        <p>No meeting types match your search criteria "@searchTerm"</p>
+                                                        <a href="@Url.Action("MeetingTypeList")" class="btn btn-outline-primary">
+                                                            <i class="bi bi-arrow-left me-1"></i>Clear Search
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <h3>No meeting types yet</h3>
+                                                        <p>Get started by creating your first meeting type</p>
+                                                        <a asp-action="MeetingTypeAddEdit" class="btn btn-primary">
+                                                            <i class="bi bi-plus-lg me-1"></i>Add First Meeting Type
+                                                        </a>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>
                                     }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4">
-                                            <div class="empty-state">
-                                                <i class="bi bi-tags"></i>
-                                                <h6>No meeting types found</h6>
-                                                @if (!string.IsNullOrEmpty(searchTerm))
-                                                {
-                                                    <p>No meeting types found matching "@searchTerm"</p>
-                                                    <a href="@Url.Action("MeetingTypeList")" class="btn btn-outline-primary btn-sm">
-                                                        Clear Search
-                                                    </a>
-                                                }
-                                                else
-                                                {
-                                                    <p>No meeting types found</p>
-                                                    <a asp-action="MeetingTypeAddEdit" class="btn btn-primary btn-sm">
-                                                        Add First Meeting Type
-                                                    </a>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -220,6 +247,7 @@
 
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script>
         // View meeting type details
         function viewMeetingType(id) {
@@ -228,7 +256,7 @@
                 modernUI.setButtonLoading(button, 'Loading...');
             }
             
-            fetch(`/MeetingType/GetMeetingTypeDetails/${id}`)
+            fetch(`/MeetingType/GetMeetingTypeDetails?id=${id}`)
                 .then(response => response.json())
                 .then(data => {
                     if (button) {
@@ -320,14 +348,6 @@
                     });
                 });
         }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.querySelector('#customModal .custom-modal-body').innerHTML = 
-                        '<div class="alert alert-danger">Failed to load meeting type details</div>';
-                });
-        }
 
         // Delete meeting type
         function deleteMeetingType(id, name) {
@@ -348,21 +368,35 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            modernUI.showToast(data.message, 'success');
+                            modernUI.showToast({
+                                title: 'Success',
+                                message: data.message || 'Meeting type deleted successfully',
+                                type: 'success'
+                            });
                             setTimeout(() => location.reload(), 1500);
                         } else {
-                            modernUI.showToast(data.message, 'error');
+                            modernUI.showToast({
+                                title: 'Error',
+                                message: data.message || 'Failed to delete meeting type',
+                                type: 'error'
+                            });
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        modernUI.showToast('Failed to delete meeting type', 'error');
+                        modernUI.showToast({
+                            title: 'Error',
+                            message: 'Failed to delete meeting type',
+                            type: 'error'
+                        });
                     });
                 }
             });
         }
 
-        // Auto-hide alerts
-        modernUI.autoHideAlerts();
+        // Initialize live search
+        document.addEventListener('DOMContentLoaded', function() {
+            modernUI.setupLiveSearch('input[name="searchTerm"]', '#meetingTypeTable');
+        });
     </script>
 }

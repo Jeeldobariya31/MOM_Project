@@ -327,28 +327,6 @@
                     });
                 });
         }
-                                    class: 'btn-secondary',
-                                    onclick: 'modernUI.closeModal()'
-                                }
-                            ]
-                        });
-                    } else {
-                        modernUI.showToast({
-                            title: 'Error',
-                            message: data.message || 'Failed to load venue details',
-                            type: 'error'
-                        });
-                    }
-                })
-                .catch(error => {
-                    modernUI.showToast({
-                        title: 'Error',
-                        message: 'Failed to load venue details',
-                        type: 'error'
-                    });
-                });
-        }
-
         function deleteVenue(id, name) {
             modernUI.showConfirmation({
                 title: 'Delete Venue',

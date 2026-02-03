@@ -21,7 +21,6 @@ C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\rjsmcshtml.ds
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\scopedcss\bundle\MOM.styles.css
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\scopedcss\projectbundle\MOM.bundle.scp.css
-C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\06cozjskh2-{0}-ye550511jm-ye550511jm.gz
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\ebg96rvb19-{0}-1btxpmx81r-1btxpmx81r.gz
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\bs29xfjatu-{0}-8q78rmbpvf-8q78rmbpvf.gz
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\ru3dclc4zh-{0}-ive1fon2cn-ive1fon2cn.gz
@@ -471,5 +470,6 @@ C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\cm
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\MOM.sourcelink.json
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\93obdz2pf6-{0}-5ipweew5fc-5ipweew5fc.gz
 C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\qz9ztxckwi-{0}-t7io6r5i10-t7io6r5i10.gz
-C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\zraug394xl-{0}-ow9iwjxmns-ow9iwjxmns.gz
-C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\8qzcfebaxm-{0}-eg5ppkaopp-eg5ppkaopp.gz
+C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\8qzcfebaxm-{0}-l5l51n9fyy-l5l51n9fyy.gz
+C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\zraug394xl-{0}-4thbp0bn5m-4thbp0bn5m.gz
+C:\Users\Lenovo\OneDrive\Desktop\MOM_Project\MOM\obj\Debug\net10.0\compressed\06cozjskh2-{0}-gsnhz70eol-gsnhz70eol.gz

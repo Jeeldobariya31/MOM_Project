@@ -323,6 +323,51 @@ body {
     border-left-color: var(--info-color);
 }
 
+/* Force guidelines to always be visible - NEVER hide these */
+.alert-info:not(.alert-dismissible),
+.alert-warning:not(.alert-dismissible) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* SPECIFIC GUIDELINES PROTECTION - Only protect sidebar guidelines */
+.col-lg-4 .card .card-body .alert-info,
+.col-lg-4 .card .card-body .alert-warning,
+.card .card-body .alert-info:contains("Guidelines"),
+.card .card-body .alert-warning:contains("Guidelines"),
+.card .card-body .alert-info:contains("Tips"),
+.card .card-body .alert-warning:contains("Tips") {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+}
+
+/* Prevent any JavaScript from hiding sidebar guidelines */
+.col-lg-4 .card .card-body .alert-info.fade,
+.col-lg-4 .card .card-body .alert-warning.fade {
+    opacity: 1 !important;
+    display: block !important;
+}
+
+/* Override any Bootstrap fade classes for sidebar guidelines only */
+.col-lg-4 .card .card-body .alert-info.show,
+.col-lg-4 .card .card-body .alert-warning.show,
+.col-lg-4 .card .card-body .alert-info.hide,
+.col-lg-4 .card .card-body .alert-warning.hide {
+    opacity: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
 /* ================================
    Custom Animated Modal/Popup
 ================================ */

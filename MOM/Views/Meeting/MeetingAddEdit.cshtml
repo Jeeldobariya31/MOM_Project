@@ -63,7 +63,7 @@
                     <form asp-action="MeetingAddEdit" method="post" enctype="multipart/form-data" id="meetingForm" novalidate>
                         <input type="hidden" asp-for="MeetingID" />
                         <input type="hidden" asp-for="Created" />
-                        <input type="hidden" asp-for="DocumentPath" />
+                        <input type="hidden" name="DocumentPath" value="@Model.DocumentPath" />
 
                         <div class="row g-4">
                             <!-- Meeting Date & Time -->
@@ -139,7 +139,7 @@
                             <!-- Document Upload -->
                             <div class="col-md-8">
                                 <label class="form-label">
-                                    <i class="bi bi-file-earmark-arrow-up me-1"></i>Meeting Document
+                                    <i class="bi bi-file-earmark-arrow-up me-1"></i>Meeting Document <span class="text-muted">(Optional)</span>
                                 </label>
                                 <div class="file-upload-wrapper">
                                     <input type="file" name="upload" class="form-control form-control-modern" 
@@ -192,12 +192,12 @@
                                                 <span asp-validation-for="CancellationDateTime" class="text-danger"></span>
                                             </div>
                                             <div class="col-md-6">
-                                                <label asp-for="CancellationReason" class="form-label">
-                                                    Cancellation Reason <span class="text-danger">*</span>
+                                                <label class="form-label">
+                                                    Cancellation Reason <span class="text-muted">(Optional)</span>
                                                 </label>
-                                                <input asp-for="CancellationReason" class="form-control form-control-modern" 
+                                                <input name="CancellationReason" value="@Model.CancellationReason" class="form-control form-control-modern" 
                                                        placeholder="Reason for cancellation..." maxlength="250" />
-                                                <span asp-validation-for="CancellationReason" class="text-danger"></span>
+                                                <div class="form-text">Provide reason if needed for record keeping</div>
                                             </div>
                                         </div>
                                     </div>
@@ -237,25 +237,37 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="bi bi-lightbulb me-1"></i>Tips for Effective Meetings</h6>
-                        <ul class="mb-0 small">
-                            <li>Schedule meetings at least 24 hours in advance</li>
-                            <li>Provide clear agenda and objectives</li>
-                            <li>Choose appropriate venue based on attendee count</li>
-                            <li>Upload relevant documents before the meeting</li>
-                            <li>Send invitations to all required participants</li>
-                        </ul>
+                    <div class="guidelines-panel tips">
+                        <div class="guidelines-header">
+                            <i class="bi bi-lightbulb"></i>
+                            Tips for Effective Meetings
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li>Schedule meetings at least 24 hours in advance</li>
+                                <li>Provide clear agenda and objectives</li>
+                                <li>Choose appropriate venue based on attendee count</li>
+                                <li>Upload relevant documents before the meeting</li>
+                                <li>Send invitations to all required participants</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="alert alert-warning">
-                        <h6><i class="bi bi-exclamation-triangle me-1"></i>Important Notes</h6>
-                        <ul class="mb-0 small">
-                            <li>Meetings cannot be scheduled in the past</li>
-                            <li>Check venue availability before scheduling</li>
-                            <li>Maximum file size for documents: 10MB</li>
-                            <li>Supported formats: PDF, DOC, DOCX, XLS, XLSX</li>
-                        </ul>
+                    <div class="guidelines-panel warning">
+                        <div class="guidelines-header">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Important Notes
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li><strong>Meetings cannot be scheduled in the past</strong></li>
+                                <li>Check venue availability before scheduling</li>
+                                <li>Document upload is optional but recommended</li>
+                                <li>Cancellation reason is optional for record keeping</li>
+                                <li>Maximum file size for documents: 10MB</li>
+                                <li>Supported formats: PDF, DOC, DOCX, XLS, XLSX</li>
+                            </ul>
+                        </div>
                     </div>
 
                     @if (isEdit)
@@ -343,6 +355,13 @@
                     messages: {
                         maxLength: 'Description cannot exceed 250 characters'
                     }
+                },
+                'CancellationReason': {
+                    required: false,
+                    maxLength: 250,
+                    messages: {
+                        maxLength: 'Cancellation reason cannot exceed 250 characters'
+                    }
                 }
             });
 
@@ -351,16 +370,6 @@
             const submitBtn = document.getElementById('submitBtn');
             
             form.addEventListener('submit', function(e) {
-                const isCancelled = document.getElementById('isCancelledSwitch').checked;
-                const cancellationReason = document.querySelector('input[name="CancellationReason"]');
-                
-                if (isCancelled && !cancellationReason.value.trim()) {
-                    e.preventDefault();
-                    modernUI.showToast('Please provide a cancellation reason', 'error');
-                    cancellationReason.focus();
-                    return false;
-                }
-
                 if (!modernUI.validateForm('#meetingForm')) {
                     e.preventDefault();
                     return false;
@@ -374,6 +383,12 @@
             const descriptionField = document.querySelector('textarea[name="MeetingDescription"]');
             if (descriptionField) {
                 modernUI.initializeCharacterCounter(descriptionField, 250);
+            }
+
+            // Character counter for cancellation reason
+            const cancellationReasonField = document.querySelector('input[name="CancellationReason"]');
+            if (cancellationReasonField) {
+                modernUI.initializeCharacterCounter(cancellationReasonField, 250);
             }
         });
 
@@ -453,7 +468,7 @@
             });
         }
 
-        // Auto-hide alerts
-        modernUI.autoHideAlerts();
+        // Guidelines are now permanently visible with CSS !important rules
+        // No JavaScript hiding of any alerts - guidelines stay visible forever
     </script>
 }

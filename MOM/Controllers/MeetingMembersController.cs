@@ -362,8 +362,7 @@ namespace MOM.Controllers
             {
                 if (staffIds == null || staffIds.Length == 0)
                 {
-                    TempData["ErrorMessage"] = "Please select at least one staff member.";
-                    return RedirectToAction("MeetingMemberList");
+                    return Json(new { success = false, message = "Please select at least one staff member." });
                 }
 
                 // Check if meeting exists and is not cancelled
@@ -371,13 +370,11 @@ namespace MOM.Controllers
                     .FirstOrDefault(m => m.Field<int>("MeetingID") == meetingId);
                 if (meeting == null)
                 {
-                    TempData["ErrorMessage"] = "Meeting not found.";
-                    return RedirectToAction("MeetingMemberList");
+                    return Json(new { success = false, message = "Meeting not found." });
                 }
                 if (meeting.Field<bool>("IsCancelled"))
                 {
-                    TempData["ErrorMessage"] = "Cannot assign members to a cancelled meeting.";
-                    return RedirectToAction("MeetingMemberList");
+                    return Json(new { success = false, message = "Cannot assign members to a cancelled meeting." });
                 }
 
                 int assignedCount = 0;
@@ -413,14 +410,93 @@ namespace MOM.Controllers
                 if (skippedCount > 0)
                     message += $" {skippedCount} members were already assigned.";
 
-                TempData["SuccessMessage"] = message;
+                return Json(new { success = true, message = message });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
             }
+        }
 
-            return RedirectToAction("MeetingMemberList");
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                var row = _dataService.MeetingMembers.AsEnumerable()
+                    .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == id);
+                
+                if (row != null)
+                {
+                    _dataService.MeetingMembers.Rows.Remove(row);
+                    return Json(new { success = true, message = "Meeting member removed successfully!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Meeting member not found." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetMeetingMemberDetails(int id)
+        {
+            try
+            {
+                var row = _dataService.MeetingMembers.AsEnumerable()
+                    .FirstOrDefault(r => r.Field<int>("MeetingMemberID") == id);
+
+                if (row == null)
+                {
+                    return Json(new { success = false, message = "Meeting member not found." });
+                }
+
+                // Get staff information
+                var staff = _dataService.Staff.AsEnumerable()
+                    .FirstOrDefault(s => s.Field<int>("StaffID") == row.Field<int>("StaffID"));
+
+                // Get department information
+                var dept = staff != null ? _dataService.Departments.AsEnumerable()
+                    .FirstOrDefault(d => d.Field<int>("DepartmentID") == staff.Field<int>("DepartmentID")) : null;
+
+                // Get meeting information
+                var meeting = _dataService.Meetings.AsEnumerable()
+                    .FirstOrDefault(m => m.Field<int>("MeetingID") == row.Field<int>("MeetingID"));
+
+                // Get meeting type and venue
+                var meetingType = meeting != null ? _dataService.MeetingTypes.AsEnumerable()
+                    .FirstOrDefault(t => t.Field<int>("MeetingTypeID") == meeting.Field<int>("MeetingTypeID")) : null;
+
+                var venue = meeting != null ? _dataService.MeetingVenues.AsEnumerable()
+                    .FirstOrDefault(v => v.Field<int>("MeetingVenueID") == meeting.Field<int>("MeetingVenueID")) : null;
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        MeetingMemberID = row.Field<int>("MeetingMemberID"),
+                        StaffName = staff?.Field<string>("StaffName") ?? "Unknown",
+                        DepartmentName = dept?.Field<string>("DepartmentName") ?? "Unknown",
+                        MeetingDescription = meeting?.Field<string>("MeetingDescription") ?? "Unknown",
+                        MeetingDate = meeting?.Field<DateTime>("MeetingDate").ToString("dd/MM/yyyy hh:mm tt") ?? "Unknown",
+                        MeetingTypeName = meetingType?.Field<string>("MeetingTypeName") ?? "Unknown",
+                        VenueName = venue?.Field<string>("MeetingVenueName") ?? "Unknown",
+                        IsPresent = row.Field<bool>("IsPresent"),
+                        Remarks = row.Field<string>("Remarks") ?? "",
+                        Created = row.Field<DateTime>("Created").ToString("dd/MM/yyyy hh:mm tt"),
+                        Modified = row.Field<DateTime>("Modified").ToString("dd/MM/yyyy hh:mm tt")
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error getting meeting member details: {ex.Message}" });
+            }
         }
 
         [HttpGet]

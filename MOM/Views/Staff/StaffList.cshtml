@@ -264,6 +264,7 @@
 </section>
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script>
         function viewStaff(id) {
             const button = document.querySelector(`button[onclick="viewStaff(${id})"]`);
@@ -271,7 +272,7 @@
                 modernUI.setButtonLoading(button, 'Loading...');
             }
             
-            fetch(`/Staff/GetStaffDetails/${id}`)
+            fetch(`/Staff/GetStaffDetails?id=${id}`)
                 .then(response => response.json())
                 .then(data => {
                     if (button) {
@@ -375,45 +376,6 @@
                     modernUI.showToast({
                         title: 'Error',
                         message: 'Failed to load staff details. Please try again.',
-                        type: 'error'
-                    });
-                });
-        }
-                                                <div class="row">
-                                                    <div class="col-sm-4"><strong>Modified:</strong></div>
-                                                    <div class="col-sm-8">${staff.Modified}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `,
-                            buttons: [
-                                {
-                                    text: 'Edit Staff',
-                                    class: 'btn-primary',
-                                    icon: 'bi bi-pencil',
-                                    onclick: `window.location.href='/Staff/StaffAddEdit/${id}'`
-                                },
-                                {
-                                    text: 'Close',
-                                    class: 'btn-secondary',
-                                    onclick: 'modernUI.closeModal()'
-                                }
-                            ]
-                        });
-                    } else {
-                        modernUI.showToast({
-                            title: 'Error',
-                            message: data.message || 'Failed to load staff details',
-                            type: 'error'
-                        });
-                    }
-                })
-                .catch(error => {
-                    modernUI.showToast({
-                        title: 'Error',
-                        message: 'Failed to load staff details',
                         type: 'error'
                     });
                 });

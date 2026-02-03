@@ -1,644 +1,422 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "MOM Dashboard";
+    var data = ViewBag.DashboardData;
 }
 
-
-    <div class="pagetitle">
-        <h1>Dashboard</h1>
-        <nav>
+<div class="pagetitle">
+    <h1>MOM Dashboard</h1>
+    <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a asp-controller="Home" asp-action="Index">Home</a>
             </li>
-            <li class="breadcrumb-item active">Department</li>
+            <li class="breadcrumb-item active">Dashboard</li>
         </ol>
+    </nav>
+</div><!-- End Page Title -->
 
-        </nav>
-    </div><!-- End Page Title -->
+<section class="section dashboard">
+    <div class="row">
 
-    <section class="section dashboard">
-        <div class="row">
+        <!-- Left side columns -->
+        <div class="col-lg-8">
+            <div class="row">
 
-            <!-- Left side columns -->
-            <div class="col-lg-8">
-                <div class="row">
-
-                    <!-- Sales Card -->
-                    <div class="col-xxl-4 col-md-6">
-                        <div class="card info-card sales-card">
-
-                            <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div>
-
-                            <div class="card-body">
-                                <h5 class="card-title">Sales <span>| Today</span></h5>
-
-                                <div class="d-flex align-items-center">
-                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-cart"></i>
-                                    </div>
-                                    <div class="ps-3">
-                                        <h6>145</h6>
-                                        <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
-                                    </div>
+                <!-- Total Meetings Card -->
+                <div class="col-xxl-4 col-md-6">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Meetings <span>| All Time</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@data.TotalMeetings</h6>
+                                    <span class="text-info small pt-1 fw-bold">@data.ThisMonthMeetings</span> 
+                                    <span class="text-muted small pt-2 ps-1">this month</span>
                                 </div>
                             </div>
-
                         </div>
-                    </div><!-- End Sales Card -->
-                    <!-- Revenue Card -->
-                    <div class="col-xxl-4 col-md-6">
-                        <div class="card info-card revenue-card">
+                    </div>
+                </div><!-- End Total Meetings Card -->
 
-                            <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div>
-
-                            <div class="card-body">
-                                <h5 class="card-title">Revenue <span>| This Month</span></h5>
-
-                                <div class="d-flex align-items-center">
-                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-currency-dollar"></i>
-                                    </div>
-                                    <div class="ps-3">
-                                        <h6>$3,264</h6>
-                                        <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
-                                    </div>
+                <!-- Departments Card -->
+                <div class="col-xxl-4 col-md-6">
+                    <div class="card info-card revenue-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Departments <span>| Active</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@data.TotalDepartments</h6>
+                                    <span class="text-success small pt-1 fw-bold">@data.TotalStaff</span> 
+                                    <span class="text-muted small pt-2 ps-1">staff members</span>
                                 </div>
                             </div>
-
                         </div>
-                    </div><!-- End Revenue Card -->
-                    <!-- Customers Card -->
-                    <div class="col-xxl-4 col-xl-12">
+                    </div>
+                </div><!-- End Departments Card -->
 
-                        <div class="card info-card customers-card">
-
-                            <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div>
-
-                            <div class="card-body">
-                                <h5 class="card-title">Customers <span>| This Year</span></h5>
-
-                                <div class="d-flex align-items-center">
-                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-people"></i>
-                                    </div>
-                                    <div class="ps-3">
-                                        <h6>1244</h6>
-                                        <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
-
-                                    </div>
+                <!-- Upcoming Meetings Card -->
+                <div class="col-xxl-4 col-xl-12">
+                    <div class="card info-card customers-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Upcoming Meetings <span>| Scheduled</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-clock"></i>
                                 </div>
-
+                                <div class="ps-3">
+                                    <h6>@data.UpcomingMeetings</h6>
+                                    <span class="text-primary small pt-1 fw-bold">@data.RecentMeetings</span> 
+                                    <span class="text-muted small pt-2 ps-1">this week</span>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div><!-- End Upcoming Meetings Card -->
 
-                    </div><!-- End Customers Card -->
-                    <!-- Reports -->
-                    <div class="col-12">
-                        <div class="card">
-
-                            <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div>
-
-                            <div class="card-body">
-                                <h5 class="card-title">Reports <span>/Today</span></h5>
-
-                                <!-- Line Chart -->
-                                <div id="reportsChart"></div>
-
-                                <script>
-                                    document.addEventListener("DOMContentLoaded", () => {
-                                      new ApexCharts(document.querySelector("#reportsChart"), {
+                <!-- Monthly Meeting Trends Chart -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Meeting Trends <span>/Last 6 Months</span></h5>
+                            <div id="monthlyTrendsChart"></div>
+                            <script>
+                                document.addEventListener("DOMContentLoaded", () => {
+                                    const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.MonthlyTrends));
+                                    
+                                    new ApexCharts(document.querySelector("#monthlyTrendsChart"), {
                                         series: [{
-                                          name: 'Sales',
-                                          data: [31, 40, 28, 51, 42, 82, 56],
-                                        }, {
-                                          name: 'Revenue',
-                                          data: [11, 32, 45, 32, 34, 52, 41]
-                                        }, {
-                                          name: 'Customers',
-                                          data: [15, 11, 32, 18, 9, 24, 11]
+                                            name: 'Meetings Held',
+                                            data: monthlyData.map(item => item.count),
                                         }],
                                         chart: {
-                                          height: 350,
-                                          type: 'area',
-                                          toolbar: {
-                                            show: false
-                                          },
+                                            height: 350,
+                                            type: 'area',
+                                            toolbar: { show: false },
                                         },
-                                        markers: {
-                                          size: 4
-                                        },
-                                        colors: ['#4154f1', '#2eca6a', '#ff771d'],
+                                        markers: { size: 4 },
+                                        colors: ['#4154f1'],
                                         fill: {
-                                          type: "gradient",
-                                          gradient: {
-                                            shadeIntensity: 1,
-                                            opacityFrom: 0.3,
-                                            opacityTo: 0.4,
-                                            stops: [0, 90, 100]
-                                          }
+                                            type: "gradient",
+                                            gradient: {
+                                                shadeIntensity: 1,
+                                                opacityFrom: 0.3,
+                                                opacityTo: 0.4,
+                                                stops: [0, 90, 100]
+                                            }
                                         },
-                                        dataLabels: {
-                                          enabled: false
-                                        },
-                                        stroke: {
-                                          curve: 'smooth',
-                                          width: 2
-                                        },
+                                        dataLabels: { enabled: false },
+                                        stroke: { curve: 'smooth', width: 2 },
                                         xaxis: {
-                                          type: 'datetime',
-                                          categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
+                                            categories: monthlyData.map(item => item.month)
                                         },
                                         tooltip: {
-                                          x: {
-                                            format: 'dd/MM/yy HH:mm'
-                                          },
+                                            x: { format: 'MMM yyyy' },
                                         }
-                                      }).render();
-                                    });
-                                </script>
-                                <!-- End Line Chart -->
-
-                            </div>
-
+                                    }).render();
+                                });
+                            </script>
                         </div>
-                    </div><!-- End Reports -->
-                    <!-- Recent Sales -->
-                    <div class="col-12">
-                        <div class="card recent-sales overflow-auto">
+                    </div>
+                </div><!-- End Monthly Trends Chart -->
 
-                            <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div>
-
-                            <div class="card-body">
-                                <h5 class="card-title">Recent Sales <span>| Today</span></h5>
-
-                                <table class="table table-borderless datatable">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Customer</th>
-                                            <th scope="col">Product</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <th scope="row"><a href="#">#2457</a></th>
-                                            <td>Brandon Jacob</td>
-                                            <td><a href="#" class="text-primary">At praesentium minu</a></td>
-                                            <td>$64</td>
-                                            <td><span class="badge bg-success">Approved</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row"><a href="#">#2147</a></th>
-                                            <td>Bridie Kessler</td>
-                                            <td><a href="#" class="text-primary">Blanditiis dolor omnis similique</a></td>
-                                            <td>$47</td>
-                                            <td><span class="badge bg-warning">Pending</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row"><a href="#">#2049</a></th>
-                                            <td>Ashleigh Langosh</td>
-                                            <td><a href="#" class="text-primary">At recusandae consectetur</a></td>
-                                            <td>$147</td>
-                                            <td><span class="badge bg-success">Approved</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row"><a href="#">#2644</a></th>
-                                            <td>Angus Grady</td>
-                                            <td><a href="#" class="text-primar">Ut voluptatem id earum et</a></td>
-                                            <td>$67</td>
-                                            <td><span class="badge bg-danger">Rejected</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row"><a href="#">#2644</a></th>
-                                            <td>Raheem Lehner</td>
-                                            <td><a href="#" class="text-primary">Sunt similique distinctio</a></td>
-                                            <td>$165</td>
-                                            <td><span class="badge bg-success">Approved</span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                            </div>
-
+                <!-- Recent Meetings -->
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto">
+                        <div class="card-body">
+                            <h5 class="card-title">Recent Meetings <span>| Last 30 Days</span></h5>
+                            <table class="table table-borderless datatable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Meeting ID</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Department</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (data.RecentMeetingsData != null)
+                                    {
+                                        @foreach (var meeting in data.RecentMeetingsData)
+                                        {
+                                            <tr>
+                                                <th scope="row">
+                                                    <a asp-controller="Meeting" asp-action="MeetingAddEdit" asp-route-id="@meeting.MeetingID">
+                                                        #M@meeting.MeetingID.ToString("000")
+                                                    </a>
+                                                </th>
+                                                <td>@meeting.Description</td>
+                                                <td><span class="text-primary">@meeting.DepartmentName</span></td>
+                                                <td>@meeting.MeetingDate.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    @if (meeting.IsCancelled)
+                                                    {
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                    }
+                                                    else if (meeting.MeetingDate > DateTime.Now)
+                                                    {
+                                                        <span class="badge bg-info">Scheduled</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success">Completed</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                    </div><!-- End Recent Sales -->
-                    <!-- Top Selling -->
-                    <div class="col-12">
-                        <div class="card top-selling overflow-auto">
+                    </div>
+                </div><!-- End Recent Meetings -->
 
-                            <div class="filter">
-                                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li class="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a class="dropdown-item" href="#">Today</a></li>
-                                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                                </ul>
+                <!-- Quick Actions -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Quick Actions <span>| Management</span></h5>
+                            <div class="row mb-3">
+                                <div class="col-md-3 mb-2">
+                                    <a asp-controller="Meeting" asp-action="MeetingAddEdit" class="btn btn-primary w-100">
+                                        <i class="bi bi-plus-circle me-2"></i>New Meeting
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <a asp-controller="Department" asp-action="DepartmentAddEdit" class="btn btn-success w-100">
+                                        <i class="bi bi-building me-2"></i>Add Department
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <a asp-controller="Staff" asp-action="StaffAddEdit" class="btn btn-info w-100">
+                                        <i class="bi bi-person-plus me-2"></i>Add Staff
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <a asp-controller="MeetingVenue" asp-action="MeetingVenueAddEdit" class="btn btn-warning w-100">
+                                        <i class="bi bi-geo-alt me-2"></i>Add Venue
+                                    </a>
+                                </div>
                             </div>
 
-                            <div class="card-body pb-0">
-                                <h5 class="card-title">Top Selling <span>| Today</span></h5>
-
+                            <div class="table-responsive">
                                 <table class="table table-borderless">
                                     <thead>
                                         <tr>
-                                            <th scope="col">Preview</th>
-                                            <th scope="col">Product</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Sold</th>
-                                            <th scope="col">Revenue</th>
+                                            <th scope="col">Module</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Total Records</th>
+                                            <th scope="col">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <th scope="row"><a href="#"><img src="assets/img/product-1.jpg" alt=""></a></th>
-                                            <td><a href="#" class="text-primary fw-bold">Ut inventore ipsa voluptas nulla</a></td>
-                                            <td>$64</td>
-                                            <td class="fw-bold">124</td>
-                                            <td>$5,828</td>
+                                            <td><i class="bi bi-calendar-event text-primary me-2"></i><strong>Meetings</strong></td>
+                                            <td>Manage all meeting records and minutes</td>
+                                            <td class="fw-bold">@data.TotalMeetings</td>
+                                            <td><a asp-controller="Meeting" asp-action="MeetingList" class="btn btn-sm btn-outline-primary">View All</a></td>
                                         </tr>
                                         <tr>
-                                            <th scope="row"><a href="#"><img src="assets/img/product-2.jpg" alt=""></a></th>
-                                            <td><a href="#" class="text-primary fw-bold">Exercitationem similique doloremque</a></td>
-                                            <td>$46</td>
-                                            <td class="fw-bold">98</td>
-                                            <td>$4,508</td>
+                                            <td><i class="bi bi-building text-success me-2"></i><strong>Departments</strong></td>
+                                            <td>Organizational departments and divisions</td>
+                                            <td class="fw-bold">@data.TotalDepartments</td>
+                                            <td><a asp-controller="Department" asp-action="DepartmentList" class="btn btn-sm btn-outline-success">View All</a></td>
                                         </tr>
                                         <tr>
-                                            <th scope="row"><a href="#"><img src="assets/img/product-3.jpg" alt=""></a></th>
-                                            <td><a href="#" class="text-primary fw-bold">Doloribus nisi exercitationem</a></td>
-                                            <td>$59</td>
-                                            <td class="fw-bold">74</td>
-                                            <td>$4,366</td>
+                                            <td><i class="bi bi-people text-info me-2"></i><strong>Staff</strong></td>
+                                            <td>Employee records and meeting participants</td>
+                                            <td class="fw-bold">@data.TotalStaff</td>
+                                            <td><a asp-controller="Staff" asp-action="StaffList" class="btn btn-sm btn-outline-info">View All</a></td>
                                         </tr>
                                         <tr>
-                                            <th scope="row"><a href="#"><img src="assets/img/product-4.jpg" alt=""></a></th>
-                                            <td><a href="#" class="text-primary fw-bold">Officiis quaerat sint rerum error</a></td>
-                                            <td>$32</td>
-                                            <td class="fw-bold">63</td>
-                                            <td>$2,016</td>
+                                            <td><i class="bi bi-geo-alt text-warning me-2"></i><strong>Venues</strong></td>
+                                            <td>Meeting locations and conference rooms</td>
+                                            <td class="fw-bold">@data.TotalVenues</td>
+                                            <td><a asp-controller="MeetingVenue" asp-action="MeetingVenueList" class="btn btn-sm btn-outline-warning">View All</a></td>
                                         </tr>
                                         <tr>
-                                            <th scope="row"><a href="#"><img src="assets/img/product-5.jpg" alt=""></a></th>
-                                            <td><a href="#" class="text-primary fw-bold">Sit unde debitis delectus repellendus</a></td>
-                                            <td>$79</td>
-                                            <td class="fw-bold">41</td>
-                                            <td>$3,239</td>
+                                            <td><i class="bi bi-person-check text-secondary me-2"></i><strong>Members</strong></td>
+                                            <td>Meeting participants and attendees</td>
+                                            <td class="fw-bold">@data.ActiveMembers</td>
+                                            <td><a asp-controller="MeetingMembers" asp-action="MeetingMemberList" class="btn btn-sm btn-outline-secondary">View All</a></td>
                                         </tr>
                                     </tbody>
                                 </table>
-
                             </div>
-
                         </div>
-                    </div><!-- End Top Selling -->
+                    </div>
+                </div><!-- End Quick Actions -->
 
+            </div>
+        </div><!-- End Left side columns -->
+
+        <!-- Right side columns -->
+        <div class="col-lg-4">
+
+            <!-- Statistics Overview -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Statistics Overview <span>| Current</span></h5>
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h4 class="text-primary mb-1">@data.AttendanceRate%</h4>
+                                <small class="text-muted">Attendance Rate</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3">
+                                <h4 class="text-danger mb-1">@data.CancelledMeetings</h4>
+                                <small class="text-muted">Cancelled</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3">
+                                <h4 class="text-success mb-1">@data.ActiveMembers</h4>
+                                <small class="text-muted">Active Members</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3">
+                                <h4 class="text-info mb-1">@data.TotalVenues</h4>
+                                <small class="text-muted">Venues</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div><!-- End Left side columns -->
-            <!-- Right side columns -->
-            <div class="col-lg-4">
+            </div><!-- End Statistics Overview -->
 
-                <!-- Recent Activity -->
-                <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Today</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="card-body">
-                        <h5 class="card-title">Recent Activity <span>| Today</span></h5>
-
-                        <div class="activity">
-
-                            <div class="activity-item d-flex">
-                                <div class="activite-label">32 min</div>
-                                <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
-                                <div class="activity-content">
-                                    Quia quae rerum <a href="#" class="fw-bold text-dark">explicabo officiis</a> beatae
-                                </div>
-                            </div><!-- End activity item-->
-
-                            <div class="activity-item d-flex">
-                                <div class="activite-label">56 min</div>
-                                <i class='bi bi-circle-fill activity-badge text-danger align-self-start'></i>
-                                <div class="activity-content">
-                                    Voluptatem blanditiis blanditiis eveniet
-                                </div>
-                            </div><!-- End activity item-->
-
-                            <div class="activity-item d-flex">
-                                <div class="activite-label">2 hrs</div>
-                                <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
-                                <div class="activity-content">
-                                    Voluptates corrupti molestias voluptatem
-                                </div>
-                            </div><!-- End activity item-->
-
-                            <div class="activity-item d-flex">
-                                <div class="activite-label">1 day</div>
-                                <i class='bi bi-circle-fill activity-badge text-info align-self-start'></i>
-                                <div class="activity-content">
-                                    Tempore autem saepe <a href="#" class="fw-bold text-dark">occaecati voluptatem</a> tempore
-                                </div>
-                            </div><!-- End activity item-->
-
-                            <div class="activity-item d-flex">
-                                <div class="activite-label">2 days</div>
-                                <i class='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
-                                <div class="activity-content">
-                                    Est sit eum reiciendis exercitationem
-                                </div>
-                            </div><!-- End activity item-->
-
-                            <div class="activity-item d-flex">
-                                <div class="activite-label">4 weeks</div>
-                                <i class='bi bi-circle-fill activity-badge text-muted align-self-start'></i>
-                                <div class="activity-content">
-                                    Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
-                                </div>
-                            </div><!-- End activity item-->
-
-                        </div>
-
-                    </div>
-                </div><!-- End Recent Activity -->
-                <!-- Budget Report -->
-                <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Today</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="card-body pb-0">
-                        <h5 class="card-title">Budget Report <span>| This Month</span></h5>
-
-                        <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
-
-                        <script>
-                            document.addEventListener("DOMContentLoaded", () => {
-                              var budgetChart = echarts.init(document.querySelector("#budgetChart")).setOption({
-                                legend: {
-                                  data: ['Allocated Budget', 'Actual Spending']
-                                },
-                                radar: {
-                                  // shape: 'circle',
-                                  indicator: [{
-                                      name: 'Sales',
-                                      max: 6500
-                                    },
-                                    {
-                                      name: 'Administration',
-                                      max: 16000
-                                    },
-                                    {
-                                      name: 'Information Technology',
-                                      max: 30000
-                                    },
-                                    {
-                                      name: 'Customer Support',
-                                      max: 38000
-                                    },
-                                    {
-                                      name: 'Development',
-                                      max: 52000
-                                    },
-                                    {
-                                      name: 'Marketing',
-                                      max: 25000
-                                    }
-                                  ]
-                                },
+            <!-- Department Distribution -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Meeting Distribution <span>| By Department</span></h5>
+                    <div id="departmentChart" style="min-height: 400px;" class="echart"></div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const departmentData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.DepartmentMeetings));
+                            
+                            echarts.init(document.querySelector("#departmentChart")).setOption({
+                                tooltip: { trigger: 'item' },
+                                legend: { top: '5%', left: 'center' },
                                 series: [{
-                                  name: 'Budget vs spending',
-                                  type: 'radar',
-                                  data: [{
-                                      value: [4200, 3000, 20000, 35000, 50000, 18000],
-                                      name: 'Allocated Budget'
+                                    name: 'Meetings by Department',
+                                    type: 'pie',
+                                    radius: ['40%', '70%'],
+                                    avoidLabelOverlap: false,
+                                    label: { show: false, position: 'center' },
+                                    emphasis: {
+                                        label: { show: true, fontSize: '18', fontWeight: 'bold' }
                                     },
-                                    {
-                                      value: [5000, 14000, 28000, 26000, 42000, 21000],
-                                      name: 'Actual Spending'
-                                    }
-                                  ]
+                                    labelLine: { show: false },
+                                    data: departmentData.map(item => ({
+                                        value: item.count,
+                                        name: item.departmentName
+                                    }))
                                 }]
-                              });
                             });
-                        </script>
+                        });
+                    </script>
+                </div>
+            </div><!-- End Department Distribution -->
 
+            <!-- Meeting Types -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Meeting Types <span>| Distribution</span></h5>
+                    <div class="activity">
+                        @if (data.MeetingTypeDistribution != null)
+                        {
+                            @foreach (var type in data.MeetingTypeDistribution)
+                            {
+                                <div class="activity-item d-flex">
+                                    <div class="activite-label">@type.Count</div>
+                                    <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
+                                    <div class="activity-content">
+                                        <strong>@type.MeetingTypeName</strong>
+                                    </div>
+                                </div>
+                            }
+                        }
                     </div>
-                </div><!-- End Budget Report -->
-                <!-- Website Traffic -->
-                <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
+                </div>
+            </div><!-- End Meeting Types -->
 
-                            <li><a class="dropdown-item" href="#">Today</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
-                        </ul>
+            <!-- Upcoming Meetings -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Meetings <span>| Next 5</span></h5>
+                    <div class="news">
+                        @if (data.UpcomingMeetingsData != null && data.UpcomingMeetingsData.Length > 0)
+                        {
+                            @foreach (var meeting in data.UpcomingMeetingsData)
+                            {
+                                <div class="post-item clearfix">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="bi bi-calendar-event text-primary" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h6><a asp-controller="Meeting" asp-action="MeetingAddEdit" asp-route-id="@meeting.MeetingID">@meeting.Description</a></h6>
+                                            <p class="mb-1 small">@meeting.DepartmentName - @meeting.VenueName</p>
+                                            <small class="text-muted">@meeting.MeetingDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
+                                <p class="mt-2">No upcoming meetings scheduled</p>
+                            </div>
+                        }
                     </div>
+                </div>
+            </div><!-- End Upcoming Meetings -->
 
-                    <div class="card-body pb-0">
-                        <h5 class="card-title">Website Traffic <span>| Today</span></h5>
-
-                        <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-
-                        <script>
-                            document.addEventListener("DOMContentLoaded", () => {
-                              echarts.init(document.querySelector("#trafficChart")).setOption({
-                                tooltip: {
-                                  trigger: 'item'
-                                },
-                                legend: {
-                                  top: '5%',
-                                  left: 'center'
-                                },
-                                series: [{
-                                  name: 'Access From',
-                                  type: 'pie',
-                                  radius: ['40%', '70%'],
-                                  avoidLabelOverlap: false,
-                                  label: {
-                                    show: false,
-                                    position: 'center'
-                                  },
-                                  emphasis: {
-                                    label: {
-                                      show: true,
-                                      fontSize: '18',
-                                      fontWeight: 'bold'
-                                    }
-                                  },
-                                  labelLine: {
-                                    show: false
-                                  },
-                                  data: [{
-                                      value: 1048,
-                                      name: 'Search Engine'
-                                    },
-                                    {
-                                      value: 735,
-                                      name: 'Direct'
-                                    },
-                                    {
-                                      value: 580,
-                                      name: 'Email'
-                                    },
-                                    {
-                                      value: 484,
-                                      name: 'Union Ads'
-                                    },
-                                    {
-                                      value: 300,
-                                      name: 'Video Ads'
-                                    }
-                                  ]
-                                }]
-                              });
-                            });
-                        </script>
-
-                    </div>
-                </div><!-- End Website Traffic -->
-                <!-- News & Updates Traffic -->
-                <div class="card">
-                    <div class="filter">
-                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                            <li class="dropdown-header text-start">
-                                <h6>Filter</h6>
-                            </li>
-
-                            <li><a class="dropdown-item" href="#">Today</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="card-body pb-0">
-                        <h5 class="card-title">News &amp; Updates <span>| Today</span></h5>
-
-                        <div class="news">
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-1.jpg" alt="">
-                                <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                                <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
+            <!-- Venue Utilization -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Venue Utilization <span>| Usage</span></h5>
+                    @if (data.VenueUtilization != null)
+                    {
+                        @foreach (var venue in data.VenueUtilization)
+                        {
+                            var percentage = data.TotalMeetings > 0 ? (double)venue.Count / data.TotalMeetings * 100 : 0;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span class="small">@venue.VenueName</span>
+                                    <span class="small">@venue.Count meetings</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                         style="width: @percentage.ToString("F1")%" 
+                                         aria-valuenow="@percentage.ToString("F1")" 
+                                         aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
                             </div>
+                        }
+                    }
+                </div>
+            </div><!-- End Venue Utilization -->
 
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-2.jpg" alt="">
-                                <h4><a href="#">Quidem autem et impedit</a></h4>
-                                <p>Illo nemo neque maiores vitae officiis cum eum turos elan dries werona nande...</p>
-                            </div>
+        </div><!-- End Right side columns -->
 
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-3.jpg" alt="">
-                                <h4><a href="#">Id quia et et ut maxime similique occaecati ut</a></h4>
-                                <p>Fugiat voluptas vero eaque accusantium eos. Consequuntur sed ipsam et totam...</p>
-                            </div>
+    </div>
+</section>
 
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-4.jpg" alt="">
-                                <h4><a href="#">Laborum corporis quo dara net para</a></h4>
-                                <p>Qui enim quia optio. Eligendi aut asperiores enim repellendusvel rerum cuder...</p>
-                            </div>
-
-                            <div class="post-item clearfix">
-                                <img src="assets/img/news-5.jpg" alt="">
-                                <h4><a href="#">Et dolores corrupti quae illo quod dolor</a></h4>
-                                <p>Odit ut eveniet modi reiciendis. Atque cupiditate libero beatae dignissimos eius...</p>
-                            </div>
-
-                        </div><!-- End sidebar recent posts-->
-
-                    </div>
-                </div><!-- End News & Updates -->
-
-            </div><!-- End Right side columns -->
-
-        </div>
-    </section>
-
-
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        @ViewBag.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

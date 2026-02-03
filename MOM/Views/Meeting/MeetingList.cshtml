@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Meeting List";
-    var searchTerm = ViewBag.Search as string ?? "";
+    var search = ViewBag.Search as string ?? "";
     var totalRecords = ViewBag.TotalRecords as int? ?? 0;
     var filteredRecords = Model.Rows.Count;
 
@@ -82,12 +82,22 @@
                     <!-- Search and Filter Section -->
                     <div class="filter-section">
                         <form method="get" class="row g-3">
+                            <input type="hidden" name="page" value="1" />
+                            
                             <div class="col-md-3">
-                                <label class="form-label">Search</label>
+                                <label class="form-label">Search Meetings</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="text" name="search" value="@ViewBag.Search" 
-                                           class="form-control" placeholder="Search meetings..." />
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="search" 
+                                           value="@search" 
+                                           class="form-control" 
+                                           placeholder="Search meetings..." />
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-1"></i>Search
+                                    </button>
                                 </div>
                             </div>
 
@@ -130,7 +140,7 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label">Venue</label>
                                 <select name="venueFilter" class="form-select">
                                     <option value="">All Venues</option>
@@ -143,180 +153,194 @@
                                     }
                                 </select>
                             </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label">From Date</label>
-                                <input type="date" name="dateFrom" value="@ViewBag.DateFrom" class="form-control" />
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label">To Date</label>
-                                <input type="date" name="dateTo" value="@ViewBag.DateTo" class="form-control" />
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label">Show</label>
-                                <select name="pageSize" class="form-select" onchange="this.form.submit()">
-                                    <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
-                                    <option value="25" selected="@(ViewBag.PageSize == 25)">25</option>
-                                    <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
-                                    <option value="100" selected="@(ViewBag.PageSize == 100)">100</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6 d-flex align-items-end gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-search me-1"></i> Apply Filters
-                                </button>
-                                <a asp-action="MeetingList" class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-clockwise me-1"></i> Reset
-                                </a>
+                            
+                            <div class="col-md-1 d-flex align-items-end">
+                                @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(ViewBag.StatusFilter as string) || ViewBag.DepartmentFilter.ToString() != "0" || ViewBag.TypeFilter.ToString() != "0" || ViewBag.VenueFilter.ToString() != "0")
+                                {
+                                    <a href="@Url.Action("MeetingList")" class="btn btn-outline-secondary w-100">
+                                        <i class="bi bi-x-lg me-1"></i>Clear
+                                    </a>
+                                }
                             </div>
                         </form>
                     </div>
 
-                    <!-- TABLE -->
-                    <div class="table-responsive">
-                        <table class="table table-modern" id="meetingTable">
-                            <thead>
-                                <tr>
-                                    <th><i class="bi bi-calendar me-1"></i>Date & Time</th>
-                                    <th><i class="bi bi-chat-text me-1"></i>Description</th>
-                                    <th><i class="bi bi-tag me-1"></i>Type</th>
-                                    <th><i class="bi bi-geo-alt me-1"></i>Venue</th>
-                                    <th><i class="bi bi-building me-1"></i>Department</th>
-                                    <th><i class="bi bi-people me-1"></i>Members</th>
-                                    <th><i class="bi bi-check-circle me-1"></i>Status</th>
-                                    <th class="text-center"><i class="bi bi-gear me-1"></i>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @if (Model.Rows.Count == 0)
-                                {
+                    <!-- Data Table -->
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="meetingTable">
+                                <thead>
                                     <tr>
-                                        <td colspan="8">
-                                            <div class="empty-state">
-                                                <i class="bi bi-calendar-x"></i>
-                                                <h6>No meetings found</h6>
-                                                <p>No meetings match your current filter criteria.</p>
-                                                <a asp-action="MeetingAddEdit" class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-plus-lg me-1"></i>Schedule First Meeting
-                                                </a>
-                                            </div>
-                                        </td>
+                                        <th>Meeting Details</th>
+                                        <th>Date & Time</th>
+                                        <th>Type & Venue</th>
+                                        <th>Department</th>
+                                        <th>Members</th>
+                                        <th>Status</th>
+                                        <th class="text-center" style="width: 200px;">Actions</th>
                                     </tr>
-                                }
-                                else
-                                {
-                                    @foreach (System.Data.DataRow row in Model.Rows)
+                                </thead>
+                                <tbody>
+                                    @if (Model.Rows.Count > 0)
                                     {
-                                        bool isCancelled = GetBool(row, "IsCancelled");
-                                        DateTime date = GetDate(row, "MeetingDate");
-                                        int memberCount = GetInt(row, "MemberCount");
-                                        int presentCount = GetInt(row, "PresentCount");
+                                        @foreach (System.Data.DataRow row in Model.Rows)
+                                        {
+                                            bool isCancelled = GetBool(row, "IsCancelled");
+                                            DateTime date = GetDate(row, "MeetingDate");
+                                            int memberCount = GetInt(row, "MemberCount");
+                                            int presentCount = GetInt(row, "PresentCount");
 
-                                        string status =
-                                        isCancelled ? "Cancelled" :
-                                        date.Date == DateTime.Today ? "Today" :
-                                        date > DateTime.Now ? "Upcoming" :
-                                        "Past";
+                                            string status =
+                                            isCancelled ? "Cancelled" :
+                                            date.Date == DateTime.Today ? "Today" :
+                                            date > DateTime.Now ? "Upcoming" :
+                                            "Past";
 
-                                        string id = GetValue(row, "MeetingID");
-                                        string description = GetValue(row, "MeetingDescription");
-                                        string type = GetValue(row, "MeetingTypeName");
-                                        string venue = GetValue(row, "VenueName");
-                                        string dept = GetValue(row, "DepartmentName");
-                                        string docPath = GetValue(row, "DocumentPath");
+                                            int meetingId = GetInt(row, "MeetingID");
+                                            string description = GetValue(row, "MeetingDescription");
+                                            string type = GetValue(row, "MeetingTypeName");
+                                            string venue = GetValue(row, "VenueName");
+                                            string dept = GetValue(row, "DepartmentName");
+                                            string docPath = GetValue(row, "DocumentPath");
 
-                                        <tr class="@(isCancelled ? "table-muted" : "")">
-                                            <td>
-                                                <div class="date-time-cell">
-                                                    <div class="date">@(date == DateTime.MinValue ? "" : date.ToString("MMM dd, yyyy"))</div>
-                                                    <div class="time">@(date == DateTime.MinValue ? "" : date.ToString("hh:mm tt"))</div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="description-cell">
-                                                    <div class="title">@description</div>
-                                                    @if (!string.IsNullOrEmpty(docPath))
+                                            <tr class="@(isCancelled ? "table-muted" : "")">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-primary me-3">
+                                                            <i class="bi bi-calendar-event"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-semibold">@description</h6>
+                                                            <small class="text-muted">ID: @meetingId</small>
+                                                            @if (!string.IsNullOrEmpty(docPath))
+                                                            {
+                                                                <div class="mt-1">
+                                                                    <a href="@docPath" target="_blank" class="text-primary small">
+                                                                        <i class="bi bi-file-earmark-text me-1"></i>Document
+                                                                    </a>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <span class="fw-medium">
+                                                            @(date == DateTime.MinValue ? "" : date.ToString("dd MMM yyyy"))
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            @(date == DateTime.MinValue ? "" : date.ToString("hh:mm tt"))
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="badge bg-info">@type</span>
+                                                        <span class="badge bg-secondary">@venue</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary">@dept</span>
+                                                </td>
+                                                <td>
+                                                    @if (memberCount > 0)
                                                     {
-                                                        <div class="document">
-                                                            <a href="@docPath" target="_blank" class="text-primary">
-                                                                <i class="bi bi-file-earmark-text me-1"></i>Document
-                                                            </a>
+                                                        <div class="d-flex flex-column gap-1">
+                                                            <span class="badge bg-info">@memberCount Total</span>
+                                                            <span class="badge bg-success">@presentCount Present</span>
                                                         </div>
                                                     }
-                                                </div>
-                                            </td>
-                                            <td><span class="badge badge-info">@type</span></td>
-                                            <td>@venue</td>
-                                            <td><span class="badge badge-secondary">@dept</span></td>
-                                            <td>
-                                                @if (memberCount > 0)
-                                                {
-                                                    <div class="member-stats">
-                                                        <span class="badge badge-primary">@memberCount Total</span>
-                                                        <span class="badge badge-success">@presentCount Present</span>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">No members</span>
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (status == "Cancelled")
-                                                {
-                                                    <span class="badge badge-danger">Cancelled</span>
-                                                }
-                                                else if (status == "Today")
-                                                {
-                                                    <span class="badge badge-warning">Today</span>
-                                                }
-                                                else if (status == "Upcoming")
-                                                {
-                                                    <span class="badge badge-success">Upcoming</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge badge-secondary">Past</span>
-                                                }
-                                            </td>
-
-                                            <td class="text-center">
-                                                <div class="action-buttons">
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                            onclick="viewMeeting(@id)" title="View Details">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <a asp-action="MeetingAddEdit" asp-route-id="@id"
-                                                       class="btn btn-sm btn-outline-secondary" title="Edit Meeting">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-
-                                                    @if (!isCancelled && date > DateTime.Now)
+                                                    else
                                                     {
-                                                        <button type="button" class="btn btn-sm btn-outline-warning" 
-                                                                onclick="cancelMeeting(@id)" title="Cancel Meeting">
-                                                            <i class="bi bi-x-circle"></i>
-                                                        </button>
+                                                        <span class="text-muted">No members</span>
                                                     }
-
-                                                    @if (!isCancelled || memberCount == 0)
+                                                </td>
+                                                <td>
+                                                    @if (status == "Cancelled")
                                                     {
-                                                        <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                onclick="deleteMeeting(@id)" title="Delete Meeting">
-                                                            <i class="bi bi-trash"></i>
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                    }
+                                                    else if (status == "Today")
+                                                    {
+                                                        <span class="badge bg-warning">Today</span>
+                                                    }
+                                                    else if (status == "Upcoming")
+                                                    {
+                                                        <span class="badge bg-success">Upcoming</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Past</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" 
+                                                                class="btn btn-outline-info btn-sm" 
+                                                                onclick="viewMeeting(@meetingId)"
+                                                                title="View Details">
+                                                            <i class="bi bi-eye"></i>
                                                         </button>
+                                                        <a asp-action="MeetingAddEdit" asp-route-id="@meetingId"
+                                                           class="btn btn-outline-primary btn-sm" 
+                                                           title="Edit Meeting">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+
+                                                        @if (!isCancelled && date > DateTime.Now)
+                                                        {
+                                                            <button type="button" 
+                                                                    class="btn btn-outline-warning btn-sm" 
+                                                                    onclick="cancelMeeting(@meetingId)" 
+                                                                    title="Cancel Meeting">
+                                                                <i class="bi bi-x-circle"></i>
+                                                            </button>
+                                                        }
+
+                                                        @if (!isCancelled || memberCount == 0)
+                                                        {
+                                                            <button type="button" 
+                                                                    class="btn btn-outline-danger btn-sm" 
+                                                                    onclick="deleteMeeting(@meetingId)" 
+                                                                    title="Delete Meeting">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="empty-state">
+                                                    <i class="bi bi-calendar-x"></i>
+                                                    @if (!string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(ViewBag.StatusFilter as string) || ViewBag.DepartmentFilter.ToString() != "0")
+                                                    {
+                                                        <h3>No meetings found</h3>
+                                                        <p>No meetings match your search criteria</p>
+                                                        <a href="@Url.Action("MeetingList")" class="btn btn-outline-primary">
+                                                            <i class="bi bi-arrow-left me-1"></i>Clear Filters
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <h3>No meetings yet</h3>
+                                                        <p>Get started by scheduling your first meeting</p>
+                                                        <a asp-action="MeetingAddEdit" class="btn btn-primary">
+                                                            <i class="bi bi-plus-lg me-1"></i>Schedule First Meeting
+                                                        </a>
                                                     }
                                                 </div>
                                             </td>
                                         </tr>
                                     }
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- Pagination -->
@@ -393,17 +417,23 @@
 
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script>
         // View meeting details
         function viewMeeting(meetingId) {
+            console.log('viewMeeting called with ID:', meetingId);
             const button = document.querySelector(`button[onclick="viewMeeting(${meetingId})"]`);
             if (button) {
                 modernUI.setButtonLoading(button, 'Loading...');
             }
             
             fetch(`/Meeting/GetMeetingDetails?id=${meetingId}`)
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Response data:', data);
                     if (button) {
                         modernUI.resetButton(button);
                     }
@@ -461,6 +491,16 @@
                                                         <span class="badge bg-info ms-1">${modernUI.safeValue(meeting.PresentCount, '0')} present</span>
                                                     </div>
                                                 </div>
+                                                ${meeting.DocumentPath ? `
+                                                    <div class="row mt-2">
+                                                        <div class="col-sm-5"><strong>Document:</strong></div>
+                                                        <div class="col-sm-7">
+                                                            <a href="${meeting.DocumentPath}" target="_blank" class="text-primary">
+                                                                <i class="bi bi-file-earmark-text me-1"></i>View Document
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                ` : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -495,36 +535,15 @@
                     }
                 })
                 .catch(error => {
+                    console.error('Error loading meeting details:', error);
                     if (button) {
                         modernUI.resetButton(button);
                     }
-                    console.error('Error loading meeting details:', error);
                     modernUI.showToast({
                         title: 'Error',
                         message: 'Failed to load meeting details. Please try again.',
                         type: 'error'
                     });
-                });
-        }
-                                    </div>
-                                    ${data.document ? `
-                                        <div class="col-12">
-                                            <strong>Document:</strong><br>
-                                            <a href="${data.document}" target="_blank" class="text-primary">
-                                                <i class="bi bi-file-earmark-text me-1"></i>View Document
-                                            </a>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        `;
-                        document.querySelector('#customModal .custom-modal-body').innerHTML = content;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading meeting details:', error);
-                    document.querySelector('#customModal .custom-modal-body').innerHTML = 
-                        '<div class="alert alert-danger">Error loading meeting details.</div>';
                 });
         }
 
@@ -533,11 +552,26 @@
             modernUI.showModal({
                 title: 'Cancel Meeting',
                 content: `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Are you sure you want to cancel this meeting?</strong>
+                        <p class="mb-0 mt-2">This action will mark the meeting as cancelled and notify all participants.</p>
+                    </div>
                     <form id="cancelMeetingForm">
                         <div class="mb-3">
-                            <label class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
-                            <textarea name="reason" class="form-control" rows="3" required 
-                                      placeholder="Please provide a reason for cancelling this meeting..."></textarea>
+                            <label class="form-label">
+                                Cancellation Reason <span class="text-muted">(Optional)</span>
+                            </label>
+                            <textarea name="reason" class="form-control" rows="3" maxlength="250"
+                                      placeholder="Provide a reason for cancellation (optional)..." 
+                                      oninput="updateCharacterCount(this)"></textarea>
+                            <div class="d-flex justify-content-between">
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Providing a reason helps participants understand why the meeting was cancelled.
+                                </div>
+                                <small class="text-muted" id="charCount">0/250</small>
+                            </div>
                         </div>
                     </form>
                 `,
@@ -545,11 +579,13 @@
                     {
                         text: 'Cancel Meeting',
                         class: 'btn-warning',
+                        icon: 'bi bi-x-circle',
                         onclick: `submitCancelMeeting(${meetingId})`
                     },
                     {
-                        text: 'Close',
-                        class: 'btn-secondary'
+                        text: 'Keep Meeting',
+                        class: 'btn-secondary',
+                        onclick: 'modernUI.closeModal()'
                     }
                 ]
             });
@@ -559,50 +595,130 @@
             const form = document.getElementById('cancelMeetingForm');
             const reason = form.reason.value.trim();
             
-            if (!reason) {
-                modernUI.showToast('Please provide a cancellation reason', 'error');
-                return;
+            // Show loading state
+            const submitButton = document.querySelector('button[onclick*="submitCancelMeeting"]');
+            if (submitButton) {
+                modernUI.setButtonLoading(submitButton, 'Cancelling...');
             }
 
-            // Submit cancellation
+            // Submit cancellation (reason is optional)
             const formData = new FormData();
             formData.append('id', meetingId);
-            formData.append('reason', reason);
+            formData.append('reason', reason); // Can be empty
 
             fetch('/Meeting/CancelMeeting', {
                 method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
+                if (submitButton) {
+                    modernUI.resetButton(submitButton);
+                }
+                
                 if (data.success) {
                     modernUI.closeModal();
-                    modernUI.showToast('Meeting cancelled successfully', 'success');
+                    modernUI.showToast({
+                        title: 'Success',
+                        message: 'Meeting cancelled successfully',
+                        type: 'success'
+                    });
                     setTimeout(() => location.reload(), 1500);
                 } else {
-                    modernUI.showToast(data.message || 'Error cancelling meeting', 'error');
+                    modernUI.showToast({
+                        title: 'Error',
+                        message: data.message || 'Error cancelling meeting',
+                        type: 'error'
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                modernUI.showToast('Error cancelling meeting', 'error');
+                if (submitButton) {
+                    modernUI.resetButton(submitButton);
+                }
+                modernUI.showToast({
+                    title: 'Error',
+                    message: 'Error cancelling meeting. Please try again.',
+                    type: 'error'
+                });
             });
+        }
+
+        // Character count helper for cancellation reason
+        function updateCharacterCount(textarea) {
+            const charCount = document.getElementById('charCount');
+            if (charCount) {
+                const count = textarea.value.length;
+                charCount.textContent = `${count}/250`;
+                
+                if (count > 200) {
+                    charCount.className = 'text-warning';
+                } else if (count > 240) {
+                    charCount.className = 'text-danger';
+                } else {
+                    charCount.className = 'text-muted';
+                }
+            }
         }
 
         // Delete meeting
         function deleteMeeting(meetingId) {
+            console.log('deleteMeeting called with ID:', meetingId);
             modernUI.showConfirmation({
                 title: 'Delete Meeting',
                 message: `Are you sure you want to delete this meeting?<br><small class="text-muted">This action cannot be undone.</small>`,
                 confirmText: 'Delete Meeting',
                 confirmClass: 'btn-danger',
                 onConfirm: () => {
-                    window.location.href = `/Meeting/DeleteMeeting/${meetingId}`;
+                    console.log('Delete confirmed for meeting ID:', meetingId);
+                    fetch('/Meeting/Delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `id=${meetingId}`
+                    })
+                    .then(response => {
+                        console.log('Delete response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Delete response data:', data);
+                        if (data.success) {
+                            modernUI.showToast({
+                                title: 'Success',
+                                message: data.message || 'Meeting deleted successfully',
+                                type: 'success'
+                            });
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            modernUI.showToast({
+                                title: 'Error',
+                                message: data.message || 'Failed to delete meeting',
+                                type: 'error'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting meeting:', error);
+                        modernUI.showToast({
+                            title: 'Error',
+                            message: 'Failed to delete meeting',
+                            type: 'error'
+                        });
+                    });
                 }
             });
         }
 
-        // Auto-hide alerts
-        modernUI.autoHideAlerts();
+        // Initialize live search
+        document.addEventListener('DOMContentLoaded', function() {
+            modernUI.setupLiveSearch('input[name="search"]', '#meetingTable');
+        });
     </script>
 }

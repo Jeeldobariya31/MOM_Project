@@ -12,7 +12,6 @@ namespace MOM.Models
         [Required(ErrorMessage = "Meeting date is required")]
         [DataType(DataType.DateTime)]
         [Display(Name = "Meeting Date & Time")]
-        [FutureDate(ErrorMessage = "Meeting date must be in the future")]
         public DateTime MeetingDate { get; set; }
 
         [Required(ErrorMessage = "Venue is required")]
@@ -28,14 +27,12 @@ namespace MOM.Models
         public int DepartmentID { get; set; }
 
         [StringLength(250, ErrorMessage = "Description cannot exceed 250 characters")]
-        [RegularExpression(@"^[a-zA-Z0-9\s.,'-]*$", ErrorMessage = "Invalid characters in description")]
         [Display(Name = "Meeting Description")]
         public string MeetingDescription { get; set; } = string.Empty;
 
         [StringLength(250, ErrorMessage = "Document path cannot exceed 250 characters")]
-        [RegularExpression(@"^.*\.(pdf|docx|xlsx)$", ErrorMessage = "Only PDF, DOCX, XLSX files are allowed")]
         [Display(Name = "Document Path")]
-        public string DocumentPath { get; set; } = string.Empty;
+        public string? DocumentPath { get; set; }
 
         [Display(Name = "Created Date")]
         public DateTime Created { get; set; } = DateTime.Now;
@@ -50,10 +47,8 @@ namespace MOM.Models
         public DateTime? CancellationDateTime { get; set; }
 
         [StringLength(250, ErrorMessage = "Cancellation reason cannot exceed 250 characters")]
-        [RegularExpression(@"^[a-zA-Z0-9\s.,'-]*$", ErrorMessage = "Invalid characters in cancellation reason")]
         [Display(Name = "Cancellation Reason")]
-        [RequiredIf("IsCancelled", true, ErrorMessage = "Cancellation reason is required when meeting is cancelled")]
-        public string CancellationReason { get; set; } = string.Empty;
+        public string? CancellationReason { get; set; }
 
         // Navigation properties
         [NotMapped]

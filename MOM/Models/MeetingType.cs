@@ -11,11 +11,11 @@ namespace MOM.Models
         [Required(ErrorMessage = "Meeting type name is required.")]
         [StringLength(100, ErrorMessage = "Meeting type name cannot exceed 100 characters.")]
         [Display(Name = "Meeting Type Name")]
-        public string MeetingTypeName { get; set; }
+        public string MeetingTypeName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Remarks are required.")]
         [StringLength(100, ErrorMessage = "Remarks cannot exceed 100 characters.")]
-        public string Remarks { get; set; }
+        public string Remarks { get; set; } = string.Empty;
 
         [Display(Name = "Created Date")]
         public DateTime Created { get; set; } = DateTime.Now;

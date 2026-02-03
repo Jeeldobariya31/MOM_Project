@@ -51,8 +51,8 @@
 }
 
 <section class="section">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+    <div class="row">
+        <div class="col-lg-8">
             <div class="card shadow-hover">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
@@ -274,27 +274,147 @@
                 </div>
             }
         </div>
+
+        <!-- Guidelines Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
+                        <i class="bi bi-info-circle me-1"></i>Staff Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="guidelines-panel tips">
+                        <div class="guidelines-header">
+                            <i class="bi bi-lightbulb"></i>
+                            Best Practices
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li>Use full names for staff members</li>
+                                <li>Ensure email addresses are unique and valid</li>
+                                <li>Include country code for mobile numbers</li>
+                                <li>Assign to appropriate department</li>
+                                <li>Add meaningful remarks for context</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guidelines-panel warning">
+                        <div class="guidelines-header">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Important Notes
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li><strong>Email addresses must be unique</strong></li>
+                                <li>Cannot delete staff with meeting records</li>
+                                <li>Department assignment affects meeting access</li>
+                                <li>Mobile format: +1234567890 or 1234567890</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    @if (isEdit)
+                    {
+                        <div class="info-card">
+                            <h6 class="info-card-title">
+                                <i class="bi bi-clock-history me-1"></i>Staff History
+                            </h6>
+                            <div class="info-card-content">
+                                <div class="info-item">
+                                    <span class="info-label">Created:</span>
+                                    <span class="info-value">@Model.Created.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Last Modified:</span>
+                                    <span class="info-value">@Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
+                        <i class="bi bi-lightning me-1"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="StaffList" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-list me-1"></i>View All Staff
+                        </a>
+                        <a asp-controller="Department" asp-action="DepartmentList" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-building me-1"></i>Manage Departments
+                        </a>
+                        @if (isEdit)
+                        {
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="viewStaffMeetings()">
+                                <i class="bi bi-calendar-event me-1"></i>View Staff Meetings
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Form validation
+            // Initialize modern form validation
+            modernUI.initializeFormValidation('#staffForm', {
+                'StaffName': {
+                    required: true,
+                    minLength: 2,
+                    maxLength: 50,
+                    pattern: /^[a-zA-Z\s.'-]+$/,
+                    messages: {
+                        required: 'Staff name is required',
+                        minLength: 'Name must be at least 2 characters',
+                        maxLength: 'Name cannot exceed 50 characters',
+                        pattern: 'Only letters, spaces, dots, apostrophes, and hyphens are allowed'
+                    }
+                },
+                'EmailAddress': {
+                    required: true,
+                    email: true,
+                    maxLength: 50,
+                    messages: {
+                        required: 'Email address is required',
+                        email: 'Please enter a valid email address',
+                        maxLength: 'Email cannot exceed 50 characters'
+                    }
+                },
+                'MobileNo': {
+                    required: true,
+                    minLength: 10,
+                    maxLength: 20,
+                    pattern: /^[\+]?[0-9\s\-\(\)]+$/,
+                    messages: {
+                        required: 'Mobile number is required',
+                        minLength: 'Mobile number must be at least 10 digits',
+                        maxLength: 'Mobile number cannot exceed 20 characters',
+                        pattern: 'Please enter a valid mobile number'
+                    }
+                },
+                'DepartmentID': {
+                    required: true,
+                    messages: {
+                        required: 'Please select a department'
+                    }
+                }
+            });
+
+            // Form submission with loading state
             const form = document.getElementById('staffForm');
             const submitBtn = document.getElementById('submitBtn');
-            const staffNameInput = document.querySelector('input[name="StaffName"]');
-            const emailInput = document.querySelector('input[name="EmailAddress"]');
-            const mobileInput = document.querySelector('input[name="MobileNo"]');
-            const departmentSelect = document.querySelector('select[name="DepartmentID"]');
-
-            // Real-time validation
-            staffNameInput.addEventListener('input', validateStaffName);
-            emailInput.addEventListener('input', validateEmail);
-            mobileInput.addEventListener('input', validateMobile);
-            departmentSelect.addEventListener('change', validateDepartment);
-
-            // Form submission
+            
             form.addEventListener('submit', function(e) {
                 if (!modernUI.validateForm('#staffForm')) {
                     e.preventDefault();
@@ -302,74 +422,13 @@
                 }
                 
                 // Show loading state
-                modernUI.showLoading(submitBtn, 'Saving...');
+                modernUI.setButtonLoading(submitBtn, 'Saving...');
             });
 
-            function validateStaffName() {
-                const value = staffNameInput.value.trim();
-                
-                if (value.length < 2) {
-                    modernUI.showFieldError(staffNameInput, 'Staff name must be at least 2 characters');
-                    return false;
-                } else if (value.length > 50) {
-                    modernUI.showFieldError(staffNameInput, 'Staff name cannot exceed 50 characters');
-                    return false;
-                } else if (!/^[a-zA-Z\s.'-]+$/.test(value)) {
-                    modernUI.showFieldError(staffNameInput, 'Staff name contains invalid characters');
-                    return false;
-                } else {
-                    modernUI.clearFieldError(staffNameInput);
-                    return true;
-                }
-            }
-
-            function validateEmail() {
-                const value = emailInput.value.trim();
-                const emailRegex = /^[^\\s@@]+@@[^\\s@@]+\\.[^\\s@@]+$/;
-                
-                if (value.length === 0) {
-                    modernUI.showFieldError(emailInput, 'Email address is required');
-                    return false;
-                } else if (!emailRegex.test(value)) {
-                    modernUI.showFieldError(emailInput, 'Please enter a valid email address');
-                    return false;
-                } else if (value.length > 50) {
-                    modernUI.showFieldError(emailInput, 'Email address cannot exceed 50 characters');
-                    return false;
-                } else {
-                    modernUI.clearFieldError(emailInput);
-                    return true;
-                }
-            }
-
-            function validateMobile() {
-                const value = mobileInput.value.trim();
-                
-                if (value.length < 10) {
-                    modernUI.showFieldError(mobileInput, 'Mobile number must be at least 10 digits');
-                    return false;
-                } else if (value.length > 20) {
-                    modernUI.showFieldError(mobileInput, 'Mobile number cannot exceed 20 characters');
-                    return false;
-                } else if (!/^[\+]?[0-9\s\-\(\)]+$/.test(value)) {
-                    modernUI.showFieldError(mobileInput, 'Please enter a valid mobile number');
-                    return false;
-                } else {
-                    modernUI.clearFieldError(mobileInput);
-                    return true;
-                }
-            }
-
-            function validateDepartment() {
-                const value = departmentSelect.value;
-                
-                if (!value || value === "") {
-                    modernUI.showFieldError(departmentSelect, 'Please select a department');
-                    return false;
-                } else {
-                    modernUI.clearFieldError(departmentSelect);
-                    return true;
-                }
+            // Character counter for remarks
+            const remarksField = document.querySelector('textarea[name="Remarks"]');
+            if (remarksField) {
+                modernUI.initializeCharacterCounter(remarksField, 100);
             }
         });
 
@@ -377,21 +436,33 @@
             modernUI.showConfirmation({
                 title: 'Reset Form',
                 message: 'Are you sure you want to reset the form? All changes will be lost.',
-                confirmText: 'Reset Form',
+                confirmText: 'Reset',
                 confirmClass: 'btn-warning',
                 onConfirm: () => {
                     document.getElementById('staffForm').reset();
-                    // Remove validation classes
-                    document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-                        el.classList.remove('is-valid', 'is-invalid');
-                    });
-                    modernUI.showToast({
-                        title: 'Form Reset',
-                        message: 'Form has been reset successfully',
-                        type: 'info'
-                    });
+                    modernUI.clearFormValidation('#staffForm');
+                    modernUI.showToast('Form has been reset', 'info');
                 }
             });
         }
+
+        // Quick action functions
+        function viewStaffMeetings() {
+            @if (isEdit)
+            {
+                <text>
+                window.location.href = '/MeetingMembers/MeetingMemberList?staffFilter=@Model.StaffID';
+                </text>
+            }
+            else
+            {
+                <text>
+                modernUI.showToast('Please save the staff member first', 'info');
+                </text>
+            }
+        }
+
+        // Guidelines are now permanently visible with CSS !important rules
+        // No JavaScript hiding of any alerts - guidelines stay visible forever
     </script>
 }

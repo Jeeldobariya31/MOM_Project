@@ -1,9 +1,9 @@
 ﻿@{
-    ViewData["Title"] = "Contact";
+    ViewData["Title"] = "Contact Us";
 }
 
 <div class="pagetitle">
-    <h1>Contact</h1>
+    <h1>Contact Us</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -27,8 +27,10 @@
                         <i class="bi bi-geo-alt"></i>
                         <h3>Address</h3>
                         <p>
-                            MOM Office<br />
-                            Ahmedabad, India
+                            MOM System Headquarters<br />
+                            Tech Park, Sector 5<br />
+                            Ahmedabad, Gujarat 380015<br />
+                            India
                         </p>
                     </div>
                 </div>
@@ -38,8 +40,9 @@
                         <i class="bi bi-telephone"></i>
                         <h3>Call Us</h3>
                         <p>
-                            +91 98765 43210<br />
-                            +91 91234 56789
+                            <strong>Support:</strong> +91 98765 43210<br />
+                            <strong>Sales:</strong> +91 91234 56789<br />
+                            <strong>Technical:</strong> +91 87654 32109
                         </p>
                     </div>
                 </div>
@@ -49,8 +52,9 @@
                         <i class="bi bi-envelope"></i>
                         <h3>Email Us</h3>
                         <p>
-                            support@mom.com<br />
-                            info@mom.com
+                            <strong>General:</strong> info@momsystem.com<br />
+                            <strong>Support:</strong> support@momsystem.com<br />
+                            <strong>Technical:</strong> tech@momsystem.com
                         </p>
                     </div>
                 </div>
@@ -60,8 +64,10 @@
                         <i class="bi bi-clock"></i>
                         <h3>Working Hours</h3>
                         <p>
-                            Monday - Friday<br />
-                            9:00 AM - 5:00 PM
+                            <strong>Monday - Friday:</strong><br />
+                            9:00 AM - 6:00 PM IST<br />
+                            <strong>Saturday:</strong><br />
+                            10:00 AM - 2:00 PM IST
                         </p>
                     </div>
                 </div>
@@ -69,51 +75,136 @@
 
         </div>
 
-        <!-- Contact Form (UI Only) -->
+        <!-- Contact Form -->
         <div class="col-xl-6">
             <div class="card p-4">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-chat-dots text-primary me-2"></i>
+                    Send us a Message
+                </h5>
 
                 <form>
-
                     <div class="row gy-4">
 
                         <div class="col-md-6">
+                            <label for="name" class="form-label">Full Name *</label>
                             <input type="text"
+                                   id="name"
                                    class="form-control"
-                                   placeholder="Your Name">
+                                   placeholder="Your Full Name"
+                                   required>
                         </div>
 
                         <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address *</label>
                             <input type="email"
+                                   id="email"
                                    class="form-control"
-                                   placeholder="Your Email">
+                                   placeholder="your.email@company.com"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel"
+                                   id="phone"
+                                   class="form-control"
+                                   placeholder="+91 98765 43210">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Department</label>
+                            <select id="department" class="form-select">
+                                <option value="">Select Department</option>
+                                <option value="IT">IT Department</option>
+                                <option value="HR">Human Resources</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Operations">Operations</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
 
                         <div class="col-md-12">
-                            <input type="text"
-                                   class="form-control"
-                                   placeholder="Subject">
+                            <label for="subject" class="form-label">Subject *</label>
+                            <select id="subject" class="form-select" required>
+                                <option value="">Select Subject</option>
+                                <option value="Technical Support">Technical Support</option>
+                                <option value="Feature Request">Feature Request</option>
+                                <option value="Bug Report">Bug Report</option>
+                                <option value="General Inquiry">General Inquiry</option>
+                                <option value="Training Request">Training Request</option>
+                                <option value="Account Issues">Account Issues</option>
+                            </select>
                         </div>
 
                         <div class="col-md-12">
-                            <textarea class="form-control"
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea id="message"
+                                      class="form-control"
                                       rows="6"
-                                      placeholder="Message"></textarea>
+                                      placeholder="Please describe your inquiry in detail..."
+                                      required></textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="privacy" required>
+                                <label class="form-check-label" for="privacy">
+                                    I agree to the <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a> *
+                                </label>
+                            </div>
                         </div>
 
                         <div class="col-md-12 text-center">
                             <button type="button" class="btn btn-primary px-4">
-                                Send Message
+                                <i class="bi bi-send me-2"></i>Send Message
                             </button>
                         </div>
 
                     </div>
-
                 </form>
 
             </div>
         </div>
 
+    </div>
+
+    <!-- Additional Information -->
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle text-primary me-2"></i>
+                        Additional Information
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="fw-bold">Technical Support</h6>
+                            <p class="text-muted small">
+                                For technical issues, system bugs, or login problems,
+                                please contact our technical support team directly.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold">Training & Onboarding</h6>
+                            <p class="text-muted small">
+                                Need help getting started? We offer comprehensive
+                                training sessions for new users and administrators.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold">Feature Requests</h6>
+                            <p class="text-muted small">
+                                Have an idea for improving MOM System? We welcome
+                                feedback and feature suggestions from our users.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </section>

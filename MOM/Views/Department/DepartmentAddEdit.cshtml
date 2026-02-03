@@ -50,7 +50,7 @@
 }
 
 <section class="section">
-    <div class="row justify-content-center">
+    <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-hover">
                 <div class="card-header">
@@ -223,23 +223,129 @@
                 </div>
             }
         </div>
+
+        <!-- Guidelines Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
+                        <i class="bi bi-info-circle me-1"></i>Department Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="guidelines-panel tips">
+                        <div class="guidelines-header">
+                            <i class="bi bi-lightbulb"></i>
+                            Best Practices
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li>Use clear, descriptive department names</li>
+                                <li>Keep names concise but meaningful</li>
+                                <li>Avoid special characters except &, ., and -</li>
+                                <li>Consider organizational hierarchy</li>
+                                <li>Use consistent naming conventions</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guidelines-panel warning">
+                        <div class="guidelines-header">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Important Notes
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li><strong>Department names must be unique</strong></li>
+                                <li>Cannot delete departments with staff or meetings</li>
+                                <li>Changes affect all associated records</li>
+                                <li>Name length: 2-100 characters</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    @if (isEdit)
+                    {
+                        <div class="info-card">
+                            <h6 class="info-card-title">
+                                <i class="bi bi-clock-history me-1"></i>Department History
+                            </h6>
+                            <div class="info-card-content">
+                                <div class="info-item">
+                                    <span class="info-label">Created:</span>
+                                    <span class="info-value">@Model.Created.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Last Modified:</span>
+                                    <span class="info-value">@Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
+                        <i class="bi bi-lightning me-1"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="DepartmentList" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-list me-1"></i>View All Departments
+                        </a>
+                        <a asp-controller="Staff" asp-action="StaffList" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-people me-1"></i>Manage Staff
+                        </a>
+                        @if (isEdit)
+                        {
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="viewDepartmentStaff()">
+                                <i class="bi bi-person-lines-fill me-1"></i>View Department Staff
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Form validation
-            const form = document.getElementById('departmentForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const departmentNameInput = document.querySelector('input[name="DepartmentName"]');
-
-            // Real-time validation
-            departmentNameInput.addEventListener('input', function() {
-                validateDepartmentName();
+            // Initialize modern form validation
+            modernUI.initializeFormValidation('#departmentForm', {
+                'DepartmentName': {
+                    required: true,
+                    minLength: 2,
+                    maxLength: 100,
+                    pattern: /^[a-zA-Z0-9\s&.-]+$/,
+                    messages: {
+                        required: 'Department name is required',
+                        minLength: 'Name must be at least 2 characters',
+                        maxLength: 'Name cannot exceed 100 characters',
+                        pattern: 'Only letters, numbers, spaces, &, ., and - are allowed'
+                    }
+                },
+                'Remarks': {
+                    required: true,
+                    minLength: 5,
+                    maxLength: 100,
+                    messages: {
+                        required: 'Remarks are required',
+                        minLength: 'Remarks must be at least 5 characters',
+                        maxLength: 'Remarks cannot exceed 100 characters'
+                    }
+                }
             });
 
-            // Form submission
+            // Form submission with loading state
+            const form = document.getElementById('departmentForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
             form.addEventListener('submit', function(e) {
                 if (!modernUI.validateForm('#departmentForm')) {
                     e.preventDefault();
@@ -247,25 +353,13 @@
                 }
                 
                 // Show loading state
-                modernUI.showLoading(submitBtn, 'Saving...');
+                modernUI.setButtonLoading(submitBtn, 'Saving...');
             });
 
-            function validateDepartmentName() {
-                const value = departmentNameInput.value.trim();
-                
-                if (value.length < 2) {
-                    modernUI.showFieldError(departmentNameInput, 'Department name must be at least 2 characters');
-                    return false;
-                } else if (value.length > 100) {
-                    modernUI.showFieldError(departmentNameInput, 'Department name cannot exceed 100 characters');
-                    return false;
-                } else if (!/^[a-zA-Z0-9\s&.-]+$/.test(value)) {
-                    modernUI.showFieldError(departmentNameInput, 'Department name contains invalid characters');
-                    return false;
-                } else {
-                    modernUI.clearFieldError(departmentNameInput);
-                    return true;
-                }
+            // Character counter for remarks
+            const remarksField = document.querySelector('textarea[name="Remarks"]');
+            if (remarksField) {
+                modernUI.initializeCharacterCounter(remarksField, 100);
             }
         });
 
@@ -273,22 +367,34 @@
             modernUI.showConfirmation({
                 title: 'Reset Form',
                 message: 'Are you sure you want to reset the form? All changes will be lost.',
-                confirmText: 'Reset Form',
+                confirmText: 'Reset',
                 confirmClass: 'btn-warning',
                 onConfirm: () => {
                     document.getElementById('departmentForm').reset();
-                    // Remove validation classes
-                    document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-                        el.classList.remove('is-valid', 'is-invalid');
-                    });
-                    modernUI.showToast({
-                        title: 'Form Reset',
-                        message: 'Form has been reset successfully',
-                        type: 'info'
-                    });
+                    modernUI.clearFormValidation('#departmentForm');
+                    modernUI.showToast('Form has been reset', 'info');
                 }
             });
         }
+
+        // Quick action functions
+        function viewDepartmentStaff() {
+            @if (isEdit)
+            {
+                <text>
+                window.location.href = '/Staff/StaffList?departmentFilter=@Model.DepartmentID';
+                </text>
+            }
+            else
+            {
+                <text>
+                modernUI.showToast('Please save the department first', 'info');
+                </text>
+            }
+        }
+
+        // Guidelines are now permanently visible with CSS !important rules
+        // No JavaScript hiding of any alerts - guidelines stay visible forever
     </script>
     
     <!-- Enables client-side validation -->

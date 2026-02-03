@@ -50,7 +50,7 @@
 }
 
 <section class="section">
-    <div class="row justify-content-center">
+    <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-hover">
                 <div class="card-header">
@@ -187,6 +187,93 @@
                 </div>
             }
         </div>
+
+        <!-- Guidelines Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
+                        <i class="bi bi-info-circle me-1"></i>Venue Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="guidelines-panel tips">
+                        <div class="guidelines-header">
+                            <i class="bi bi-lightbulb"></i>
+                            Best Practices
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li>Use descriptive venue names (e.g., "Conference Room A")</li>
+                                <li>Include location details if helpful</li>
+                                <li>Consider capacity and equipment available</li>
+                                <li>Use consistent naming conventions</li>
+                                <li>Keep names professional and clear</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guidelines-panel warning">
+                        <div class="guidelines-header">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Important Notes
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li><strong>Venue names must be unique</strong></li>
+                                <li>Cannot delete venues with scheduled meetings</li>
+                                <li>Check availability before scheduling</li>
+                                <li>Name length: 2-100 characters</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    @if (isEdit)
+                    {
+                        <div class="info-card">
+                            <h6 class="info-card-title">
+                                <i class="bi bi-clock-history me-1"></i>Venue History
+                            </h6>
+                            <div class="info-card-content">
+                                <div class="info-item">
+                                    <span class="info-label">Created:</span>
+                                    <span class="info-value">@Model.Created.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Last Modified:</span>
+                                    <span class="info-value">@Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
+                        <i class="bi bi-lightning me-1"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="MeetingVenueList" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-list me-1"></i>View All Venues
+                        </a>
+                        <a asp-controller="Meeting" asp-action="MeetingList" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-calendar-event me-1"></i>View All Meetings
+                        </a>
+                        @if (isEdit)
+                        {
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="viewVenueMeetings()">
+                                <i class="bi bi-calendar-check me-1"></i>View Venue Meetings
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -225,7 +312,7 @@
         });
 
         function resetForm() {
-            modernUI.showConfirmModal({
+            modernUI.showConfirmation({
                 title: 'Reset Form',
                 message: 'Are you sure you want to reset the form? All changes will be lost.',
                 confirmText: 'Reset',
@@ -238,7 +325,23 @@
             });
         }
 
-        // Auto-hide alerts
-        modernUI.autoHideAlerts();
+        // Quick action functions
+        function viewVenueMeetings() {
+            @if (isEdit)
+            {
+                <text>
+                window.location.href = '/Meeting/MeetingList?venueFilter=@Model.MeetingVenueID';
+                </text>
+            }
+            else
+            {
+                <text>
+                modernUI.showToast('Please save the venue first', 'info');
+                </text>
+            }
+        }
+
+        // Guidelines are now permanently visible with CSS !important rules
+        // No JavaScript hiding of any alerts - guidelines stay visible forever
     </script>
 }

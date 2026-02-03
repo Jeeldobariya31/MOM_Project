@@ -192,25 +192,35 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="bi bi-lightbulb me-1"></i>Best Practices</h6>
-                        <ul class="mb-0 small">
-                            <li>Assign members before the meeting date</li>
-                            <li>Ensure all required participants are included</li>
-                            <li>Update attendance status after the meeting</li>
-                            <li>Add relevant remarks for absent members</li>
-                            <li>Consider department relevance when assigning</li>
-                        </ul>
+                    <div class="guidelines-panel tips">
+                        <div class="guidelines-header">
+                            <i class="bi bi-lightbulb"></i>
+                            Best Practices
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li>Assign members before the meeting date</li>
+                                <li>Ensure all required participants are included</li>
+                                <li>Update attendance status after the meeting</li>
+                                <li>Add relevant remarks for absent members</li>
+                                <li>Consider department relevance when assigning</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="alert alert-warning">
-                        <h6><i class="bi bi-exclamation-triangle me-1"></i>Important Notes</h6>
-                        <ul class="mb-0 small">
-                            <li>Cannot assign same member to a meeting twice</li>
-                            <li>Cannot assign members to cancelled meetings</li>
-                            <li>Attendance can be updated after assignment</li>
-                            <li>Remarks help track participation quality</li>
-                        </ul>
+                    <div class="guidelines-panel warning">
+                        <div class="guidelines-header">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Important Notes
+                        </div>
+                        <div class="guidelines-content">
+                            <ul>
+                                <li><strong>Cannot assign same member to a meeting twice</strong></li>
+                                <li>Cannot assign members to cancelled meetings</li>
+                                <li>Attendance can be updated after assignment</li>
+                                <li>Remarks help track participation quality</li>
+                            </ul>
+                        </div>
                     </div>
 
                     @if (isEdit)
@@ -406,7 +416,7 @@
             modernUI.showToast('Use the Bulk Assign button from the Member List page for full functionality', 'info');
         }
 
-        // Auto-hide alerts
-        modernUI.autoHideAlerts();
+        // Guidelines are now permanently visible with CSS !important rules
+        // No JavaScript hiding of any alerts - guidelines stay visible forever
     </script>
 }
