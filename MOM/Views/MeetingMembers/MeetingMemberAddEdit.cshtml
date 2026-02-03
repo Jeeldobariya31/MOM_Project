@@ -5,28 +5,48 @@
     ViewData["Title"] = isEdit ? "Edit Meeting Member" : "Assign Meeting Member";
 }
 
-<div class="pagetitle">
-    <h1>@(isEdit ? "Edit Meeting Member" : "Assign Meeting Member")</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li class="breadcrumb-item">Meetings</li>
-            <li class="breadcrumb-item"><a asp-action="MeetingMemberList">Meeting Members</a></li>
-            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Assign")</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="bi bi-person-plus me-2"></i>@(isEdit ? "Edit Meeting Member" : "Assign Meeting Member")</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item">Meetings</li>
+                    <li class="breadcrumb-item"><a asp-action="MeetingMemberList">Meeting Members</a></li>
+                    <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Assign")</li>
+                </ol>
+            </nav>
+        </div>
+        <a asp-action="MeetingMemberList" class="btn btn-light">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to List
+        </a>
+    </div>
 </div>
 
 <section class="section">
     <div class="row">
         <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-person-plus me-1"></i>
-                        @(isEdit ? "Edit Member Assignment" : "Assign Member to Meeting")
-                    </h5>
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-primary me-3">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 text-white">
+                                @(isEdit ? "Edit Member Assignment" : "Assign Member to Meeting")
+                            </h5>
+                            <p class="mb-0 text-white-50 small">
+                                @(isEdit ? "Update member assignment details" : "Create a new member assignment")
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="card-body">
                     <!-- Display validation summary -->
                     @if (!ViewData.ModelState.IsValid)
                     {
@@ -41,51 +61,57 @@
                         </div>
                     }
 
-                    <form asp-action="MeetingMemberAddEdit" method="post" class="row g-3" novalidate>
+                    <form asp-action="MeetingMemberAddEdit" method="post" id="memberForm" novalidate>
                         <input type="hidden" asp-for="MeetingMemberID" />
                         <input type="hidden" asp-for="Created" />
 
-                        <!-- Meeting Selection -->
-                        <div class="col-md-6">
-                            <label asp-for="MeetingID" class="form-label fw-bold">
-                                <i class="bi bi-calendar-event me-1"></i>Meeting <span class="text-danger">*</span>
-                            </label>
-                            <select asp-for="MeetingID" class="form-select" onchange="loadMeetingDetails(this.value)">
-                                <option value="">-- Select Meeting --</option>
-                                @foreach (System.Data.DataRow meeting in ViewBag.Meetings)
-                                {
-                                    <option value="@meeting["MeetingID"]">
-                                        @meeting["MeetingDescription"] - @Convert.ToDateTime(meeting["MeetingDate"]).ToString("MMM dd, yyyy hh:mm tt")
-                                    </option>
-                                }
-                            </select>
-                            <span asp-validation-for="MeetingID" class="text-danger"></span>
-                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Meeting Selection -->
+                                <div class="mb-4">
+                                    <label asp-for="MeetingID" class="form-label">
+                                        <i class="bi bi-calendar-event me-1"></i>Meeting <span class="text-danger">*</span>
+                                    </label>
+                                    <select asp-for="MeetingID" class="form-select form-control-modern" onchange="loadMeetingDetails(this.value)">
+                                        <option value="">-- Select Meeting --</option>
+                                        @foreach (System.Data.DataRow meeting in ViewBag.Meetings)
+                                        {
+                                            <option value="@meeting["MeetingID"]">
+                                                @meeting["MeetingDescription"] - @Convert.ToDateTime(meeting["MeetingDate"]).ToString("MMM dd, yyyy hh:mm tt")
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="MeetingID" class="text-danger"></span>
+                                </div>
+                            </div>
 
-                        <!-- Staff Selection -->
-                        <div class="col-md-6">
-                            <label asp-for="StaffID" class="form-label fw-bold">
-                                <i class="bi bi-person me-1"></i>Staff Member <span class="text-danger">*</span>
-                            </label>
-                            <select asp-for="StaffID" class="form-select" onchange="loadStaffDetails(this.value)">
-                                <option value="">-- Select Staff Member --</option>
-                                @foreach (System.Data.DataRow staff in ViewBag.Staff.Rows)
-                                {
-                                    <option value="@staff["StaffID"]" data-dept="@staff["DepartmentID"]">
-                                        @staff["StaffName"] (@staff["DepartmentName"])
-                                    </option>
-                                }
-                            </select>
-                            <span asp-validation-for="StaffID" class="text-danger"></span>
+                            <div class="col-md-6">
+                                <!-- Staff Selection -->
+                                <div class="mb-4">
+                                    <label asp-for="StaffID" class="form-label">
+                                        <i class="bi bi-person me-1"></i>Staff Member <span class="text-danger">*</span>
+                                    </label>
+                                    <select asp-for="StaffID" class="form-select form-control-modern" onchange="loadStaffDetails(this.value)">
+                                        <option value="">-- Select Staff Member --</option>
+                                        @foreach (System.Data.DataRow staff in ViewBag.Staff.Rows)
+                                        {
+                                            <option value="@staff["StaffID"]" data-dept="@staff["DepartmentID"]">
+                                                @staff["StaffName"] (@staff["DepartmentName"])
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="StaffID" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Meeting Details (shown when meeting is selected) -->
                         <div class="col-12" id="meetingDetails" style="display: none;">
-                            <div class="card border-info">
-                                <div class="card-header bg-info bg-opacity-10">
-                                    <h6 class="mb-0"><i class="bi bi-info-circle me-1"></i>Meeting Details</h6>
-                                </div>
-                                <div class="card-body" id="meetingInfo">
+                            <div class="info-card info-card-primary">
+                                <h6 class="info-card-title">
+                                    <i class="bi bi-info-circle me-1"></i>Meeting Details
+                                </h6>
+                                <div class="info-card-content" id="meetingInfo">
                                     <!-- Meeting details will be loaded here -->
                                 </div>
                             </div>
@@ -93,54 +119,59 @@
 
                         <!-- Staff Details (shown when staff is selected) -->
                         <div class="col-12" id="staffDetails" style="display: none;">
-                            <div class="card border-success">
-                                <div class="card-header bg-success bg-opacity-10">
-                                    <h6 class="mb-0"><i class="bi bi-person-check me-1"></i>Staff Details</h6>
-                                </div>
-                                <div class="card-body" id="staffInfo">
+                            <div class="info-card info-card-success">
+                                <h6 class="info-card-title">
+                                    <i class="bi bi-person-check me-1"></i>Staff Details
+                                </h6>
+                                <div class="info-card-content" id="staffInfo">
                                     <!-- Staff details will be loaded here -->
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Attendance Status -->
-                        <div class="col-md-4">
-                            <label asp-for="IsPresent" class="form-label fw-bold">
-                                <i class="bi bi-check-circle me-1"></i>Attendance Status <span class="text-danger">*</span>
-                            </label>
-                            <div class="form-check form-switch">
-                                <input asp-for="IsPresent" class="form-check-input" type="checkbox" id="isPresentSwitch">
-                                <label class="form-check-label" for="isPresentSwitch">
-                                    <span id="attendanceLabel">@(Model.IsPresent ? "Present" : "Absent")</span>
-                                </label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <!-- Attendance Status -->
+                                <div class="mb-4">
+                                    <label asp-for="IsPresent" class="form-label">
+                                        <i class="bi bi-check-circle me-1"></i>Attendance Status <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="form-check form-switch form-switch-modern">
+                                        <input asp-for="IsPresent" class="form-check-input" type="checkbox" id="isPresentSwitch">
+                                        <label class="form-check-label" for="isPresentSwitch">
+                                            <span id="attendanceLabel">@(Model.IsPresent ? "Present" : "Absent")</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-text">Toggle to mark attendance status</div>
+                                </div>
                             </div>
-                            <div class="form-text">Toggle to mark attendance status</div>
-                        </div>
 
-                        <!-- Remarks -->
-                        <div class="col-md-8">
-                            <label asp-for="Remarks" class="form-label fw-bold">
-                                <i class="bi bi-chat-text me-1"></i>Remarks
-                            </label>
-                            <textarea asp-for="Remarks" class="form-control" rows="3" 
-                                      placeholder="Optional remarks about attendance, participation, etc..." maxlength="250"></textarea>
-                            <span asp-validation-for="Remarks" class="text-danger"></span>
-                            <div class="form-text">Maximum 250 characters</div>
+                            <div class="col-md-8">
+                                <!-- Remarks -->
+                                <div class="mb-4">
+                                    <label asp-for="Remarks" class="form-label">
+                                        <i class="bi bi-chat-text me-1"></i>Remarks
+                                    </label>
+                                    <textarea asp-for="Remarks" class="form-control form-control-modern" rows="3" 
+                                              placeholder="Optional remarks about attendance, participation, etc..." maxlength="250"></textarea>
+                                    <span asp-validation-for="Remarks" class="text-danger"></span>
+                                    <div class="form-text">Maximum 250 characters</div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="col-12">
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <a asp-action="MeetingMemberList" class="btn btn-secondary">
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="MeetingMemberList" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-left me-1"></i>Back to List
                                 </a>
                                 
-                                <div>
-                                    <button type="reset" class="btn btn-outline-secondary me-2">
+                                <div class="d-flex gap-2">
+                                    <button type="reset" class="btn btn-outline-secondary">
                                         <i class="bi bi-arrow-clockwise me-1"></i>Reset
                                     </button>
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
                                         <i class="bi bi-check-lg me-1"></i>
                                         @(isEdit ? "Update Assignment" : "Assign Member")
                                     </button>
@@ -154,12 +185,13 @@
 
         <!-- Guidelines Sidebar -->
         <div class="col-lg-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
                         <i class="bi bi-info-circle me-1"></i>Assignment Guidelines
-                    </h5>
-                    
+                    </h6>
+                </div>
+                <div class="card-body">
                     <div class="alert alert-info">
                         <h6><i class="bi bi-lightbulb me-1"></i>Best Practices</h6>
                         <ul class="mb-0 small">
@@ -183,22 +215,33 @@
 
                     @if (isEdit)
                     {
-                        <div class="alert alert-secondary">
-                            <h6><i class="bi bi-clock-history me-1"></i>Assignment History</h6>
-                            <p class="mb-1 small"><strong>Created:</strong> @Model.Created.ToString("MMM dd, yyyy hh:mm tt")</p>
-                            <p class="mb-0 small"><strong>Last Modified:</strong> @Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</p>
+                        <div class="info-card">
+                            <h6 class="info-card-title">
+                                <i class="bi bi-clock-history me-1"></i>Assignment History
+                            </h6>
+                            <div class="info-card-content">
+                                <div class="info-item">
+                                    <span class="info-label">Created:</span>
+                                    <span class="info-value">@Model.Created.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Last Modified:</span>
+                                    <span class="info-value">@Model.Modified.ToString("MMM dd, yyyy hh:mm tt")</span>
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
             </div>
 
             <!-- Quick Actions -->
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">
+            <div class="card shadow-hover">
+                <div class="card-header">
+                    <h6 class="mb-0 text-white">
                         <i class="bi bi-lightning me-1"></i>Quick Actions
-                    </h5>
-                    
+                    </h6>
+                </div>
+                <div class="card-body">
                     <div class="d-grid gap-2">
                         <a asp-action="MeetingMemberList" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-list me-1"></i>View All Members
@@ -206,7 +249,7 @@
                         <a asp-controller="Meeting" asp-action="MeetingList" class="btn btn-outline-info btn-sm">
                             <i class="bi bi-calendar-event me-1"></i>View All Meetings
                         </a>
-                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="showBulkAssignModal()">
                             <i class="bi bi-people-fill me-1"></i>Bulk Assign
                         </button>
                     </div>
@@ -220,6 +263,47 @@
     <partial name="_ValidationScriptsPartial" />
     
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize modern form validation
+            modernUI.initializeFormValidation('#memberForm', {
+                'MeetingID': {
+                    required: true,
+                    messages: {
+                        required: 'Please select a meeting'
+                    }
+                },
+                'StaffID': {
+                    required: true,
+                    messages: {
+                        required: 'Please select a staff member'
+                    }
+                }
+            });
+
+            // Form submission with loading state
+            const form = document.getElementById('memberForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            form.addEventListener('submit', function(e) {
+                if (!modernUI.validateForm('#memberForm')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading state
+                modernUI.setButtonLoading(submitBtn, 'Saving...');
+            });
+
+            // Initialize details if editing
+            @if (isEdit)
+            {
+                <text>
+                loadMeetingDetails(@Model.MeetingID);
+                loadStaffDetails(@Model.StaffID);
+                </text>
+            }
+        });
+
         // Toggle attendance label
         document.getElementById('isPresentSwitch').addEventListener('change', function() {
             const label = document.getElementById('attendanceLabel');
@@ -229,25 +313,7 @@
         // Character counter for remarks
         const remarksField = document.querySelector('textarea[name="Remarks"]');
         if (remarksField) {
-            const maxLength = 250;
-            const counter = document.createElement('div');
-            counter.className = 'form-text text-end';
-            counter.innerHTML = `<span id="charCount">0</span>/${maxLength} characters`;
-            remarksField.parentNode.appendChild(counter);
-
-            remarksField.addEventListener('input', function() {
-                const count = this.value.length;
-                document.getElementById('charCount').textContent = count;
-                
-                if (count > maxLength * 0.9) {
-                    counter.className = 'form-text text-end text-warning';
-                } else {
-                    counter.className = 'form-text text-end';
-                }
-            });
-
-            // Initialize counter
-            remarksField.dispatchEvent(new Event('input'));
+            modernUI.initializeCharacterCounter(remarksField, 250);
         }
 
         // Load meeting details
@@ -264,25 +330,35 @@
                         document.getElementById('meetingInfo').innerHTML = `
                             <div class="row">
                                 <div class="col-md-6">
-                                    <strong>Description:</strong><br>
-                                    <span class="text-muted">${data.meetingDescription}</span>
+                                    <div class="info-item">
+                                        <span class="info-label">Description:</span>
+                                        <span class="info-value">${data.meetingDescription}</span>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Date & Time:</strong><br>
-                                    <span class="text-muted">${data.meetingDate}</span>
+                                    <div class="info-item">
+                                        <span class="info-label">Date & Time:</span>
+                                        <span class="info-value">${data.meetingDate}</span>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mt-2">
-                                    <strong>Type:</strong><br>
-                                    <span class="badge bg-info">${data.meetingTypeName}</span>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Type:</span>
+                                        <span class="badge badge-info">${data.meetingTypeName}</span>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mt-2">
-                                    <strong>Venue:</strong><br>
-                                    <span class="text-muted">${data.venueName}</span>
+                                <div class="col-md-6">
+                                    <div class="info-item">
+                                        <span class="info-label">Venue:</span>
+                                        <span class="info-value">${data.venueName}</span>
+                                    </div>
                                 </div>
-                                <div class="col-12 mt-2">
-                                    <strong>Department:</strong><br>
-                                    <span class="badge bg-primary">${data.departmentName}</span>
-                                    ${data.isCancelled ? '<span class="badge bg-danger ms-2">CANCELLED</span>' : ''}
+                                <div class="col-12">
+                                    <div class="info-item">
+                                        <span class="info-label">Department:</span>
+                                        <span class="badge badge-primary">${data.departmentName}</span>
+                                        ${data.isCancelled ? '<span class="badge badge-danger ms-2">CANCELLED</span>' : ''}
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -309,47 +385,28 @@
             document.getElementById('staffInfo').innerHTML = `
                 <div class="row">
                     <div class="col-md-6">
-                        <strong>Staff Name:</strong><br>
-                        <span class="text-muted">${staffName}</span>
+                        <div class="info-item">
+                            <span class="info-label">Staff Name:</span>
+                            <span class="info-value">${staffName}</span>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <strong>Department:</strong><br>
-                        <span class="badge bg-success">${deptName}</span>
+                        <div class="info-item">
+                            <span class="info-label">Department:</span>
+                            <span class="badge badge-success">${deptName}</span>
+                        </div>
                     </div>
                 </div>
             `;
             document.getElementById('staffDetails').style.display = 'block';
         }
 
-        // Initialize details if editing
-        @if (isEdit)
-        {
-            <text>
-            document.addEventListener('DOMContentLoaded', function() {
-                loadMeetingDetails(@Model.MeetingID);
-                loadStaffDetails(@Model.StaffID);
-            });
-            </text>
+        // Bulk assign modal (simplified version)
+        function showBulkAssignModal() {
+            modernUI.showToast('Use the Bulk Assign button from the Member List page for full functionality', 'info');
         }
 
-        // Form validation enhancement
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const meetingId = document.querySelector('select[name="MeetingID"]').value;
-            const staffId = document.querySelector('select[name="StaffID"]').value;
-            
-            if (!meetingId) {
-                e.preventDefault();
-                alert('Please select a meeting.');
-                document.querySelector('select[name="MeetingID"]').focus();
-                return false;
-            }
-            
-            if (!staffId) {
-                e.preventDefault();
-                alert('Please select a staff member.');
-                document.querySelector('select[name="StaffID"]').focus();
-                return false;
-            }
-        });
+        // Auto-hide alerts
+        modernUI.autoHideAlerts();
     </script>
 }

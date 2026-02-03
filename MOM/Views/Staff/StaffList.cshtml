@@ -11,17 +11,26 @@
     var departments = ViewBag.Departments as List<dynamic> ?? new List<dynamic>();
 }
 
-<div class="pagetitle">
-    <h1>Staff Management</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item active">Staff</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="bi bi-people me-2"></i>Staff Management</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">Master</li>
+                    <li class="breadcrumb-item active">Staff</li>
+                </ol>
+            </nav>
+        </div>
+        <a asp-action="StaffAddEdit" class="btn btn-light">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Staff Member
+        </a>
+    </div>
 </div>
 
 <!-- Success/Error Messages -->
@@ -46,9 +55,9 @@
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-            <div class="card">
+            <div class="card shadow-hover">
                 <div class="card-body">
-                    <!-- Header with Add Button -->
+                    <!-- Header with Stats -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h5 class="card-title mb-1">
@@ -56,24 +65,31 @@
                                 Staff Management
                             </h5>
                             <p class="text-muted small mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
                                 Showing @filteredRecords of @totalRecords staff members
                             </p>
                         </div>
-                        <a asp-action="StaffAddEdit" class="btn btn-primary">
-                            <i class="bi bi-plus-lg me-1"></i>
-                            Add Staff Member
-                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="modernUI.exportTable('#staffTable', 'staff', 'csv')">
+                                <i class="bi bi-file-earmark-excel me-1"></i>
+                                Export
+                            </button>
+                            <a asp-action="StaffAddEdit" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-1"></i>
+                                Add Staff Member
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Search and Filter Section -->
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <form method="get" class="d-flex">
-                                <input type="hidden" name="sortBy" value="@sortBy" />
-                                <input type="hidden" name="sortOrder" value="@sortOrder" />
-                                <input type="hidden" name="departmentFilter" value="@departmentFilter" />
-                                
-                                <div class="input-group me-2">
+                    <div class="filter-section">
+                        <form method="get" class="row g-3">
+                            <input type="hidden" name="sortBy" value="@sortBy" />
+                            <input type="hidden" name="sortOrder" value="@sortOrder" />
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Search Staff</label>
+                                <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bi bi-search"></i>
                                     </span>
@@ -81,20 +97,16 @@
                                            name="searchTerm" 
                                            value="@searchTerm" 
                                            class="form-control" 
-                                           placeholder="Search staff members..." />
-                                    <button type="submit" class="btn btn-outline-secondary">
-                                        Search
+                                           placeholder="Search by name, email, or mobile..." />
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-1"></i>Search
                                     </button>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="col-md-4">
-                            <form method="get" class="d-flex">
-                                <input type="hidden" name="searchTerm" value="@searchTerm" />
-                                <input type="hidden" name="sortBy" value="@sortBy" />
-                                <input type="hidden" name="sortOrder" value="@sortOrder" />
-                                
-                                <select name="departmentFilter" class="form-select me-2" onchange="this.form.submit()">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label">Department Filter</label>
+                                <select name="departmentFilter" class="form-select" onchange="this.form.submit()">
                                     <option value="">All Departments</option>
                                     @foreach (var dept in departments)
                                     {
@@ -103,139 +115,147 @@
                                         </option>
                                     }
                                 </select>
-                                
+                            </div>
+                            
+                            <div class="col-md-2 d-flex align-items-end">
                                 @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(departmentFilter))
                                 {
-                                    <a href="@Url.Action("StaffList")" class="btn btn-outline-danger">
-                                        <i class="bi bi-x-lg"></i>
+                                    <a href="@Url.Action("StaffList")" class="btn btn-outline-secondary w-100">
+                                        <i class="bi bi-x-lg me-1"></i>Clear
                                     </a>
                                 }
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
 
                     <!-- Data Table -->
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="staffTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>
-                                        <a href="@Url.Action("StaffList", new { searchTerm, departmentFilter, sortBy = "StaffName", sortOrder = (sortBy == "StaffName" && sortOrder == "asc") ? "desc" : "asc" })" 
-                                           class="text-decoration-none text-dark">
-                                            Staff Name
-                                            @if (sortBy == "StaffName")
-                                            {
-                                                <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
-                                            }
-                                        </a>
-                                    </th>
-                                    <th>Department</th>
-                                    <th>Contact Information</th>
-                                    <th>
-                                        <a href="@Url.Action("StaffList", new { searchTerm, departmentFilter, sortBy = "Created", sortOrder = (sortBy == "Created" && sortOrder == "asc") ? "desc" : "asc" })" 
-                                           class="text-decoration-none text-dark">
-                                            Created Date
-                                            @if (sortBy == "Created")
-                                            {
-                                                <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
-                                            }
-                                        </a>
-                                    </th>
-                                    <th class="text-center" style="width: 200px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.Rows.Count > 0)
-                                {
-                                    @foreach (System.Data.DataRow row in Model.Rows)
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="staffTable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <a href="@Url.Action("StaffList", new { searchTerm, departmentFilter, sortBy = "StaffName", sortOrder = (sortBy == "StaffName" && sortOrder == "asc") ? "desc" : "asc" })" 
+                                               class="text-decoration-none text-dark d-flex align-items-center">
+                                                Staff Name
+                                                @if (sortBy == "StaffName")
+                                                {
+                                                    <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
+                                                }
+                                            </a>
+                                        </th>
+                                        <th>Department</th>
+                                        <th>Contact Information</th>
+                                        <th>
+                                            <a href="@Url.Action("StaffList", new { searchTerm, departmentFilter, sortBy = "Created", sortOrder = (sortBy == "Created" && sortOrder == "asc") ? "desc" : "asc" })" 
+                                               class="text-decoration-none text-dark d-flex align-items-center">
+                                                Created Date
+                                                @if (sortBy == "Created")
+                                                {
+                                                    <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
+                                                }
+                                            </a>
+                                        </th>
+                                        <th class="text-center" style="width: 200px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Rows.Count > 0)
                                     {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                        <i class="bi bi-person text-primary"></i>
+                                        @foreach (System.Data.DataRow row in Model.Rows)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar bg-primary me-3">
+                                                            <i class="bi bi-person"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-semibold">@row["StaffName"]</h6>
+                                                            <small class="text-muted">ID: @row["StaffID"]</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">
+                                                        @row["DepartmentName"]
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <i class="bi bi-envelope me-1 text-muted"></i>
+                                                        <small>@row["EmailAddress"]</small>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0">@row["StaffName"]</h6>
-                                                        <small class="text-muted">ID: @row["StaffID"]</small>
+                                                        <i class="bi bi-phone me-1 text-muted"></i>
+                                                        <small>@row["MobileNo"]</small>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info-subtle text-info">
-                                                    @row["DepartmentName"]
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <i class="bi bi-envelope me-1"></i>
-                                                    <small>@row["EmailAddress"]</small>
-                                                </div>
-                                                <div>
-                                                    <i class="bi bi-phone me-1"></i>
-                                                    <small>@row["MobileNo"]</small>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="text-muted">
-                                                    @Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")
-                                                </span>
-                                                <br>
-                                                <small class="text-muted">
-                                                    @Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")
-                                                </small>
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" 
-                                                            class="btn btn-outline-info btn-sm" 
-                                                            onclick="viewStaff(@row["StaffID"])"
-                                                            title="View Details">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <a asp-action="StaffAddEdit" 
-                                                       asp-route-id="@row["StaffID"]"
-                                                       class="btn btn-outline-primary btn-sm"
-                                                       title="Edit">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <button type="button" 
-                                                            class="btn btn-outline-danger btn-sm" 
-                                                            onclick="deleteStaff(@row["StaffID"], '@row["StaffName"]')"
-                                                            title="Delete">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <span class="fw-medium">
+                                                            @Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")
+                                                        </span>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            @Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" 
+                                                                class="btn btn-outline-info btn-sm" 
+                                                                onclick="viewStaff(@row["StaffID"])"
+                                                                title="View Details">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <a asp-action="StaffAddEdit" 
+                                                           asp-route-id="@row["StaffID"]"
+                                                           class="btn btn-outline-primary btn-sm"
+                                                           title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <button type="button" 
+                                                                class="btn btn-outline-danger btn-sm" 
+                                                                onclick="deleteStaff(@row["StaffID"], '@row["StaffName"]')"
+                                                                title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5">
+                                                <div class="empty-state">
+                                                    <i class="bi bi-people"></i>
+                                                    @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(departmentFilter))
+                                                    {
+                                                        <h3>No staff members found</h3>
+                                                        <p>No staff members match your search criteria</p>
+                                                        <a href="@Url.Action("StaffList")" class="btn btn-outline-primary">
+                                                            <i class="bi bi-arrow-left me-1"></i>Clear Filters
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <h3>No staff members yet</h3>
+                                                        <p>Get started by adding your first staff member</p>
+                                                        <a asp-action="StaffAddEdit" class="btn btn-primary">
+                                                            <i class="bi bi-plus-lg me-1"></i>Add First Staff Member
+                                                        </a>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>
                                     }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-inbox display-4 d-block mb-2"></i>
-                                                @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(departmentFilter))
-                                                {
-                                                    <p>No staff members found matching your criteria</p>
-                                                    <a href="@Url.Action("StaffList")" class="btn btn-outline-primary btn-sm">
-                                                        Clear Filters
-                                                    </a>
-                                                }
-                                                else
-                                                {
-                                                    <p>No staff members found</p>
-                                                    <a asp-action="StaffAddEdit" class="btn btn-primary btn-sm">
-                                                        Add First Staff Member
-                                                    </a>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -243,186 +263,208 @@
     </div>
 </section>
 
-<!-- Staff Details Modal -->
-<div class="modal fade" id="staffModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Staff Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="staffModalBody">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    Confirm Delete
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the staff member <strong id="deleteStaffName"></strong>?</p>
-                <p class="text-muted small">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="bi bi-trash me-1"></i>
-                    Delete Staff Member
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
-        let deleteId = 0;
-
         function viewStaff(id) {
+            const button = document.querySelector(`button[onclick="viewStaff(${id})"]`);
+            if (button) {
+                modernUI.setButtonLoading(button, 'Loading...');
+            }
+            
             fetch(`/Staff/GetStaffDetails/${id}`)
                 .then(response => response.json())
                 .then(data => {
+                    if (button) {
+                        modernUI.resetButton(button);
+                    }
+                    
                     if (data.success) {
                         const staff = data.data;
-                        document.getElementById('staffModalBody').innerHTML = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Staff ID:</strong></div>
-                                        <div class="col-sm-8">${staff.StaffID}</div>
+                        modernUI.showModal({
+                            title: `<i class="bi bi-person me-2"></i>Staff Details`,
+                            size: 'lg',
+                            content: `
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary mb-3">
+                                                    <i class="bi bi-person-badge me-1"></i>Personal Information
+                                                </h6>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Staff ID:</strong></div>
+                                                    <div class="col-sm-8">${modernUI.safeValue(staff.StaffID)}</div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Name:</strong></div>
+                                                    <div class="col-sm-8">${modernUI.safeValue(staff.StaffName)}</div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Department:</strong></div>
+                                                    <div class="col-sm-8"><span class="badge bg-info">${modernUI.safeValue(staff.DepartmentName)}</span></div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Email:</strong></div>
+                                                    <div class="col-sm-8">
+                                                        ${staff.EmailAddress ? `<a href="mailto:${staff.EmailAddress}">${staff.EmailAddress}</a>` : 'N/A'}
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-4"><strong>Mobile:</strong></div>
+                                                    <div class="col-sm-8">
+                                                        ${staff.MobileNo ? `<a href="tel:${staff.MobileNo}">${staff.MobileNo}</a>` : 'N/A'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Name:</strong></div>
-                                        <div class="col-sm-8">${staff.StaffName}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Department:</strong></div>
-                                        <div class="col-sm-8"><span class="badge bg-info">${staff.DepartmentName}</span></div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Email:</strong></div>
-                                        <div class="col-sm-8"><a href="mailto:${staff.EmailAddress}">${staff.EmailAddress}</a></div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Mobile:</strong></div>
-                                        <div class="col-sm-8"><a href="tel:${staff.MobileNo}">${staff.MobileNo}</a></div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Meetings:</strong></div>
-                                        <div class="col-sm-8"><span class="badge bg-success">${staff.MeetingCount}</span></div>
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-success mb-3">
+                                                    <i class="bi bi-info-circle me-1"></i>Additional Information
+                                                </h6>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Meetings:</strong></div>
+                                                    <div class="col-sm-8"><span class="badge bg-success">${modernUI.safeValue(staff.MeetingCount, '0')}</span></div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Remarks:</strong></div>
+                                                    <div class="col-sm-8">${modernUI.safeValue(staff.Remarks, 'No remarks')}</div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-4"><strong>Created:</strong></div>
+                                                    <div class="col-sm-8">${modernUI.formatDate(staff.Created)}</div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-4"><strong>Modified:</strong></div>
+                                                    <div class="col-sm-8">${modernUI.formatDate(staff.Modified)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Remarks:</strong></div>
-                                        <div class="col-sm-8">${staff.Remarks || 'No remarks'}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Created:</strong></div>
-                                        <div class="col-sm-8">${staff.Created}</div>
-                                    </div>
-                                    <div class="row mb-2">
-                                        <div class="col-sm-4"><strong>Modified:</strong></div>
-                                        <div class="col-sm-8">${staff.Modified}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        new bootstrap.Modal(document.getElementById('staffModal')).show();
+                            `,
+                            buttons: [
+                                {
+                                    text: 'Edit Staff',
+                                    class: 'btn-primary',
+                                    icon: 'bi bi-pencil',
+                                    onclick: `window.location.href='/Staff/StaffAddEdit/${id}'`
+                                },
+                                {
+                                    text: 'Close',
+                                    class: 'btn-secondary',
+                                    onclick: 'modernUI.closeModal()'
+                                }
+                            ]
+                        });
                     } else {
-                        showToast('Error', data.message, 'error');
+                        modernUI.showToast({
+                            title: 'Error',
+                            message: data.message || 'Failed to load staff details',
+                            type: 'error'
+                        });
                     }
                 })
                 .catch(error => {
-                    showToast('Error', 'Failed to load staff details', 'error');
+                    if (button) {
+                        modernUI.resetButton(button);
+                    }
+                    console.error('Error loading staff details:', error);
+                    modernUI.showToast({
+                        title: 'Error',
+                        message: 'Failed to load staff details. Please try again.',
+                        type: 'error'
+                    });
+                });
+        }
+                                                <div class="row">
+                                                    <div class="col-sm-4"><strong>Modified:</strong></div>
+                                                    <div class="col-sm-8">${staff.Modified}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            buttons: [
+                                {
+                                    text: 'Edit Staff',
+                                    class: 'btn-primary',
+                                    icon: 'bi bi-pencil',
+                                    onclick: `window.location.href='/Staff/StaffAddEdit/${id}'`
+                                },
+                                {
+                                    text: 'Close',
+                                    class: 'btn-secondary',
+                                    onclick: 'modernUI.closeModal()'
+                                }
+                            ]
+                        });
+                    } else {
+                        modernUI.showToast({
+                            title: 'Error',
+                            message: data.message || 'Failed to load staff details',
+                            type: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    modernUI.showToast({
+                        title: 'Error',
+                        message: 'Failed to load staff details',
+                        type: 'error'
+                    });
                 });
         }
 
         function deleteStaff(id, name) {
-            deleteId = id;
-            document.getElementById('deleteStaffName').textContent = name;
-            new bootstrap.Modal(document.getElementById('deleteModal')).show();
-        }
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-            if (deleteId > 0) {
-                fetch('/Staff/Delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    },
-                    body: `id=${deleteId}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-                    if (data.success) {
-                        showToast('Success', data.message, 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showToast('Error', data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-                    showToast('Error', 'Failed to delete staff member', 'error');
-                });
-            }
-        });
-
-        function showToast(title, message, type) {
-            const toastHtml = `
-                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <strong>${title}:</strong> ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-            
-            let toastContainer = document.getElementById('toastContainer');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'toastContainer';
-                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-                document.body.appendChild(toastContainer);
-            }
-            
-            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-            const toastElement = toastContainer.lastElementChild;
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-            
-            toastElement.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
+            modernUI.showConfirmation({
+                title: 'Delete Staff Member',
+                message: `Are you sure you want to delete the staff member "<strong>${name}</strong>"?<br><small class="text-muted">This action cannot be undone.</small>`,
+                confirmText: 'Delete Staff Member',
+                confirmClass: 'btn-danger',
+                onConfirm: () => {
+                    fetch('/Staff/Delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `id=${id}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            modernUI.showToast({
+                                title: 'Success',
+                                message: data.message || 'Staff member deleted successfully',
+                                type: 'success'
+                            });
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            modernUI.showToast({
+                                title: 'Error',
+                                message: data.message || 'Failed to delete staff member',
+                                type: 'error'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        modernUI.showToast({
+                            title: 'Error',
+                            message: 'Failed to delete staff member',
+                            type: 'error'
+                        });
+                    });
+                }
             });
         }
 
-        // Auto-hide alerts after 5 seconds
+        // Initialize live search
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
+            modernUI.setupLiveSearch('input[name="searchTerm"]', '#staffTable');
         });
     </script>
 }

@@ -9,17 +9,26 @@
     var filteredRecords = ViewBag.FilteredRecords as int? ?? 0;
 }
 
-<div class="pagetitle">
-    <h1>Meeting Types</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item active">Meeting Types</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="bi bi-tags me-2"></i>Meeting Type Management</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">Master</li>
+                    <li class="breadcrumb-item active">Meeting Types</li>
+                </ol>
+            </nav>
+        </div>
+        <a asp-action="MeetingTypeAddEdit" class="btn btn-light">
+            <i class="bi bi-plus-lg me-1"></i>
+            Add Meeting Type
+        </a>
+    </div>
 </div>
 
 <!-- Success/Error Messages -->
@@ -44,9 +53,9 @@
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-            <div class="card">
+            <div class="card shadow-hover">
                 <div class="card-body">
-                    <!-- Header with Add Button -->
+                    <!-- Header with Stats -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h5 class="card-title mb-1">
@@ -54,87 +63,73 @@
                                 Meeting Type Management
                             </h5>
                             <p class="text-muted small mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
                                 Showing @filteredRecords of @totalRecords meeting types
                             </p>
                         </div>
-                        <a asp-action="MeetingTypeAddEdit" class="btn btn-primary">
-                            <i class="bi bi-plus-lg me-1"></i>
-                            Add Meeting Type
-                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="modernUI.exportTable('#meetingTypeTable', 'meeting-types', 'csv')">
+                                <i class="bi bi-file-earmark-excel me-1"></i>
+                                Export
+                            </button>
+                            <a asp-action="MeetingTypeAddEdit" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-1"></i>
+                                Add Meeting Type
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Search and Filter Section -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <form method="get" class="d-flex">
-                                <input type="hidden" name="sortBy" value="@sortBy" />
-                                <input type="hidden" name="sortOrder" value="@sortOrder" />
+                    <div class="filter-section">
+                        <form method="get" class="row g-3">
+                            <input type="hidden" name="sortBy" value="@sortBy" />
+                            <input type="hidden" name="sortOrder" value="@sortOrder" />
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Search</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-search"></i>
-                                    </span>
-                                    <input type="text" 
-                                           name="searchTerm" 
-                                           value="@searchTerm" 
-                                           class="form-control" 
-                                           placeholder="Search meeting types..." />
-                                    <button type="submit" class="btn btn-outline-secondary">
-                                        Search
-                                    </button>
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" name="searchTerm" value="@searchTerm" 
+                                           class="form-control" placeholder="Search meeting types..." />
+                                    <button type="submit" class="btn btn-primary">Search</button>
                                     @if (!string.IsNullOrEmpty(searchTerm))
                                     {
-                                        <a href="@Url.Action("MeetingTypeList")" class="btn btn-outline-danger">
+                                        <a href="@Url.Action("MeetingTypeList")" class="btn btn-outline-secondary">
                                             <i class="bi bi-x-lg"></i>
                                         </a>
                                     }
                                 </div>
-                            </form>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportData('excel')">
-                                    <i class="bi bi-file-earmark-excel me-1"></i>
-                                    Excel
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportData('pdf')">
-                                    <i class="bi bi-file-earmark-pdf me-1"></i>
-                                    PDF
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="printTable()">
-                                    <i class="bi bi-printer me-1"></i>
-                                    Print
-                                </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
 
                     <!-- Data Table -->
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="meetingTypeTable">
-                            <thead class="table-light">
+                        <table class="table table-modern" id="meetingTypeTable">
+                            <thead>
                                 <tr>
                                     <th>
                                         <a href="@Url.Action("MeetingTypeList", new { searchTerm, sortBy = "MeetingTypeName", sortOrder = (sortBy == "MeetingTypeName" && sortOrder == "asc") ? "desc" : "asc" })" 
-                                           class="text-decoration-none text-dark">
-                                            Meeting Type Name
+                                           class="text-decoration-none">
+                                            <i class="bi bi-tags me-1"></i>Meeting Type Name
                                             @if (sortBy == "MeetingTypeName")
                                             {
                                                 <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
                                             }
                                         </a>
                                     </th>
-                                    <th>Remarks</th>
+                                    <th><i class="bi bi-chat-text me-1"></i>Remarks</th>
                                     <th>
                                         <a href="@Url.Action("MeetingTypeList", new { searchTerm, sortBy = "Created", sortOrder = (sortBy == "Created" && sortOrder == "asc") ? "desc" : "asc" })" 
-                                           class="text-decoration-none text-dark">
-                                            Created Date
+                                           class="text-decoration-none">
+                                            <i class="bi bi-calendar me-1"></i>Created Date
                                             @if (sortBy == "Created")
                                             {
                                                 <i class="bi bi-arrow-@(sortOrder == "asc" ? "up" : "down") ms-1"></i>
                                             }
                                         </a>
                                     </th>
-                                    <th class="text-center" style="width: 200px;">Actions</th>
+                                    <th class="text-center"><i class="bi bi-gear me-1"></i>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -145,43 +140,40 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar-sm bg-info-subtle rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                        <i class="bi bi-tags text-info"></i>
+                                                    <div class="avatar bg-info me-3">
+                                                        <i class="bi bi-tags"></i>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0">@row["MeetingTypeName"]</h6>
-                                                        <small class="text-muted">ID: @row["MeetingTypeID"]</small>
+                                                        <div class="title">@row["MeetingTypeName"]</div>
+                                                        <div class="subtitle">ID: @row["MeetingTypeID"]</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="text-muted">@row["Remarks"]</span>
+                                                <div class="remarks-cell">@row["Remarks"]</div>
                                             </td>
                                             <td>
-                                                <span class="text-muted">
-                                                    @Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")
-                                                </span>
-                                                <br>
-                                                <small class="text-muted">
-                                                    @Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")
-                                                </small>
+                                                <div class="date-time-cell">
+                                                    <div class="date">@Convert.ToDateTime(row["Created"]).ToString("dd MMM yyyy")</div>
+                                                    <div class="time">@Convert.ToDateTime(row["Created"]).ToString("hh:mm tt")</div>
+                                                </div>
                                             </td>
                                             <td class="text-center">
-                                                <div class="btn-group" role="group">
+                                                <div class="action-buttons">
                                                     <button type="button" 
-                                                            class="btn btn-outline-info btn-sm" 
+                                                            class="btn btn-sm btn-outline-primary" 
                                                             onclick="viewMeetingType(@row["MeetingTypeID"])"
                                                             title="View Details">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
                                                     <a asp-action="MeetingTypeAddEdit" 
                                                        asp-route-id="@row["MeetingTypeID"]"
-                                                       class="btn btn-outline-primary btn-sm"
+                                                       class="btn btn-sm btn-outline-secondary"
                                                        title="Edit">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <button type="button" 
-                                                            class="btn btn-outline-danger btn-sm" 
+                                                            class="btn btn-sm btn-outline-danger" 
                                                             onclick="deleteMeetingType(@row["MeetingTypeID"], '@row["MeetingTypeName"]')"
                                                             title="Delete">
                                                         <i class="bi bi-trash"></i>
@@ -194,9 +186,10 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="4" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                        <td colspan="4">
+                                            <div class="empty-state">
+                                                <i class="bi bi-tags"></i>
+                                                <h6>No meeting types found</h6>
                                                 @if (!string.IsNullOrEmpty(searchTerm))
                                                 {
                                                     <p>No meeting types found matching "@searchTerm"</p>
@@ -224,176 +217,152 @@
     </div>
 </section>
 
-<!-- Meeting Type Details Modal -->
-<div class="modal fade" id="meetingTypeModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Meeting Type Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="meetingTypeModalBody">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    Confirm Delete
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the meeting type <strong id="deleteMeetingTypeName"></strong>?</p>
-                <p class="text-muted small">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="bi bi-trash me-1"></i>
-                    Delete Meeting Type
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @section Scripts {
     <script>
-        let deleteId = 0;
-
+        // View meeting type details
         function viewMeetingType(id) {
+            const button = document.querySelector(`button[onclick="viewMeetingType(${id})"]`);
+            if (button) {
+                modernUI.setButtonLoading(button, 'Loading...');
+            }
+            
             fetch(`/MeetingType/GetMeetingTypeDetails/${id}`)
                 .then(response => response.json())
                 .then(data => {
+                    if (button) {
+                        modernUI.resetButton(button);
+                    }
+                    
                     if (data.success) {
                         const meetingType = data.data;
-                        document.getElementById('meetingTypeModalBody').innerHTML = `
-                            <div class="row">
-                                <div class="col-sm-4"><strong>Type ID:</strong></div>
-                                <div class="col-sm-8">${meetingType.MeetingTypeID}</div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm-4"><strong>Type Name:</strong></div>
-                                <div class="col-sm-8">${meetingType.MeetingTypeName}</div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm-4"><strong>Remarks:</strong></div>
-                                <div class="col-sm-8">${meetingType.Remarks}</div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm-4"><strong>Meeting Count:</strong></div>
-                                <div class="col-sm-8"><span class="badge bg-success">${meetingType.MeetingCount}</span></div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm-4"><strong>Created:</strong></div>
-                                <div class="col-sm-8">${meetingType.Created}</div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-sm-4"><strong>Modified:</strong></div>
-                                <div class="col-sm-8">${meetingType.Modified}</div>
-                            </div>
-                        `;
-                        new bootstrap.Modal(document.getElementById('meetingTypeModal')).show();
+                        modernUI.showModal({
+                            title: `<i class="bi bi-tags me-2"></i>Meeting Type Details`,
+                            size: 'lg',
+                            content: `
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-primary mb-3">
+                                                    <i class="bi bi-info-circle me-1"></i>Basic Information
+                                                </h6>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-5"><strong>Type ID:</strong></div>
+                                                    <div class="col-sm-7">${modernUI.safeValue(meetingType.MeetingTypeID)}</div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-5"><strong>Type Name:</strong></div>
+                                                    <div class="col-sm-7">${modernUI.safeValue(meetingType.MeetingTypeName)}</div>
+                                                </div>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-5"><strong>Created:</strong></div>
+                                                    <div class="col-sm-7">${modernUI.formatDate(meetingType.Created)}</div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-5"><strong>Modified:</strong></div>
+                                                    <div class="col-sm-7">${modernUI.formatDate(meetingType.Modified)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-success mb-3">
+                                                    <i class="bi bi-bar-chart me-1"></i>Statistics & Details
+                                                </h6>
+                                                <div class="row mb-2">
+                                                    <div class="col-sm-5"><strong>Meetings:</strong></div>
+                                                    <div class="col-sm-7"><span class="badge bg-success">${modernUI.safeValue(meetingType.MeetingCount, '0')}</span></div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-5"><strong>Remarks:</strong></div>
+                                                    <div class="col-sm-7">${modernUI.safeValue(meetingType.Remarks, 'No remarks')}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            buttons: [
+                                {
+                                    text: 'Edit Type',
+                                    class: 'btn-primary',
+                                    icon: 'bi bi-pencil',
+                                    onclick: `window.location.href='/MeetingType/MeetingTypeAddEdit/${id}'`
+                                },
+                                {
+                                    text: 'Close',
+                                    class: 'btn-secondary',
+                                    onclick: 'modernUI.closeModal()'
+                                }
+                            ]
+                        });
                     } else {
-                        showToast('Error', data.message, 'error');
+                        modernUI.showToast({
+                            title: 'Error',
+                            message: data.message || 'Failed to load meeting type details',
+                            type: 'error'
+                        });
                     }
                 })
                 .catch(error => {
-                    showToast('Error', 'Failed to load meeting type details', 'error');
+                    if (button) {
+                        modernUI.resetButton(button);
+                    }
+                    console.error('Error loading meeting type details:', error);
+                    modernUI.showToast({
+                        title: 'Error',
+                        message: 'Failed to load meeting type details. Please try again.',
+                        type: 'error'
+                    });
+                });
+        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.querySelector('#customModal .custom-modal-body').innerHTML = 
+                        '<div class="alert alert-danger">Failed to load meeting type details</div>';
                 });
         }
 
+        // Delete meeting type
         function deleteMeetingType(id, name) {
-            deleteId = id;
-            document.getElementById('deleteMeetingTypeName').textContent = name;
-            new bootstrap.Modal(document.getElementById('deleteModal')).show();
-        }
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-            if (deleteId > 0) {
-                fetch('/MeetingType/Delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    },
-                    body: `id=${deleteId}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-                    if (data.success) {
-                        showToast('Success', data.message, 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        showToast('Error', data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-                    showToast('Error', 'Failed to delete meeting type', 'error');
-                });
-            }
-        });
-
-        function showToast(title, message, type) {
-            const toastHtml = `
-                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <strong>${title}:</strong> ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-            
-            let toastContainer = document.getElementById('toastContainer');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'toastContainer';
-                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-                document.body.appendChild(toastContainer);
-            }
-            
-            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-            const toastElement = toastContainer.lastElementChild;
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-            
-            toastElement.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
+            modernUI.showConfirmation({
+                title: 'Delete Meeting Type',
+                message: `Are you sure you want to delete the meeting type "<strong>${name}</strong>"?<br><small class="text-muted">This action cannot be undone.</small>`,
+                confirmText: 'Delete Meeting Type',
+                confirmClass: 'btn-danger',
+                onConfirm: () => {
+                    fetch('/MeetingType/Delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: `id=${id}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            modernUI.showToast(data.message, 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            modernUI.showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        modernUI.showToast('Failed to delete meeting type', 'error');
+                    });
+                }
             });
         }
 
-        function exportData(format) {
-            showToast('Info', `Exporting data to ${format.toUpperCase()}...`, 'info');
-        }
-
-        function printTable() {
-            window.print();
-        }
-
-        // Auto-hide alerts after 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(alert => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
-        });
+        // Auto-hide alerts
+        modernUI.autoHideAlerts();
     </script>
 }

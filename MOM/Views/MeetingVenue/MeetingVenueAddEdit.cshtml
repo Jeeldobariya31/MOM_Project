@@ -5,20 +5,29 @@
     bool isEdit = Model.MeetingVenueID > 0;
 }
 
-<div class="pagetitle">
-    <h1>@(isEdit ? "Edit Meeting Venue" : "Add Meeting Venue")</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-            </li>
-            <li class="breadcrumb-item">Master</li>
-            <li class="breadcrumb-item">
-                <a asp-action="MeetingVenueList">Meeting Venues</a>
-            </li>
-            <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Add")</li>
-        </ol>
-    </nav>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="bi bi-geo-alt me-2"></i>@(isEdit ? "Edit Meeting Venue" : "Add Meeting Venue")</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">Master</li>
+                    <li class="breadcrumb-item">
+                        <a asp-action="MeetingVenueList">Meeting Venues</a>
+                    </li>
+                    <li class="breadcrumb-item active">@(isEdit ? "Edit" : "Add")</li>
+                </ol>
+            </nav>
+        </div>
+        <a asp-action="MeetingVenueList" class="btn btn-light">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to List
+        </a>
+    </div>
 </div>
 
 <!-- Success/Error Messages -->
@@ -43,17 +52,17 @@
 <section class="section">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card">
+            <div class="card shadow-hover">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
-                        <div class="avatar-sm bg-success-subtle rounded-circle d-flex align-items-center justify-content-center me-3">
-                            <i class="bi bi-geo-alt text-success"></i>
+                        <div class="avatar bg-primary me-3">
+                            <i class="bi bi-geo-alt"></i>
                         </div>
                         <div>
-                            <h5 class="card-title mb-0">
+                            <h5 class="mb-0 text-white">
                                 @(isEdit ? "Edit Meeting Venue" : "Add New Meeting Venue")
                             </h5>
-                            <p class="text-muted small mb-0">
+                            <p class="mb-0 text-white-50 small">
                                 @(isEdit ? "Update meeting venue information" : "Create a new meeting venue")
                             </p>
                         </div>
@@ -72,13 +81,13 @@
                             <div class="col-md-8">
                                 <!-- Meeting Venue Name -->
                                 <div class="mb-4">
-                                    <label asp-for="MeetingVenueName" class="form-label fw-bold">
+                                    <label asp-for="MeetingVenueName" class="form-label">
                                         <i class="bi bi-geo-alt me-1"></i>
                                         Meeting Venue Name 
                                         <span class="text-danger">*</span>
                                     </label>
                                     <input asp-for="MeetingVenueName"
-                                           class="form-control form-control-lg"
+                                           class="form-control form-control-modern"
                                            maxlength="100"
                                            placeholder="Enter meeting venue name"
                                            autocomplete="off" />
@@ -94,31 +103,32 @@
                             {
                                 <div class="col-md-4">
                                     <!-- Venue Statistics -->
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <h6 class="card-title">
-                                                <i class="bi bi-graph-up text-info me-1"></i>
-                                                Venue Statistics
-                                            </h6>
-                                            <div class="text-center">
-                                                <h4 class="text-success mb-0">@Model.MeetingCount</h4>
-                                                <small class="text-muted">Total Meetings</small>
+                                    <div class="stats-card">
+                                        <div class="stats-card-body">
+                                            <div class="stats-icon">
+                                                <i class="bi bi-graph-up"></i>
+                                            </div>
+                                            <div class="stats-content">
+                                                <h3 class="stats-number">@Model.MeetingCount</h3>
+                                                <p class="stats-label">Total Meetings</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Audit Information -->
-                                    <div class="mt-3">
-                                        <h6 class="text-muted">
+                                    <div class="info-card mt-3">
+                                        <h6 class="info-card-title">
                                             <i class="bi bi-clock-history me-1"></i>
                                             Audit Information
                                         </h6>
-                                        <div class="small text-muted">
-                                            <div class="mb-1">
-                                                <strong>Created:</strong> @Model.Created.ToString("dd MMM yyyy, hh:mm tt")
+                                        <div class="info-card-content">
+                                            <div class="info-item">
+                                                <span class="info-label">Created:</span>
+                                                <span class="info-value">@Model.Created.ToString("dd MMM yyyy, hh:mm tt")</span>
                                             </div>
-                                            <div>
-                                                <strong>Modified:</strong> @Model.Modified.ToString("dd MMM yyyy, hh:mm tt")
+                                            <div class="info-item">
+                                                <span class="info-label">Modified:</span>
+                                                <span class="info-value">@Model.Modified.ToString("dd MMM yyyy, hh:mm tt")</span>
                                             </div>
                                         </div>
                                     </div>
@@ -127,25 +137,21 @@
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <a asp-action="MeetingVenueList" class="btn btn-outline-secondary">
-                                            <i class="bi bi-arrow-left me-1"></i>
-                                            Back to List
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
-                                            <i class="bi bi-arrow-clockwise me-1"></i>
-                                            Reset
-                                        </button>
-                                        <button type="submit" class="btn btn-success" id="submitBtn">
-                                            <i class="bi bi-@(isEdit ? "check" : "plus")-lg me-1"></i>
-                                            @(isEdit ? "Update Venue" : "Save Venue")
-                                        </button>
-                                    </div>
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="MeetingVenueList" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    Back to List
+                                </a>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <i class="bi bi-@(isEdit ? "check" : "plus")-lg me-1"></i>
+                                        @(isEdit ? "Update Venue" : "Save Venue")
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -156,22 +162,24 @@
             @if (isEdit && Model.MeetingCount > 0)
             {
                 <!-- Related Information -->
-                <div class="card mt-4">
+                <div class="card shadow-hover mt-4">
                     <div class="card-header">
-                        <h6 class="card-title mb-0">
-                            <i class="bi bi-link-45deg text-warning me-1"></i>
+                        <h6 class="mb-0 text-white">
+                            <i class="bi bi-link-45deg me-1"></i>
                             Related Information
                         </h6>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex align-items-center p-3 bg-success-subtle rounded">
-                            <i class="bi bi-calendar-event-fill text-success fs-4 me-3"></i>
-                            <div>
-                                <h6 class="mb-0">@Model.MeetingCount Meetings</h6>
-                                <small class="text-muted">Associated with this venue</small>
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-event-fill text-info fs-4 me-3"></i>
+                                <div>
+                                    <h6 class="mb-0">@Model.MeetingCount Meetings</h6>
+                                    <small class="text-muted">Associated with this venue</small>
+                                </div>
                             </div>
                         </div>
-                        <div class="alert alert-warning mt-3 mb-0">
+                        <div class="alert alert-warning mb-0">
                             <i class="bi bi-exclamation-triangle me-1"></i>
                             <strong>Note:</strong> This venue cannot be deleted as it has associated meetings.
                         </div>
@@ -185,79 +193,52 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Form validation
-            const form = document.getElementById('venueForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const venueNameInput = document.querySelector('input[name="MeetingVenueName"]');
-
-            // Real-time validation
-            venueNameInput.addEventListener('input', function() {
-                validateVenueName();
+            // Initialize modern form validation
+            modernUI.initializeFormValidation('#venueForm', {
+                'MeetingVenueName': {
+                    required: true,
+                    minLength: 2,
+                    maxLength: 100,
+                    pattern: /^[a-zA-Z0-9\s&.-]+$/,
+                    messages: {
+                        required: 'Meeting venue name is required',
+                        minLength: 'Name must be at least 2 characters',
+                        maxLength: 'Name cannot exceed 100 characters',
+                        pattern: 'Only letters, numbers, spaces, &, ., and - are allowed'
+                    }
+                }
             });
 
-            // Form submission
+            // Form submission with loading state
+            const form = document.getElementById('venueForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
             form.addEventListener('submit', function(e) {
-                if (!validateForm()) {
+                if (!modernUI.validateForm('#venueForm')) {
                     e.preventDefault();
                     return false;
                 }
                 
                 // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+                modernUI.setButtonLoading(submitBtn, 'Saving...');
             });
-
-            function validateVenueName() {
-                const value = venueNameInput.value.trim();
-                
-                if (value.length < 2) {
-                    venueNameInput.classList.add('is-invalid');
-                    venueNameInput.classList.remove('is-valid');
-                    return false;
-                } else if (value.length > 100) {
-                    venueNameInput.classList.add('is-invalid');
-                    venueNameInput.classList.remove('is-valid');
-                    return false;
-                } else if (!/^[a-zA-Z0-9\s&.-]+$/.test(value)) {
-                    venueNameInput.classList.add('is-invalid');
-                    venueNameInput.classList.remove('is-valid');
-                    return false;
-                } else {
-                    venueNameInput.classList.remove('is-invalid');
-                    venueNameInput.classList.add('is-valid');
-                    return true;
-                }
-            }
-
-            function validateForm() {
-                let isValid = true;
-                
-                // Validate venue name
-                if (!validateVenueName()) {
-                    isValid = false;
-                }
-                
-                return isValid;
-            }
         });
 
         function resetForm() {
-            if (confirm('Are you sure you want to reset the form? All changes will be lost.')) {
-                document.getElementById('venueForm').reset();
-                // Remove validation classes
-                document.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-                    el.classList.remove('is-valid', 'is-invalid');
-                });
-            }
+            modernUI.showConfirmModal({
+                title: 'Reset Form',
+                message: 'Are you sure you want to reset the form? All changes will be lost.',
+                confirmText: 'Reset',
+                confirmClass: 'btn-warning',
+                onConfirm: () => {
+                    document.getElementById('venueForm').reset();
+                    modernUI.clearFormValidation('#venueForm');
+                    modernUI.showToast('Form has been reset', 'info');
+                }
+            });
         }
 
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
+        // Auto-hide alerts
+        modernUI.autoHideAlerts();
     </script>
 }
