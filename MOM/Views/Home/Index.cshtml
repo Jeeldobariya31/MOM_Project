@@ -32,8 +32,8 @@
                                     <i class="bi bi-calendar-event"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>@data.TotalMeetings</h6>
-                                    <span class="text-info small pt-1 fw-bold">@data.ThisMonthMeetings</span> 
+                                    <h6>@(data?.TotalMeetings ?? 0)</h6>
+                                    <span class="text-info small pt-1 fw-bold">@(data?.ThisMonthMeetings ?? 0)</span> 
                                     <span class="text-muted small pt-2 ps-1">this month</span>
                                 </div>
                             </div>
@@ -51,8 +51,8 @@
                                     <i class="bi bi-building"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>@data.TotalDepartments</h6>
-                                    <span class="text-success small pt-1 fw-bold">@data.TotalStaff</span> 
+                                    <h6>@(data?.TotalDepartments ?? 0)</h6>
+                                    <span class="text-success small pt-1 fw-bold">@(data?.TotalStaff ?? 0)</span> 
                                     <span class="text-muted small pt-2 ps-1">staff members</span>
                                 </div>
                             </div>
@@ -70,8 +70,8 @@
                                     <i class="bi bi-clock"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>@data.UpcomingMeetings</h6>
-                                    <span class="text-primary small pt-1 fw-bold">@data.RecentMeetings</span> 
+                                    <h6>@(data?.UpcomingMeetings ?? 0)</h6>
+                                    <span class="text-primary small pt-1 fw-bold">@(data?.RecentMeetings ?? 0)</span> 
                                     <span class="text-muted small pt-2 ps-1">this week</span>
                                 </div>
                             </div>
@@ -84,41 +84,68 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Meeting Trends <span>/Last 6 Months</span></h5>
-                            <div id="monthlyTrendsChart"></div>
+                            
+                            <div id="monthlyTrendsChart" style="min-height: 350px;"></div>
                             <script>
                                 document.addEventListener("DOMContentLoaded", () => {
-                                    const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.MonthlyTrends));
-                                    
-                                    new ApexCharts(document.querySelector("#monthlyTrendsChart"), {
-                                        series: [{
-                                            name: 'Meetings Held',
-                                            data: monthlyData.map(item => item.count),
-                                        }],
-                                        chart: {
-                                            height: 350,
-                                            type: 'area',
-                                            toolbar: { show: false },
-                                        },
-                                        markers: { size: 4 },
-                                        colors: ['#4154f1'],
-                                        fill: {
-                                            type: "gradient",
-                                            gradient: {
-                                                shadeIntensity: 1,
-                                                opacityFrom: 0.3,
-                                                opacityTo: 0.4,
-                                                stops: [0, 90, 100]
+                                    try {
+                                        @if (data?.MonthlyTrends != null)
+                                        {
+                                            <text>
+                                            const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.MonthlyTrends));
+                                            console.log("Monthly data:", monthlyData);
+                                            
+                                            if (typeof ApexCharts === 'undefined') {
+                                                console.error("ApexCharts library not loaded");
+                                                document.querySelector("#monthlyTrendsChart").innerHTML = '<div class="alert alert-warning">ApexCharts library not loaded</div>';
+                                                return;
                                             }
-                                        },
-                                        dataLabels: { enabled: false },
-                                        stroke: { curve: 'smooth', width: 2 },
-                                        xaxis: {
-                                            categories: monthlyData.map(item => item.month)
-                                        },
-                                        tooltip: {
-                                            x: { format: 'MMM yyyy' },
+                                            
+                                            const chart = new ApexCharts(document.querySelector("#monthlyTrendsChart"), {
+                                                series: [{
+                                                    name: 'Meetings Held',
+                                                    data: monthlyData.map(item => item.Count || 0),
+                                                }],
+                                                chart: {
+                                                    height: 350,
+                                                    type: 'area',
+                                                    toolbar: { show: false },
+                                                },
+                                                markers: { size: 4 },
+                                                colors: ['#4154f1'],
+                                                fill: {
+                                                    type: "gradient",
+                                                    gradient: {
+                                                        shadeIntensity: 1,
+                                                        opacityFrom: 0.3,
+                                                        opacityTo: 0.4,
+                                                        stops: [0, 90, 100]
+                                                    }
+                                                },
+                                                dataLabels: { enabled: false },
+                                                stroke: { curve: 'smooth', width: 2 },
+                                                xaxis: {
+                                                    categories: monthlyData.map(item => item.Month || 'Unknown')
+                                                },
+                                                tooltip: {
+                                                    x: { format: 'MMM yyyy' },
+                                                }
+                                            });
+                                            
+                                            chart.render();
+                                            console.log("Chart rendered successfully");
+                                            </text>
                                         }
-                                    }).render();
+                                        else
+                                        {
+                                            <text>
+                                            document.querySelector("#monthlyTrendsChart").innerHTML = '<div class="alert alert-warning">No monthly trends data available</div>';
+                                            </text>
+                                        }
+                                    } catch (error) {
+                                        console.error("Chart error:", error);
+                                        document.querySelector("#monthlyTrendsChart").innerHTML = '<div class="alert alert-danger">Error loading chart: ' + error.message + '</div>';
+                                    }
                                 });
                             </script>
                         </div>
@@ -130,49 +157,67 @@
                     <div class="card recent-sales overflow-auto">
                         <div class="card-body">
                             <h5 class="card-title">Recent Meetings <span>| Last 30 Days</span></h5>
-                            <table class="table table-borderless datatable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Meeting ID</th>
-                                        <th scope="col">Description</th>
-                                        <th scope="col">Department</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (data.RecentMeetingsData != null)
-                                    {
+                            
+                            @if (data?.RecentMeetingsData != null && data.RecentMeetingsData.Length > 0)
+                            {
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Meeting Details</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Department</th>
+                                            <th scope="col">Venue</th>
+                                            <th scope="col">Date & Time</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         @foreach (var meeting in data.RecentMeetingsData)
                                         {
                                             <tr>
-                                                <th scope="row">
-                                                    <a asp-controller="Meeting" asp-action="MeetingAddEdit" asp-route-id="@meeting.MeetingID">
-                                                        #M@meeting.MeetingID.ToString("000")
+                                                <td>
+                                                    <a asp-controller="Meeting" asp-action="MeetingAddEdit" asp-route-id="@meeting.MeetingID" class="fw-bold text-decoration-none">
+                                                        @meeting.Description
                                                     </a>
-                                                </th>
-                                                <td>@meeting.Description</td>
-                                                <td><span class="text-primary">@meeting.DepartmentName</span></td>
-                                                <td>@meeting.MeetingDate.ToString("MMM dd, yyyy")</td>
+                                                </td>
+                                                <td><span class="badge bg-secondary">@meeting.MeetingTypeName</span></td>
+                                                <td><span class="badge bg-primary">@meeting.DepartmentName</span></td>
+                                                <td>
+                                                    <i class="bi bi-geo-alt text-muted me-1"></i>
+                                                    <span class="small">@meeting.VenueName</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <span class="fw-bold small">@meeting.MeetingDate.ToString("MMM dd, yyyy")</span>
+                                                        <small class="text-muted">@meeting.MeetingDate.ToString("HH:mm")</small>
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     @if (meeting.IsCancelled)
                                                     {
-                                                        <span class="badge bg-danger">Cancelled</span>
+                                                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
                                                     }
                                                     else if (meeting.MeetingDate > DateTime.Now)
                                                     {
-                                                        <span class="badge bg-info">Scheduled</span>
+                                                        <span class="badge bg-info"><i class="bi bi-clock me-1"></i>Scheduled</span>
                                                     }
                                                     else
                                                     {
-                                                        <span class="badge bg-success">Completed</span>
+                                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Completed</span>
                                                     }
                                                 </td>
                                             </tr>
                                         }
-                                    }
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info text-center">
+                                    <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
+                                    <p class="mt-2">No recent meetings found in the last 30 days</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div><!-- End Recent Meetings -->
@@ -219,31 +264,31 @@
                                         <tr>
                                             <td><i class="bi bi-calendar-event text-primary me-2"></i><strong>Meetings</strong></td>
                                             <td>Manage all meeting records and minutes</td>
-                                            <td class="fw-bold">@data.TotalMeetings</td>
+                                            <td class="fw-bold">@(data?.TotalMeetings ?? 0)</td>
                                             <td><a asp-controller="Meeting" asp-action="MeetingList" class="btn btn-sm btn-outline-primary">View All</a></td>
                                         </tr>
                                         <tr>
                                             <td><i class="bi bi-building text-success me-2"></i><strong>Departments</strong></td>
                                             <td>Organizational departments and divisions</td>
-                                            <td class="fw-bold">@data.TotalDepartments</td>
+                                            <td class="fw-bold">@(data?.TotalDepartments ?? 0)</td>
                                             <td><a asp-controller="Department" asp-action="DepartmentList" class="btn btn-sm btn-outline-success">View All</a></td>
                                         </tr>
                                         <tr>
                                             <td><i class="bi bi-people text-info me-2"></i><strong>Staff</strong></td>
                                             <td>Employee records and meeting participants</td>
-                                            <td class="fw-bold">@data.TotalStaff</td>
+                                            <td class="fw-bold">@(data?.TotalStaff ?? 0)</td>
                                             <td><a asp-controller="Staff" asp-action="StaffList" class="btn btn-sm btn-outline-info">View All</a></td>
                                         </tr>
                                         <tr>
                                             <td><i class="bi bi-geo-alt text-warning me-2"></i><strong>Venues</strong></td>
                                             <td>Meeting locations and conference rooms</td>
-                                            <td class="fw-bold">@data.TotalVenues</td>
+                                            <td class="fw-bold">@(data?.TotalVenues ?? 0)</td>
                                             <td><a asp-controller="MeetingVenue" asp-action="MeetingVenueList" class="btn btn-sm btn-outline-warning">View All</a></td>
                                         </tr>
                                         <tr>
                                             <td><i class="bi bi-person-check text-secondary me-2"></i><strong>Members</strong></td>
                                             <td>Meeting participants and attendees</td>
-                                            <td class="fw-bold">@data.ActiveMembers</td>
+                                            <td class="fw-bold">@(data?.ActiveMembers ?? 0)</td>
                                             <td><a asp-controller="MeetingMembers" asp-action="MeetingMemberList" class="btn btn-sm btn-outline-secondary">View All</a></td>
                                         </tr>
                                     </tbody>
@@ -266,25 +311,25 @@
                     <div class="row text-center">
                         <div class="col-6 mb-3">
                             <div class="border rounded p-3">
-                                <h4 class="text-primary mb-1">@data.AttendanceRate%</h4>
+                                <h4 class="text-primary mb-1">@(data?.AttendanceRate ?? 0)%</h4>
                                 <small class="text-muted">Attendance Rate</small>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
                             <div class="border rounded p-3">
-                                <h4 class="text-danger mb-1">@data.CancelledMeetings</h4>
+                                <h4 class="text-danger mb-1">@(data?.CancelledMeetings ?? 0)</h4>
                                 <small class="text-muted">Cancelled</small>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="border rounded p-3">
-                                <h4 class="text-success mb-1">@data.ActiveMembers</h4>
+                                <h4 class="text-success mb-1">@(data?.ActiveMembers ?? 0)</h4>
                                 <small class="text-muted">Active Members</small>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="border rounded p-3">
-                                <h4 class="text-info mb-1">@data.TotalVenues</h4>
+                                <h4 class="text-info mb-1">@(data?.TotalVenues ?? 0)</h4>
                                 <small class="text-muted">Venues</small>
                             </div>
                         </div>
@@ -296,30 +341,61 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Meeting Distribution <span>| By Department</span></h5>
-                    <div id="departmentChart" style="min-height: 400px;" class="echart"></div>
+                    
+                    <div id="departmentChart" style="min-height: 400px; margin-top: 30px;" class="echart"></div>
                     <script>
                         document.addEventListener("DOMContentLoaded", () => {
-                            const departmentData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.DepartmentMeetings));
-                            
-                            echarts.init(document.querySelector("#departmentChart")).setOption({
-                                tooltip: { trigger: 'item' },
-                                legend: { top: '5%', left: 'center' },
-                                series: [{
-                                    name: 'Meetings by Department',
-                                    type: 'pie',
-                                    radius: ['40%', '70%'],
-                                    avoidLabelOverlap: false,
-                                    label: { show: false, position: 'center' },
-                                    emphasis: {
-                                        label: { show: true, fontSize: '18', fontWeight: 'bold' }
-                                    },
-                                    labelLine: { show: false },
-                                    data: departmentData.map(item => ({
-                                        value: item.count,
-                                        name: item.departmentName
-                                    }))
-                                }]
-                            });
+                            try {
+                                @if (data?.DepartmentMeetings != null && data.DepartmentMeetings.Length > 0)
+                                {
+                                    <text>
+                                    const departmentData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data.DepartmentMeetings));
+                                    console.log("Department data:", departmentData);
+                                    
+                                    if (typeof echarts === 'undefined') {
+                                        console.error("ECharts library not loaded");
+                                        document.querySelector("#departmentChart").innerHTML = '<div class="alert alert-warning">ECharts library not loaded</div>';
+                                        return;
+                                    }
+                                    
+                                    const chart = echarts.init(document.querySelector("#departmentChart"));
+                                    chart.setOption({
+                                        tooltip: { trigger: 'item' },
+                                        legend: { 
+                                            top: '10%', 
+                                            left: 'center',
+                                            itemGap: 15
+                                        },
+                                        series: [{
+                                            name: 'Meetings by Department',
+                                            type: 'pie',
+                                            radius: ['40%', '70%'],
+                                            center: ['50%', '60%'],
+                                            avoidLabelOverlap: false,
+                                            label: { show: false, position: 'center' },
+                                            emphasis: {
+                                                label: { show: true, fontSize: '18', fontWeight: 'bold' }
+                                            },
+                                            labelLine: { show: false },
+                                            data: departmentData.map(item => ({
+                                                value: item.Count || 0,
+                                                name: item.DepartmentName || 'Unknown'
+                                            }))
+                                        }]
+                                    });
+                                    console.log("Department chart rendered successfully");
+                                    </text>
+                                }
+                                else
+                                {
+                                    <text>
+                                    document.querySelector("#departmentChart").innerHTML = '<div class="alert alert-warning">No department data available</div>';
+                                    </text>
+                                }
+                            } catch (error) {
+                                console.error("Department chart error:", error);
+                                document.querySelector("#departmentChart").innerHTML = '<div class="alert alert-danger">Error loading chart: ' + error.message + '</div>';
+                            }
                         });
                     </script>
                 </div>
@@ -330,7 +406,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Meeting Types <span>| Distribution</span></h5>
                     <div class="activity">
-                        @if (data.MeetingTypeDistribution != null)
+                        @if (data?.MeetingTypeDistribution != null && data.MeetingTypeDistribution.Length > 0)
                         {
                             @foreach (var type in data.MeetingTypeDistribution)
                             {
@@ -343,6 +419,13 @@
                                 </div>
                             }
                         }
+                        else
+                        {
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-tags" style="font-size: 2rem;"></i>
+                                <p class="mt-2">No meeting type data available</p>
+                            </div>
+                        }
                     </div>
                 </div>
             </div><!-- End Meeting Types -->
@@ -352,19 +435,29 @@
                 <div class="card-body">
                     <h5 class="card-title">Upcoming Meetings <span>| Next 5</span></h5>
                     <div class="news">
-                        @if (data.UpcomingMeetingsData != null && data.UpcomingMeetingsData.Length > 0)
+                        @if (data?.UpcomingMeetingsData != null && data.UpcomingMeetingsData.Length > 0)
                         {
                             @foreach (var meeting in data.UpcomingMeetingsData)
                             {
-                                <div class="post-item clearfix">
-                                    <div class="d-flex align-items-center">
+                                <div class="post-item clearfix mb-3">
+                                    <div class="d-flex align-items-start">
                                         <div class="me-3">
                                             <i class="bi bi-calendar-event text-primary" style="font-size: 1.5rem;"></i>
                                         </div>
-                                        <div>
-                                            <h6><a asp-controller="Meeting" asp-action="MeetingAddEdit" asp-route-id="@meeting.MeetingID">@meeting.Description</a></h6>
-                                            <p class="mb-1 small">@meeting.DepartmentName - @meeting.VenueName</p>
-                                            <small class="text-muted">@meeting.MeetingDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                <a asp-controller="Meeting" asp-action="MeetingAddEdit" asp-route-id="@meeting.MeetingID" class="text-decoration-none">
+                                                    @meeting.Description
+                                                </a>
+                                            </h6>
+                                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                                <span class="badge bg-secondary small">@meeting.MeetingTypeName</span>
+                                                <span class="badge bg-primary small">@meeting.DepartmentName</span>
+                                                <span class="badge bg-info small"><i class="bi bi-geo-alt me-1"></i>@meeting.VenueName</span>
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock me-1"></i>@meeting.MeetingDate.ToString("MMM dd, yyyy 'at' HH:mm")
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
@@ -385,11 +478,11 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Venue Utilization <span>| Usage</span></h5>
-                    @if (data.VenueUtilization != null)
+                    @if (data?.VenueUtilization != null && data.VenueUtilization.Length > 0)
                     {
                         @foreach (var venue in data.VenueUtilization)
                         {
-                            var percentage = data.TotalMeetings > 0 ? (double)venue.Count / data.TotalMeetings * 100 : 0;
+                            var percentage = (data?.TotalMeetings ?? 0) > 0 ? (double)venue.Count / (data?.TotalMeetings ?? 1) * 100 : 0;
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between">
                                     <span class="small">@venue.VenueName</span>
@@ -403,6 +496,13 @@
                                 </div>
                             </div>
                         }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-geo-alt" style="font-size: 2rem;"></i>
+                            <p class="mt-2">No venue utilization data available</p>
+                        </div>
                     }
                 </div>
             </div><!-- End Venue Utilization -->

@@ -138,6 +138,9 @@ namespace MOM.Controllers
                         VenueName = _dataService.MeetingVenues?.AsEnumerable()
                             .FirstOrDefault(v => v.Field<int>("MeetingVenueID") == m.Field<int>("MeetingVenueID"))
                             ?.Field<string>("MeetingVenueName") ?? "Unknown",
+                        MeetingTypeName = _dataService.MeetingTypes?.AsEnumerable()
+                            .FirstOrDefault(mt => mt.Field<int>("MeetingTypeID") == m.Field<int>("MeetingTypeID"))
+                            ?.Field<string>("MeetingTypeName") ?? "Unknown",
                         IsCancelled = m.Field<bool>("IsCancelled")
                     })
                     .ToArray();
@@ -156,11 +159,14 @@ namespace MOM.Controllers
                             ?.Field<string>("DepartmentName") ?? "Unknown",
                         VenueName = _dataService.MeetingVenues?.AsEnumerable()
                             .FirstOrDefault(v => v.Field<int>("MeetingVenueID") == m.Field<int>("MeetingVenueID"))
-                            ?.Field<string>("MeetingVenueName") ?? "Unknown"
+                            ?.Field<string>("MeetingVenueName") ?? "Unknown",
+                        MeetingTypeName = _dataService.MeetingTypes?.AsEnumerable()
+                            .FirstOrDefault(mt => mt.Field<int>("MeetingTypeID") == m.Field<int>("MeetingTypeID"))
+                            ?.Field<string>("MeetingTypeName") ?? "Unknown"
                     })
                     .ToArray();
 
-                // Compile all statistics
+                // Create a strongly typed view model instead of anonymous object
                 var dashboardData = new
                 {
                     // Basic Stats
@@ -186,10 +192,16 @@ namespace MOM.Controllers
                     UpcomingMeetingsData = upcomingMeetingsData
                 };
 
+                // Pass data using ViewData instead of ViewBag for better debugging
+                ViewData["DashboardData"] = dashboardData;
                 ViewBag.DashboardData = dashboardData;
+                
+                // Add debug information
+                ViewBag.DebugInfo = $"Data loaded: Meetings={totalMeetings}, Departments={totalDepartments}, Staff={totalStaff}";
+                
                 return View();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Log error and provide fallback data
                 var fallbackData = new
@@ -213,7 +225,8 @@ namespace MOM.Controllers
                 };
                 
                 ViewBag.DashboardData = fallbackData;
-                ViewBag.ErrorMessage = "Unable to load dashboard statistics. Please try again later.";
+                ViewBag.ErrorMessage = $"Unable to load dashboard statistics: {ex.Message}";
+                ViewBag.DebugInfo = $"Exception occurred: {ex.GetType().Name}";
                 return View();
             }
         }

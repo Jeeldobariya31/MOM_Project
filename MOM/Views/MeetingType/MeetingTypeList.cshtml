@@ -265,6 +265,13 @@
                     
                     if (data.success) {
                         const meetingType = data.data;
+                        console.log('MeetingType data:', meetingType);
+                        
+                        // Helper function to safely get values
+                        const safeValue = (value, defaultValue = 'N/A') => {
+                            return (value !== null && value !== undefined && value !== '') ? value : defaultValue;
+                        };
+                        
                         modernUI.showModal({
                             title: `<i class="bi bi-tags me-2"></i>Meeting Type Details`,
                             size: 'lg',
@@ -278,19 +285,19 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Type ID:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(meetingType.MeetingTypeID)}</div>
+                                                    <div class="col-sm-7">${safeValue(meetingType.meetingTypeID)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Type Name:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(meetingType.MeetingTypeName)}</div>
+                                                    <div class="col-sm-7">${safeValue(meetingType.meetingTypeName)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Created:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(meetingType.Created)}</div>
+                                                    <div class="col-sm-7">${safeValue(meetingType.created)}</div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Modified:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(meetingType.Modified)}</div>
+                                                    <div class="col-sm-7">${safeValue(meetingType.modified)}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -303,11 +310,11 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Meetings:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-success">${modernUI.safeValue(meetingType.MeetingCount, '0')}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-success">${safeValue(meetingType.meetingCount, '0')}</span></div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Remarks:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(meetingType.Remarks, 'No remarks')}</div>
+                                                    <div class="col-sm-7">${safeValue(meetingType.remarks, 'No remarks')}</div>
                                                 </div>
                                             </div>
                                         </div>

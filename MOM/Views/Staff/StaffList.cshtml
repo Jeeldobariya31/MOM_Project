@@ -281,6 +281,13 @@
                     
                     if (data.success) {
                         const staff = data.data;
+                        console.log('Staff data:', staff);
+                        
+                        // Helper function to safely get values
+                        const safeValue = (value, defaultValue = 'N/A') => {
+                            return (value !== null && value !== undefined && value !== '') ? value : defaultValue;
+                        };
+                        
                         modernUI.showModal({
                             title: `<i class="bi bi-person me-2"></i>Staff Details`,
                             size: 'lg',
@@ -294,26 +301,26 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Staff ID:</strong></div>
-                                                    <div class="col-sm-8">${modernUI.safeValue(staff.StaffID)}</div>
+                                                    <div class="col-sm-8">${safeValue(staff.staffID)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Name:</strong></div>
-                                                    <div class="col-sm-8">${modernUI.safeValue(staff.StaffName)}</div>
+                                                    <div class="col-sm-8">${safeValue(staff.staffName)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Department:</strong></div>
-                                                    <div class="col-sm-8"><span class="badge bg-info">${modernUI.safeValue(staff.DepartmentName)}</span></div>
+                                                    <div class="col-sm-8"><span class="badge bg-info">${safeValue(staff.departmentName)}</span></div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Email:</strong></div>
                                                     <div class="col-sm-8">
-                                                        ${staff.EmailAddress ? `<a href="mailto:${staff.EmailAddress}">${staff.EmailAddress}</a>` : 'N/A'}
+                                                        ${staff.emailAddress ? `<a href="mailto:${staff.emailAddress}">${staff.emailAddress}</a>` : 'N/A'}
                                                     </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-4"><strong>Mobile:</strong></div>
                                                     <div class="col-sm-8">
-                                                        ${staff.MobileNo ? `<a href="tel:${staff.MobileNo}">${staff.MobileNo}</a>` : 'N/A'}
+                                                        ${staff.mobileNo ? `<a href="tel:${staff.mobileNo}">${staff.mobileNo}</a>` : 'N/A'}
                                                     </div>
                                                 </div>
                                             </div>
@@ -327,19 +334,19 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Meetings:</strong></div>
-                                                    <div class="col-sm-8"><span class="badge bg-success">${modernUI.safeValue(staff.MeetingCount, '0')}</span></div>
+                                                    <div class="col-sm-8"><span class="badge bg-success">${safeValue(staff.meetingCount, '0')}</span></div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Remarks:</strong></div>
-                                                    <div class="col-sm-8">${modernUI.safeValue(staff.Remarks, 'No remarks')}</div>
+                                                    <div class="col-sm-8">${safeValue(staff.remarks, 'No remarks')}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-4"><strong>Created:</strong></div>
-                                                    <div class="col-sm-8">${modernUI.formatDate(staff.Created)}</div>
+                                                    <div class="col-sm-8">${safeValue(staff.created)}</div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-4"><strong>Modified:</strong></div>
-                                                    <div class="col-sm-8">${modernUI.formatDate(staff.Modified)}</div>
+                                                    <div class="col-sm-8">${safeValue(staff.modified)}</div>
                                                 </div>
                                             </div>
                                         </div>

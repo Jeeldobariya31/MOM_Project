@@ -567,6 +567,13 @@
                     
                     if (data.success) {
                         const member = data.data;
+                        console.log('MeetingMember data:', member);
+                        
+                        // Helper function to safely get values
+                        const safeValue = (value, defaultValue = 'N/A') => {
+                            return (value !== null && value !== undefined && value !== '') ? value : defaultValue;
+                        };
+                        
                         modernUI.showModal({
                             title: `<i class="bi bi-person me-2"></i>Meeting Member Details`,
                             size: 'lg',
@@ -580,24 +587,24 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Staff Name:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.StaffName)}</div>
+                                                    <div class="col-sm-7">${safeValue(member.staffName)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Department:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-info">${modernUI.safeValue(member.DepartmentName)}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-info">${safeValue(member.departmentName)}</span></div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Attendance:</strong></div>
                                                     <div class="col-sm-7">
-                                                        <span class="badge bg-${member.IsPresent ? 'success' : 'danger'}">
-                                                            <i class="bi bi-${member.IsPresent ? 'check-circle' : 'x-circle'} me-1"></i>
-                                                            ${member.IsPresent ? 'Present' : 'Absent'}
+                                                        <span class="badge bg-${member.isPresent ? 'success' : 'danger'}">
+                                                            <i class="bi bi-${member.isPresent ? 'check-circle' : 'x-circle'} me-1"></i>
+                                                            ${member.isPresent ? 'Present' : 'Absent'}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Remarks:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.Remarks, 'No remarks')}</div>
+                                                    <div class="col-sm-7">${safeValue(member.remarks, 'No remarks')}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -610,27 +617,27 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Meeting:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.MeetingDescription)}</div>
+                                                    <div class="col-sm-7">${safeValue(member.meetingDescription)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Date & Time:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.MeetingDate)}</div>
+                                                    <div class="col-sm-7">${safeValue(member.meetingDate)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Type:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-secondary">${modernUI.safeValue(member.MeetingTypeName)}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-secondary">${safeValue(member.meetingTypeName)}</span></div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Venue:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.VenueName)}</div>
+                                                    <div class="col-sm-7">${safeValue(member.venueName)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Created:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.Created)}</div>
+                                                    <div class="col-sm-7">${safeValue(member.created)}</div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Modified:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(member.Modified)}</div>
+                                                    <div class="col-sm-7">${safeValue(member.modified)}</div>
                                                 </div>
                                             </div>
                                         </div>

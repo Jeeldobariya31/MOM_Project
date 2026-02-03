@@ -440,6 +440,13 @@
                     
                     if (data.success) {
                         const meeting = data.data;
+                        console.log('Meeting data:', meeting);
+                        
+                        // Helper function to safely get values
+                        const safeValue = (value, defaultValue = 'N/A') => {
+                            return (value !== null && value !== undefined && value !== '') ? value : defaultValue;
+                        };
+                        
                         modernUI.showModal({
                             title: `<i class="bi bi-calendar-event me-2"></i>Meeting Details`,
                             size: 'lg',
@@ -453,19 +460,19 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Description:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(meeting.MeetingDescription)}</div>
+                                                    <div class="col-sm-7">${safeValue(meeting.meetingDescription)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Date & Time:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(meeting.MeetingDate, 'dd MMM yyyy hh:mm')}</div>
+                                                    <div class="col-sm-7">${safeValue(meeting.meetingDate)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Type:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-info">${modernUI.safeValue(meeting.MeetingTypeName)}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-info">${safeValue(meeting.meetingTypeName)}</span></div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Venue:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(meeting.MeetingVenueName)}</div>
+                                                    <div class="col-sm-7">${safeValue(meeting.meetingVenueName)}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -478,24 +485,24 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Department:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-secondary">${modernUI.safeValue(meeting.DepartmentName)}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-secondary">${safeValue(meeting.departmentName)}</span></div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Status:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-${meeting.StatusClass || 'primary'}">${modernUI.safeValue(meeting.Status, 'Scheduled')}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-${meeting.statusClass || 'primary'}">${safeValue(meeting.status, 'Scheduled')}</span></div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Members:</strong></div>
                                                     <div class="col-sm-7">
-                                                        <span class="badge bg-success">${modernUI.safeValue(meeting.MemberCount, '0')} total</span>
-                                                        <span class="badge bg-info ms-1">${modernUI.safeValue(meeting.PresentCount, '0')} present</span>
+                                                        <span class="badge bg-success">${safeValue(meeting.memberCount, '0')} total</span>
+                                                        <span class="badge bg-info ms-1">${safeValue(meeting.presentCount, '0')} present</span>
                                                     </div>
                                                 </div>
-                                                ${meeting.DocumentPath ? `
+                                                ${meeting.documentPath ? `
                                                     <div class="row mt-2">
                                                         <div class="col-sm-5"><strong>Document:</strong></div>
                                                         <div class="col-sm-7">
-                                                            <a href="${meeting.DocumentPath}" target="_blank" class="text-primary">
+                                                            <a href="${meeting.documentPath}" target="_blank" class="text-primary">
                                                                 <i class="bi bi-file-earmark-text me-1"></i>View Document
                                                             </a>
                                                         </div>

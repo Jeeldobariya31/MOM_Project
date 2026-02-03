@@ -234,20 +234,36 @@
 @section Scripts {
     <script>
         function viewDepartment(id) {
+            console.log('viewDepartment called with id:', id);
             const button = document.querySelector(`button[onclick="viewDepartment(${id})"]`);
             if (button) {
                 modernUI.setButtonLoading(button, 'Loading...');
             }
             
-            fetch(`/Department/GetDepartmentDetails/${id}`)
-                .then(response => response.json())
+            const url = `/Department/GetDepartmentDetails/${id}`;
+            console.log('Fetching URL:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('API Response:', data);
                     if (button) {
                         modernUI.resetButton(button);
                     }
                     
                     if (data.success) {
                         const dept = data.data;
+                        console.log('Department data:', dept);
+                        
+                        // Helper function to safely get values
+                        const safeValue = (value, defaultValue = 'N/A') => {
+                            return (value !== null && value !== undefined && value !== '') ? value : defaultValue;
+                        };
+                        
                         modernUI.showModal({
                             title: `<i class="bi bi-building me-2"></i>Department Details`,
                             size: 'lg',
@@ -261,19 +277,19 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Department ID:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(dept.DepartmentID)}</div>
+                                                    <div class="col-sm-7">${safeValue(dept.departmentID)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Name:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(dept.DepartmentName)}</div>
+                                                    <div class="col-sm-7">${safeValue(dept.departmentName)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Created:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(dept.Created)}</div>
+                                                    <div class="col-sm-7">${safeValue(dept.created)}</div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Modified:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(dept.Modified)}</div>
+                                                    <div class="col-sm-7">${safeValue(dept.modified)}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -287,13 +303,13 @@
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Staff Count:</strong></div>
                                                     <div class="col-sm-7">
-                                                        <span class="badge bg-info">${modernUI.safeValue(dept.StaffCount, '0')}</span>
+                                                        <span class="badge bg-info">${safeValue(dept.staffCount, '0')}</span>
                                                     </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Meetings:</strong></div>
                                                     <div class="col-sm-7">
-                                                        <span class="badge bg-success">${modernUI.safeValue(dept.MeetingCount, '0')}</span>
+                                                        <span class="badge bg-success">${safeValue(dept.meetingCount, '0')}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -316,6 +332,7 @@
                             ]
                         });
                     } else {
+                        console.error('API returned error:', data.message);
                         modernUI.showToast({
                             title: 'Error',
                             message: data.message || 'Failed to load department details',
@@ -324,10 +341,10 @@
                     }
                 })
                 .catch(error => {
+                    console.error('Fetch error:', error);
                     if (button) {
                         modernUI.resetButton(button);
                     }
-                    console.error('Error loading department details:', error);
                     modernUI.showToast({
                         title: 'Error',
                         message: 'Failed to load department details. Please try again.',

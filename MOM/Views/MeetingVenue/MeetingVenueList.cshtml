@@ -248,6 +248,13 @@
                     
                     if (data.success) {
                         const venue = data.data;
+                        console.log('Venue data:', venue);
+                        
+                        // Helper function to safely get values
+                        const safeValue = (value, defaultValue = 'N/A') => {
+                            return (value !== null && value !== undefined && value !== '') ? value : defaultValue;
+                        };
+                        
                         modernUI.showModal({
                             title: `<i class="bi bi-geo-alt me-2"></i>Venue Details`,
                             size: 'lg',
@@ -261,19 +268,19 @@
                                                 </h6>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Venue ID:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(venue.MeetingVenueID)}</div>
+                                                    <div class="col-sm-7">${safeValue(venue.meetingVenueID)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Name:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.safeValue(venue.MeetingVenueName)}</div>
+                                                    <div class="col-sm-7">${safeValue(venue.meetingVenueName)}</div>
                                                 </div>
                                                 <div class="row mb-2">
                                                     <div class="col-sm-5"><strong>Created:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(venue.Created)}</div>
+                                                    <div class="col-sm-7">${safeValue(venue.created)}</div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Modified:</strong></div>
-                                                    <div class="col-sm-7">${modernUI.formatDate(venue.Modified)}</div>
+                                                    <div class="col-sm-7">${safeValue(venue.modified)}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -286,7 +293,7 @@
                                                 </h6>
                                                 <div class="row">
                                                     <div class="col-sm-5"><strong>Meetings:</strong></div>
-                                                    <div class="col-sm-7"><span class="badge bg-success">${modernUI.safeValue(venue.MeetingCount, '0')}</span></div>
+                                                    <div class="col-sm-7"><span class="badge bg-success">${safeValue(venue.meetingCount, '0')}</span></div>
                                                 </div>
                                             </div>
                                         </div>

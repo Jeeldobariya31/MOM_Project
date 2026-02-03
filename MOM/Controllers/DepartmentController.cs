@@ -250,6 +250,27 @@ namespace MOM.Controllers
         }
 
         [HttpGet]
+        public IActionResult TestDepartmentData()
+        {
+            try
+            {
+                var departments = _dataService.Departments.AsEnumerable().Select(r => new
+                {
+                    DepartmentID = r.Field<int>("DepartmentID"),
+                    DepartmentName = r.Field<string>("DepartmentName"),
+                    Created = r.Field<DateTime>("Created"),
+                    Modified = r.Field<DateTime>("Modified")
+                }).ToList();
+
+                return Json(new { success = true, count = departments.Count, data = departments });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
         public JsonResult GetDepartments()
         {
             try
