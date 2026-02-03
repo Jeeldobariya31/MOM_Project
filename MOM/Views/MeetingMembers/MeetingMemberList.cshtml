@@ -361,29 +361,248 @@
 @section Scripts {
     @Html.AntiForgeryToken()
     <script>
-        // Bulk assign modal
+        // Bulk assign members to meeting modal
         function showBulkAssignModal() {
-            const meetings = @Html.Raw(Json.Serialize(((System.Data.DataTable)ViewBag.Meetings).AsEnumerable().Select(row => new {
-                MeetingID = row.Field<int>("MeetingID"),
-                MeetingDescription = row.Field<string>("MeetingDescription"),
-                MeetingDate = row.Field<DateTime>("MeetingDate")
-            }).ToList()));
+            loadDataViaAjax();
+        }
 
-            const departments = @Html.Raw(Json.Serialize(((System.Data.DataTable)ViewBag.Departments).AsEnumerable().Select(row => new {
-                DepartmentID = row.Field<int>("DepartmentID"),
-                DepartmentName = row.Field<string>("DepartmentName")
-            }).ToList()));
+        function loadMeetingDetails(meetingId) {
+            if (!meetingId) {
+                document.getElementById('meetingDetails').style.display = 'none';
+                document.getElementById('staffList').innerHTML = '<p class="text-muted">Please select a meeting first.</p>';
+                return;
+            }
 
-            const staffData = @Html.Raw(Json.Serialize(ViewBag.StaffForJs ?? new object[0]));
+            // Load meeting details via AJAX
+            fetch(`/MeetingMembers/GetMeetingDetails?meetingId=${meetingId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data) {
+                        const meetingDate = new Date(data.meetingDate || data.MeetingDate).toLocaleDateString('en-GB', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        const description = (data.meetingDescription || data.MeetingDescription) || 'N/A';
+                        const typeName = (data.meetingTypeName || data.MeetingTypeName) || 'N/A';
+                        const venueName = (data.venueName || data.VenueName) || 'N/A';
+                        const deptName = (data.departmentName || data.DepartmentName) || 'N/A';
+                        const isCancelled = data.isCancelled || data.IsCancelled || false;
+                        
+                        document.getElementById('meetingInfo').innerHTML = `
+                            <strong>Meeting:</strong> ${description}<br>
+                            <strong>Date:</strong> ${meetingDate}<br>
+                            <strong>Type:</strong> ${typeName}<br>
+                            <strong>Venue:</strong> ${venueName}<br>
+                            <strong>Department:</strong> ${deptName}
+                            ${isCancelled ? '<br><span class="text-danger"><strong>Status:</strong> Cancelled</span>' : ''}
+                        `;
+                        document.getElementById('meetingDetails').style.display = 'block';
+                        
+                        if (isCancelled) {
+                            document.getElementById('staffList').innerHTML = '<p class="text-warning">Cannot assign members to a cancelled meeting.</p>';
+                            return;
+                        }
+                    } else {
+                        modernUI.showToast('Meeting not found', 'error');
+                        return;
+                    }
+                })
+                .catch(error => {
+                    modernUI.showToast('Error loading meeting details', 'error');
+                });
 
-            const meetingOptions = meetings.map(m => 
-                `<option value="${m.MeetingID}">${m.MeetingDescription} - ${new Date(m.MeetingDate).toLocaleDateString()}</option>`
-            ).join('');
+            // Load staff list
+            loadStaffList();
+        }
 
-            const deptOptions = departments.map(d => 
-                `<option value="${d.DepartmentID}">${d.DepartmentName}</option>`
-            ).join('');
+        function loadStaffList() {
+            if (!window.staffData || window.staffData.length === 0) {
+                document.getElementById('staffList').innerHTML = '<p class="text-muted">No staff members available.</p>';
+                return;
+            }
 
+            const meetingId = document.querySelector('select[name="meetingId"]').value;
+            
+            // Get already assigned members for this meeting
+            let assignedMembers = [];
+            if (meetingId) {
+                fetch(`/MeetingMembers/GetAssignedMembers?meetingId=${meetingId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        assignedMembers = data || [];
+                        renderStaffList(assignedMembers);
+                    })
+                    .catch(error => {
+                        renderStaffList([]);
+                    });
+            } else {
+                renderStaffList([]);
+            }
+        }
+
+        function renderStaffList(assignedMembers) {
+            const staffListHtml = window.staffData.map(staff => {
+                const staffId = staff.staffID || staff.StaffID || '';
+                const staffName = (staff.staffName || staff.StaffName) || 'Unknown';
+                const deptId = staff.departmentID || staff.DepartmentID || '';
+                const deptName = (staff.departmentName || staff.DepartmentName) || 'Unknown Dept';
+                
+                const isAssigned = assignedMembers.includes(parseInt(staffId));
+                const disabledAttr = isAssigned ? 'disabled' : '';
+                const assignedText = isAssigned ? ' <small class="text-success">(Already assigned)</small>' : '';
+                
+                return `
+                    <div class="form-check">
+                        <input class="form-check-input staff-checkbox" type="checkbox" name="staffIds" value="${staffId}" 
+                               id="staff_${staffId}" data-dept="${deptId}" ${disabledAttr}>
+                        <label class="form-check-label" for="staff_${staffId}">
+                            ${staffName} <small class="text-muted">(${deptName})</small>${assignedText}
+                        </label>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('staffList').innerHTML = staffListHtml;
+        }
+
+        function filterStaff() {
+            const selectedDept = document.getElementById('deptFilter').value;
+            const checkboxes = document.querySelectorAll('.staff-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                const parentDiv = checkbox.closest('.form-check');
+                if (!selectedDept || checkbox.dataset.dept === selectedDept) {
+                    parentDiv.style.display = 'block';
+                } else {
+                    parentDiv.style.display = 'none';
+                    if (!checkbox.disabled) {
+                        checkbox.checked = false;
+                    }
+                }
+            });
+        }
+
+        function selectAllStaff(selectAll) {
+            const visibleCheckboxes = document.querySelectorAll('.staff-checkbox');
+            visibleCheckboxes.forEach(checkbox => {
+                if (checkbox.closest('.form-check').style.display !== 'none' && !checkbox.disabled) {
+                    checkbox.checked = selectAll;
+                }
+            });
+        }
+
+        function submitBulkAssign() {
+            const form = document.getElementById('bulkAssignForm');
+            const meetingId = form.meetingId.value;
+            const selectedStaff = Array.from(form.querySelectorAll('input[name="staffIds"]:checked:not(:disabled)')).map(cb => cb.value);
+
+            if (!meetingId) {
+                modernUI.showToast('Please select a meeting', 'error');
+                return;
+            }
+
+            if (selectedStaff.length === 0) {
+                modernUI.showToast('Please select at least one staff member', 'error');
+                return;
+            }
+
+            // Disable the submit button to prevent double submission
+            const submitBtn = document.querySelector('.btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Assigning...';
+
+            // Submit bulk assignment
+            const formData = new FormData();
+            formData.append('meetingId', meetingId);
+            selectedStaff.forEach(staffId => formData.append('staffIds', staffId));
+
+            fetch('/MeetingMembers/BulkAssignMembers', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    modernUI.closeModal();
+                    modernUI.showToast(`Successfully assigned ${selectedStaff.length} member(s) to the meeting`, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    modernUI.showToast(data.message || 'Error assigning members', 'error');
+                }
+            })
+            .catch(error => {
+                modernUI.showToast('Network error occurred while assigning members', 'error');
+            })
+            .finally(() => {
+                // Re-enable the submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        }
+
+        // Load data via AJAX for bulk assign modal
+        function loadDataViaAjax() {
+            Promise.all([
+                fetch('/MeetingMembers/GetMeetingsForBulkAssign').then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    return r.json();
+                }),
+                fetch('/MeetingMembers/GetDepartmentsForBulkAssign').then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    return r.json();
+                }),
+                fetch('/MeetingMembers/GetStaffForBulkAssign').then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    return r.json();
+                })
+            ])
+            .then(([meetings, departments, staff]) => {
+                if (!meetings || !Array.isArray(meetings) || meetings.length === 0) {
+                    throw new Error('No meetings available');
+                }
+                
+                if (!departments || !Array.isArray(departments) || departments.length === 0) {
+                    throw new Error('No departments available');
+                }
+                
+                if (!staff || !Array.isArray(staff) || staff.length === 0) {
+                    throw new Error('No staff members available');
+                }
+                
+                const meetingOptions = meetings.map(m => {
+                    const meetingDate = (m.meetingDate || m.MeetingDate) ? new Date(m.meetingDate || m.MeetingDate).toLocaleDateString() : 'Invalid Date';
+                    const description = (m.meetingDescription || m.MeetingDescription) || 'No Description';
+                    const meetingId = m.meetingID || m.MeetingID || '';
+                    return `<option value="${meetingId}">${description} - ${meetingDate}</option>`;
+                }).join('');
+
+                const deptOptions = departments.map(d => {
+                    const deptId = d.departmentID || d.DepartmentID || '';
+                    const deptName = (d.departmentName || d.DepartmentName) || 'Unknown Department';
+                    return `<option value="${deptId}">${deptName}</option>`;
+                }).join('');
+
+                // Store staff data globally
+                window.staffData = staff;
+
+                showBulkAssignModalWithData(meetingOptions, deptOptions);
+            })
+            .catch(error => {
+                modernUI.showToast(`Error loading data: ${error.message}`, 'error');
+            });
+        }
+
+        function showBulkAssignModalWithData(meetingOptions, deptOptions) {
             modernUI.showModal({
                 title: 'Bulk Assign Members to Meeting',
                 content: `
@@ -439,116 +658,6 @@
                     }
                 ]
             });
-
-            // Store staff data globally for use in other functions
-            window.staffData = staffData;
-        }
-
-        function loadMeetingDetails(meetingId) {
-            if (!meetingId) {
-                document.getElementById('meetingDetails').style.display = 'none';
-                document.getElementById('staffList').innerHTML = '<p class="text-muted">Please select a meeting first.</p>';
-                return;
-            }
-
-            // Load meeting details via AJAX
-            fetch(`/MeetingMembers/GetMeetingDetails?meetingId=${meetingId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data) {
-                        document.getElementById('meetingInfo').innerHTML = `
-                            <strong>Meeting:</strong> ${data.meetingDescription}<br>
-                            <strong>Date:</strong> ${data.meetingDate}<br>
-                            <strong>Type:</strong> ${data.meetingTypeName}<br>
-                            <strong>Venue:</strong> ${data.venueName}<br>
-                            <strong>Department:</strong> ${data.departmentName}
-                        `;
-                        document.getElementById('meetingDetails').style.display = 'block';
-                    }
-                });
-
-            // Load staff list
-            loadStaffList();
-        }
-
-        function loadStaffList() {
-            if (!window.staffData) return;
-
-            const staffListHtml = window.staffData.map(staff => `
-                <div class="form-check">
-                    <input class="form-check-input staff-checkbox" type="checkbox" name="staffIds" value="${staff.StaffID}" 
-                           id="staff_${staff.StaffID}" data-dept="${staff.DepartmentID}">
-                    <label class="form-check-label" for="staff_${staff.StaffID}">
-                        ${staff.StaffName} <small class="text-muted">(${staff.DepartmentName})</small>
-                    </label>
-                </div>
-            `).join('');
-
-            document.getElementById('staffList').innerHTML = staffListHtml;
-        }
-
-        function filterStaff() {
-            const selectedDept = document.getElementById('deptFilter').value;
-            const checkboxes = document.querySelectorAll('.staff-checkbox');
-            
-            checkboxes.forEach(checkbox => {
-                const parentDiv = checkbox.closest('.form-check');
-                if (!selectedDept || checkbox.dataset.dept === selectedDept) {
-                    parentDiv.style.display = 'block';
-                } else {
-                    parentDiv.style.display = 'none';
-                    checkbox.checked = false;
-                }
-            });
-        }
-
-        function selectAllStaff(selectAll) {
-            const visibleCheckboxes = document.querySelectorAll('.staff-checkbox');
-            visibleCheckboxes.forEach(checkbox => {
-                if (checkbox.closest('.form-check').style.display !== 'none') {
-                    checkbox.checked = selectAll;
-                }
-            });
-        }
-
-        function submitBulkAssign() {
-            const form = document.getElementById('bulkAssignForm');
-            const meetingId = form.meetingId.value;
-            const selectedStaff = Array.from(form.querySelectorAll('input[name="staffIds"]:checked')).map(cb => cb.value);
-
-            if (!meetingId) {
-                modernUI.showToast('Please select a meeting', 'error');
-                return;
-            }
-
-            if (selectedStaff.length === 0) {
-                modernUI.showToast('Please select at least one staff member', 'error');
-                return;
-            }
-
-            // Submit bulk assignment
-            const formData = new FormData();
-            formData.append('meetingId', meetingId);
-            selectedStaff.forEach(staffId => formData.append('staffIds', staffId));
-
-            fetch('/MeetingMembers/BulkAssignMembers', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    modernUI.closeModal();
-                    modernUI.showToast(`Successfully assigned ${selectedStaff.length} members`, 'success');
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    modernUI.showToast(data.message || 'Error assigning members', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                modernUI.showToast('Error assigning members', 'error');
-            });
         }
 
         // View meeting member details
@@ -567,7 +676,6 @@
                     
                     if (data.success) {
                         const member = data.data;
-                        console.log('MeetingMember data:', member);
                         
                         // Helper function to safely get values
                         const safeValue = (value, defaultValue = 'N/A') => {
@@ -670,7 +778,6 @@
                     if (button) {
                         modernUI.resetButton(button);
                     }
-                    console.error('Error loading meeting member details:', error);
                     modernUI.showToast({
                         title: 'Error',
                         message: 'Failed to load meeting member details. Please try again.',

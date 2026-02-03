@@ -128,6 +128,22 @@ namespace MOM.Controllers
             ViewBag.Departments = _dataService.Departments;
             ViewBag.Staff = _dataService.Staff;
             
+            // Prepare data for JavaScript serialization
+            var meetingsForJs = _dataService.Meetings.AsEnumerable()
+                .Where(m => !m.Field<bool>("IsCancelled")) // Only active meetings
+                .Select(m => new {
+                    MeetingID = m.Field<int>("MeetingID"),
+                    MeetingDescription = m.Field<string>("MeetingDescription"),
+                    MeetingDate = m.Field<DateTime>("MeetingDate")
+                }).OrderByDescending(m => m.MeetingDate).ToList();
+            ViewBag.MeetingsForJs = meetingsForJs;
+            
+            var departmentsForJs = _dataService.Departments.AsEnumerable().Select(d => new {
+                DepartmentID = d.Field<int>("DepartmentID"),
+                DepartmentName = d.Field<string>("DepartmentName")
+            }).OrderBy(d => d.DepartmentName).ToList();
+            ViewBag.DepartmentsForJs = departmentsForJs;
+            
             // Prepare staff data for JavaScript
             var staffForJs = _dataService.Staff.AsEnumerable().Select(s => new {
                 StaffID = s.Field<int>("StaffID"),
@@ -136,7 +152,7 @@ namespace MOM.Controllers
                 DepartmentName = _dataService.Departments.AsEnumerable()
                     .FirstOrDefault(d => d.Field<int>("DepartmentID") == s.Field<int>("DepartmentID"))
                     ?.Field<string>("DepartmentName") ?? "Unknown"
-            }).ToList();
+            }).OrderBy(s => s.StaffName).ToList();
             ViewBag.StaffForJs = staffForJs;
             
             ViewBag.Search = search;
@@ -512,6 +528,93 @@ namespace MOM.Controllers
                 .OrderBy(s => s.StaffName);
 
             return Json(staff);
+        }
+
+        [HttpGet]
+        public IActionResult GetMeetingsForBulkAssign()
+        {
+            try
+            {
+                var meetings = _dataService.Meetings.AsEnumerable()
+                    .Where(m => !m.Field<bool>("IsCancelled"))
+                    .Select(m => new {
+                        MeetingID = m.Field<int>("MeetingID"),
+                        MeetingDescription = m.Field<string>("MeetingDescription"),
+                        MeetingDate = m.Field<DateTime>("MeetingDate")
+                    })
+                    .OrderByDescending(m => m.MeetingDate)
+                    .ToList();
+
+                return Json(meetings);
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<object>());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetDepartmentsForBulkAssign()
+        {
+            try
+            {
+                var departments = _dataService.Departments.AsEnumerable()
+                    .Select(d => new {
+                        DepartmentID = d.Field<int>("DepartmentID"),
+                        DepartmentName = d.Field<string>("DepartmentName")
+                    })
+                    .OrderBy(d => d.DepartmentName)
+                    .ToList();
+
+                return Json(departments);
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<object>());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetStaffForBulkAssign()
+        {
+            try
+            {
+                var staff = _dataService.Staff.AsEnumerable()
+                    .Select(s => new {
+                        StaffID = s.Field<int>("StaffID"),
+                        StaffName = s.Field<string>("StaffName"),
+                        DepartmentID = s.Field<int>("DepartmentID"),
+                        DepartmentName = _dataService.Departments.AsEnumerable()
+                            .FirstOrDefault(d => d.Field<int>("DepartmentID") == s.Field<int>("DepartmentID"))
+                            ?.Field<string>("DepartmentName") ?? "Unknown"
+                    })
+                    .OrderBy(s => s.StaffName)
+                    .ToList();
+
+                return Json(staff);
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<object>());
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetAssignedMembers(int meetingId)
+        {
+            try
+            {
+                var assignedStaffIds = _dataService.MeetingMembers.AsEnumerable()
+                    .Where(m => m.Field<int>("MeetingID") == meetingId)
+                    .Select(m => m.Field<int>("StaffID"))
+                    .ToList();
+
+                return Json(assignedStaffIds);
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<int>());
+            }
         }
 
         [HttpGet]
