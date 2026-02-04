@@ -45,13 +45,15 @@ class ModernUI {
 
     enforceGuidelinesVisibility() {
         // Only find guideline alerts in sidebar cards (not popup modals or other alerts)
+        // Specifically target alerts that contain guideline content and are in card bodies
         const guidelines = document.querySelectorAll('.card .card-body .alert-info, .card .card-body .alert-warning');
         
         guidelines.forEach(guideline => {
             // Check if this is actually a guideline (contains specific guideline text)
             const text = guideline.textContent.toLowerCase();
             if (text.includes('guidelines') || text.includes('tips') || text.includes('important notes') || 
-                text.includes('meeting guidelines') || text.includes('effective meetings')) {
+                text.includes('meeting guidelines') || text.includes('effective meetings') ||
+                text.includes('best practices') || text.includes('remember to')) {
                 
                 // Force visibility for guidelines only
                 guideline.style.display = 'block';
@@ -78,6 +80,33 @@ class ModernUI {
                     e.stopPropagation();
                     return false;
                 });
+            }
+        });
+        
+        // Allow success/error messages in main content to be dismissed normally
+        // These are the temporary messages that should auto-dismiss
+        const tempMessages = document.querySelectorAll('main .alert-success, main .alert-danger, main .alert-warning, main .alert-info');
+        tempMessages.forEach(message => {
+            // Only process if it's not a guideline
+            const text = message.textContent.toLowerCase();
+            if (!text.includes('guidelines') && !text.includes('tips') && !text.includes('important notes') && 
+                !text.includes('meeting guidelines') && !text.includes('effective meetings') &&
+                !text.includes('best practices') && !text.includes('remember to')) {
+                
+                // Ensure these can be dismissed
+                message.style.display = '';
+                message.style.visibility = '';
+                message.style.opacity = '';
+                message.style.height = '';
+                message.style.maxHeight = '';
+                message.style.overflow = '';
+                message.style.transform = '';
+                
+                // Remove any forced visibility classes
+                message.classList.remove('show');
+                if (message.classList.contains('alert-dismissible')) {
+                    message.classList.add('fade', 'show');
+                }
             }
         });
     }
