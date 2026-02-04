@@ -617,6 +617,130 @@ namespace MOM.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult ToggleAttendance(int id)
+        {
+            try
+            {
+                var row = _dataService.MeetingMembers.AsEnumerable()
+                    .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == id);
+                
+                if (row != null)
+                {
+                    bool currentStatus = row.Field<bool>("IsPresent");
+                    bool newStatus = !currentStatus;
+                    
+                    row["IsPresent"] = newStatus;
+                    row["Modified"] = DateTime.Now;
+                    
+                    return Json(new { 
+                        success = true, 
+                        message = $"Attendance marked as {(newStatus ? "Present" : "Absent")}", 
+                        isPresent = newStatus 
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Meeting member not found." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult BulkUpdateAttendance(int meetingId, int[] presentIds, int[] absentIds)
+        {
+            try
+            {
+                int updatedCount = 0;
+                
+                // Mark selected members as present
+                if (presentIds != null && presentIds.Length > 0)
+                {
+                    foreach (int memberId in presentIds)
+                    {
+                        var row = _dataService.MeetingMembers.AsEnumerable()
+                            .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == memberId && 
+                                                x.Field<int>("MeetingID") == meetingId);
+                        
+                        if (row != null && !row.Field<bool>("IsPresent"))
+                        {
+                            row["IsPresent"] = true;
+                            row["Modified"] = DateTime.Now;
+                            updatedCount++;
+                        }
+                    }
+                }
+                
+                // Mark selected members as absent
+                if (absentIds != null && absentIds.Length > 0)
+                {
+                    foreach (int memberId in absentIds)
+                    {
+                        var row = _dataService.MeetingMembers.AsEnumerable()
+                            .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == memberId && 
+                                                x.Field<int>("MeetingID") == meetingId);
+                        
+                        if (row != null && row.Field<bool>("IsPresent"))
+                        {
+                            row["IsPresent"] = false;
+                            row["Modified"] = DateTime.Now;
+                            updatedCount++;
+                        }
+                    }
+                }
+                
+                return Json(new { 
+                    success = true, 
+                    message = $"Successfully updated attendance for {updatedCount} member(s)" 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetMeetingMembersForAttendance(int meetingId)
+        {
+            try
+            {
+                var meetingMembers = _dataService.MeetingMembers.AsEnumerable()
+                    .Where(m => m.Field<int>("MeetingID") == meetingId)
+                    .Select(m => {
+                        // Get staff information
+                        var staff = _dataService.Staff.AsEnumerable()
+                            .FirstOrDefault(s => s.Field<int>("StaffID") == m.Field<int>("StaffID"));
+                        
+                        // Get department information
+                        var dept = staff != null ? _dataService.Departments.AsEnumerable()
+                            .FirstOrDefault(d => d.Field<int>("DepartmentID") == staff.Field<int>("DepartmentID")) : null;
+                        
+                        return new {
+                            meetingMemberID = m.Field<int>("MeetingMemberID"),
+                            meetingID = m.Field<int>("MeetingID"),
+                            staffID = m.Field<int>("StaffID"),
+                            staffName = staff?.Field<string>("StaffName") ?? "Unknown Staff",
+                            departmentName = dept?.Field<string>("DepartmentName") ?? "Unknown Dept",
+                            isPresent = m.Field<bool>("IsPresent"),
+                            remarks = m.Field<string>("Remarks") ?? ""
+                        };
+                    })
+                    .OrderBy(m => m.staffName)
+                    .ToList();
+
+                return Json(meetingMembers);
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<object>());
+            }
+        }
+
         [HttpGet]
         public IActionResult GetMeetingDetails(int meetingId)
         {

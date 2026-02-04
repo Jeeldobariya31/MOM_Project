@@ -48,6 +48,9 @@
             <button type="button" class="btn btn-primary" onclick="showBulkAssignModal()">
                 <i class="bi bi-people-fill me-1"></i>Bulk Assign
             </button>
+            <button type="button" class="btn btn-success" onclick="showBulkAttendanceModal()">
+                <i class="bi bi-check2-square me-1"></i>Bulk Attendance
+            </button>
         </div>
     </div>
 </div>
@@ -79,6 +82,9 @@
                             </a>
                             <button type="button" class="btn btn-primary" onclick="showBulkAssignModal()">
                                 <i class="bi bi-people-fill me-1"></i>Bulk Assign
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="showBulkAttendanceModal()">
+                                <i class="bi bi-check2-square me-1"></i>Bulk Attendance
                             </button>
                         </div>
                     </div>
@@ -163,7 +169,7 @@
                                         <th>Meeting Date</th>
                                         <th>Attendance</th>
                                         <th>Remarks</th>
-                                        <th class="text-center" style="width: 200px;">Actions</th>
+                                        <th class="text-center" style="width: 280px;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -247,6 +253,16 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group" role="group">
+                                                        <!-- Attendance Toggle Button -->
+                                                        <button type="button" 
+                                                                class="btn @(isPresent ? "btn-success" : "btn-outline-danger") btn-sm attendance-toggle" 
+                                                                onclick="toggleAttendance(@id, @(isPresent ? "true" : "false"))"
+                                                                title="@(isPresent ? "Mark as Absent" : "Mark as Present")"
+                                                                data-member-id="@id">
+                                                            <i class="bi bi-@(isPresent ? "check-circle-fill" : "x-circle")"></i>
+                                                            <span class="d-none d-md-inline ms-1">@(isPresent ? "Present" : "Absent")</span>
+                                                        </button>
+                                                        
                                                         <button type="button" 
                                                                 class="btn btn-outline-info btn-sm" 
                                                                 onclick="viewMeetingMember(@id)"
@@ -360,7 +376,307 @@
 
 @section Scripts {
     @Html.AntiForgeryToken()
+    <style>
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .attendance-toggle {
+            min-width: 90px;
+        }
+        
+        @@media (max-width: 768px) {
+            .attendance-toggle {
+                min-width: 40px;
+            }
+        }
+    </style>
     <script>
+        // Toggle attendance status
+        function toggleAttendance(memberId, currentStatus) {
+            const button = document.querySelector(`button[data-member-id="${memberId}"]`);
+            if (!button) return;
+            
+            // Store original button content
+            const originalContent = button.innerHTML;
+            const originalClass = button.className;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> <span class="d-none d-md-inline ms-1">Updating...</span>';
+            button.className = 'btn btn-outline-secondary btn-sm attendance-toggle';
+            
+            fetch('/MeetingMembers/ToggleAttendance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `id=${memberId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button appearance based on new status
+                    const isPresent = data.isPresent;
+                    const newClass = isPresent ? 'btn btn-success btn-sm attendance-toggle' : 'btn btn-outline-danger btn-sm attendance-toggle';
+                    const newIcon = isPresent ? 'check-circle-fill' : 'x-circle';
+                    const newText = isPresent ? 'Present' : 'Absent';
+                    const newTitle = isPresent ? 'Mark as Absent' : 'Mark as Present';
+                    
+                    button.className = newClass;
+                    button.innerHTML = `<i class="bi bi-${newIcon}"></i> <span class="d-none d-md-inline ms-1">${newText}</span>`;
+                    button.title = newTitle;
+                    button.setAttribute('onclick', `toggleAttendance(${memberId}, ${isPresent})`);
+                    
+                    // Update the attendance badge in the table
+                    const row = button.closest('tr');
+                    const attendanceBadge = row.querySelector('td:nth-child(5) .badge');
+                    if (attendanceBadge) {
+                        if (isPresent) {
+                            attendanceBadge.className = 'badge bg-success';
+                            attendanceBadge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Present';
+                        } else {
+                            attendanceBadge.className = 'badge bg-danger';
+                            attendanceBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i>Absent';
+                        }
+                    }
+                    
+                    // Show success toast
+                    modernUI.showToast(data.message, 'success');
+                } else {
+                    // Restore original button state on error
+                    button.innerHTML = originalContent;
+                    button.className = originalClass;
+                    modernUI.showToast(data.message || 'Failed to update attendance', 'error');
+                }
+            })
+            .catch(error => {
+                // Restore original button state on error
+                button.innerHTML = originalContent;
+                button.className = originalClass;
+                modernUI.showToast('Network error occurred while updating attendance', 'error');
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        // Bulk attendance update modal
+        function showBulkAttendanceModal() {
+            loadBulkAttendanceData();
+        }
+
+        function loadBulkAttendanceData() {
+            Promise.all([
+                fetch('/MeetingMembers/GetMeetingsForBulkAssign').then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    return r.json();
+                })
+            ])
+            .then(([meetings]) => {
+                if (!meetings || !Array.isArray(meetings) || meetings.length === 0) {
+                    throw new Error('No meetings available');
+                }
+                
+                const meetingOptions = meetings.map(m => {
+                    const meetingDate = (m.meetingDate || m.MeetingDate) ? new Date(m.meetingDate || m.MeetingDate).toLocaleDateString() : 'Invalid Date';
+                    const description = (m.meetingDescription || m.MeetingDescription) || 'No Description';
+                    const meetingId = m.meetingID || m.MeetingID || '';
+                    return `<option value="${meetingId}">${description} - ${meetingDate}</option>`;
+                }).join('');
+
+                showBulkAttendanceModalWithData(meetingOptions);
+            })
+            .catch(error => {
+                modernUI.showToast(`Error loading data: ${error.message}`, 'error');
+            });
+        }
+
+        function showBulkAttendanceModalWithData(meetingOptions) {
+            modernUI.showModal({
+                title: 'Bulk Update Attendance',
+                content: `
+                    <form id="bulkAttendanceForm">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Select Meeting <span class="text-danger">*</span></label>
+                                <select name="meetingId" class="form-select" required onchange="loadMeetingMembers(this.value)">
+                                    <option value="">-- Select Meeting --</option>
+                                    ${meetingOptions}
+                                </select>
+                            </div>
+
+                            <div class="col-12" id="meetingMembersList" style="display: none;">
+                                <label class="form-label">Meeting Members</label>
+                                <div id="membersList" class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                                    <p class="text-muted">Please select a meeting first.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                `,
+                size: 'lg',
+                buttons: [
+                    {
+                        text: 'Update Attendance',
+                        class: 'btn-success',
+                        onclick: 'submitBulkAttendance()'
+                    },
+                    {
+                        text: 'Cancel',
+                        class: 'btn-secondary'
+                    }
+                ]
+            });
+        }
+
+        function loadMeetingMembers(meetingId) {
+            if (!meetingId) {
+                document.getElementById('meetingMembersList').style.display = 'none';
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('membersList').innerHTML = '<p class="text-muted"><i class="bi bi-arrow-repeat spin me-2"></i>Loading members...</p>';
+            document.getElementById('meetingMembersList').style.display = 'block';
+
+            // Get meeting members for the selected meeting via AJAX
+            fetch(`/MeetingMembers/GetMeetingMembersForAttendance?meetingId=${meetingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        document.getElementById('membersList').innerHTML = '<p class="text-muted">No members assigned to this meeting.</p>';
+                        return;
+                    }
+
+                    const membersHtml = `
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-sm btn-success" onclick="markAllPresent()">Mark All Present</button>
+                                <button type="button" class="btn btn-sm btn-danger ms-2" onclick="markAllAbsent()">Mark All Absent</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            ${data.map(member => `
+                                <div class="col-md-6 mb-2">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0">${member.staffName || 'Unknown Staff'}</h6>
+                                                    <small class="text-muted">${member.departmentName || 'Unknown Dept'}</small>
+                                                </div>
+                                                <div class="btn-group" role="group">
+                                                    <input type="radio" class="btn-check" name="attendance_${member.meetingMemberID}" 
+                                                           id="present_${member.meetingMemberID}" value="present" 
+                                                           ${member.isPresent ? 'checked' : ''}>
+                                                    <label class="btn btn-outline-success btn-sm" for="present_${member.meetingMemberID}">
+                                                        <i class="bi bi-check-circle"></i> Present
+                                                    </label>
+                                                    
+                                                    <input type="radio" class="btn-check" name="attendance_${member.meetingMemberID}" 
+                                                           id="absent_${member.meetingMemberID}" value="absent" 
+                                                           ${!member.isPresent ? 'checked' : ''}>
+                                                    <label class="btn btn-outline-danger btn-sm" for="absent_${member.meetingMemberID}">
+                                                        <i class="bi bi-x-circle"></i> Absent
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                    document.getElementById('membersList').innerHTML = membersHtml;
+                })
+                .catch(error => {
+                    document.getElementById('membersList').innerHTML = '<p class="text-danger">Error loading members. Please try again.</p>';
+                    console.error('Error loading meeting members:', error);
+                });
+        }
+
+        function markAllPresent() {
+            document.querySelectorAll('input[type="radio"][value="present"]').forEach(radio => {
+                radio.checked = true;
+            });
+        }
+
+        function markAllAbsent() {
+            document.querySelectorAll('input[type="radio"][value="absent"]').forEach(radio => {
+                radio.checked = true;
+            });
+        }
+
+        function submitBulkAttendance() {
+            const form = document.getElementById('bulkAttendanceForm');
+            const meetingId = form.meetingId.value;
+
+            if (!meetingId) {
+                modernUI.showToast('Please select a meeting', 'error');
+                return;
+            }
+
+            // Collect attendance data
+            const presentIds = [];
+            const absentIds = [];
+
+            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                const memberId = radio.name.split('_')[1];
+                if (radio.value === 'present') {
+                    presentIds.push(parseInt(memberId));
+                } else {
+                    absentIds.push(parseInt(memberId));
+                }
+            });
+
+            if (presentIds.length === 0 && absentIds.length === 0) {
+                modernUI.showToast('No attendance changes detected', 'warning');
+                return;
+            }
+
+            // Disable the submit button
+            const submitBtn = document.querySelector('.btn-success');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
+            // Submit bulk attendance update
+            const formData = new FormData();
+            formData.append('meetingId', meetingId);
+            presentIds.forEach(id => formData.append('presentIds', id));
+            absentIds.forEach(id => formData.append('absentIds', id));
+
+            fetch('/MeetingMembers/BulkUpdateAttendance', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    modernUI.closeModal();
+                    modernUI.showToast(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    modernUI.showToast(data.message || 'Error updating attendance', 'error');
+                }
+            })
+            .catch(error => {
+                modernUI.showToast('Network error occurred while updating attendance', 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        }
+
         // Bulk assign members to meeting modal
         function showBulkAssignModal() {
             loadDataViaAjax();
