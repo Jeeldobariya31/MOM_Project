@@ -12,104 +12,9 @@ class ModernUI {
     init() {
         this.setupEventListeners();
         this.initializeComponents();
-        this.protectGuidelines();
     }
 
-    /**
-     * SPECIFIC GUIDELINES PROTECTION
-     * Only protect sidebar guidelines, not popup alerts
-     */
-    protectGuidelines() {
-        // Run immediately
-        this.enforceGuidelinesVisibility();
-        
-        // Run every 2 seconds to ensure guidelines stay visible
-        setInterval(() => {
-            this.enforceGuidelinesVisibility();
-        }, 2000);
-        
-        // Also run on DOM changes
-        if (window.MutationObserver) {
-            const observer = new MutationObserver(() => {
-                this.enforceGuidelinesVisibility();
-            });
-            
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ['style', 'class']
-            });
-        }
-    }
 
-    enforceGuidelinesVisibility() {
-        // Only find guideline alerts in sidebar cards (not popup modals or other alerts)
-        // Specifically target alerts that contain guideline content and are in card bodies
-        const guidelines = document.querySelectorAll('.card .card-body .alert-info, .card .card-body .alert-warning');
-        
-        guidelines.forEach(guideline => {
-            // Check if this is actually a guideline (contains specific guideline text)
-            const text = guideline.textContent.toLowerCase();
-            if (text.includes('guidelines') || text.includes('tips') || text.includes('important notes') || 
-                text.includes('meeting guidelines') || text.includes('effective meetings') ||
-                text.includes('best practices') || text.includes('remember to')) {
-                
-                // Force visibility for guidelines only
-                guideline.style.display = 'block';
-                guideline.style.visibility = 'visible';
-                guideline.style.opacity = '1';
-                guideline.style.height = 'auto';
-                guideline.style.maxHeight = 'none';
-                guideline.style.overflow = 'visible';
-                guideline.style.transform = 'none';
-                
-                // Remove any fade/hide classes
-                guideline.classList.remove('fade', 'hide', 'hiding', 'collapse', 'collapsing');
-                guideline.classList.add('show');
-                
-                // Prevent any event listeners from hiding guidelines
-                guideline.addEventListener('hide.bs.alert', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                });
-                
-                guideline.addEventListener('close.bs.alert', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                });
-            }
-        });
-        
-        // Allow success/error messages in main content to be dismissed normally
-        // These are the temporary messages that should auto-dismiss
-        const tempMessages = document.querySelectorAll('main .alert-success, main .alert-danger, main .alert-warning, main .alert-info');
-        tempMessages.forEach(message => {
-            // Only process if it's not a guideline
-            const text = message.textContent.toLowerCase();
-            if (!text.includes('guidelines') && !text.includes('tips') && !text.includes('important notes') && 
-                !text.includes('meeting guidelines') && !text.includes('effective meetings') &&
-                !text.includes('best practices') && !text.includes('remember to')) {
-                
-                // Ensure these can be dismissed
-                message.style.display = '';
-                message.style.visibility = '';
-                message.style.opacity = '';
-                message.style.height = '';
-                message.style.maxHeight = '';
-                message.style.overflow = '';
-                message.style.transform = '';
-                
-                // Remove any forced visibility classes
-                message.classList.remove('show');
-                if (message.classList.contains('alert-dismissible')) {
-                    message.classList.add('fade', 'show');
-                }
-            }
-        });
-    }
 
     setupEventListeners() {
         // Close modals when clicking overlay
@@ -126,8 +31,7 @@ class ModernUI {
             }
         });
 
-        // COMPLETELY DISABLED - Guidelines must NEVER be hidden automatically
-        // No automatic alert hiding of any kind
+        // Setup event listeners for modal interactions
     }
 
     initializeComponents() {
@@ -718,8 +622,7 @@ class ModernUI {
     }
 
     /**
-     * COMPLETELY REMOVED - No auto-hiding of any alerts
-     * Guidelines must remain permanently visible
+     * Component initialization
      */
 
     initializeTooltips() {
@@ -822,71 +725,6 @@ class ModernUI {
 
 // Initialize ModernUI
 const modernUI = new ModernUI();
-
-// SPECIFIC PROTECTION: Only protect sidebar guidelines, not popup alerts
-if (window.bootstrap && window.bootstrap.Alert) {
-    const originalAlert = window.bootstrap.Alert;
-    
-    window.bootstrap.Alert = function(element, config) {
-        // Check if this is a sidebar guideline alert (not a popup or modal alert)
-        if (element && element.closest('.card .card-body') && 
-            (element.classList.contains('alert-info') || element.classList.contains('alert-warning'))) {
-            
-            const text = element.textContent.toLowerCase();
-            if (text.includes('guidelines') || text.includes('tips') || text.includes('important notes') || 
-                text.includes('meeting guidelines') || text.includes('effective meetings')) {
-                
-                console.log('BLOCKED: Attempted to create Bootstrap Alert on guideline element');
-                return {
-                    close: () => console.log('BLOCKED: Attempted to close guideline alert'),
-                    dispose: () => console.log('BLOCKED: Attempted to dispose guideline alert')
-                };
-            }
-        }
-        
-        // Allow all other alerts (popups, modals, etc.) to work normally
-        return new originalAlert(element, config);
-    };
-    
-    // Copy static methods
-    Object.setPrototypeOf(window.bootstrap.Alert, originalAlert);
-    Object.assign(window.bootstrap.Alert, originalAlert);
-}
-
-// SPECIFIC DOM PROTECTION: Only protect sidebar guidelines
-const originalRemove = Element.prototype.remove;
-Element.prototype.remove = function() {
-    if (this.closest('.card .card-body') && 
-        (this.classList.contains('alert-info') || this.classList.contains('alert-warning'))) {
-        
-        const text = this.textContent.toLowerCase();
-        if (text.includes('guidelines') || text.includes('tips') || text.includes('important notes') || 
-            text.includes('meeting guidelines') || text.includes('effective meetings')) {
-            
-            console.log('BLOCKED: Attempted to remove guideline element');
-            return;
-        }
-    }
-    return originalRemove.call(this);
-};
-
-const originalSetAttribute = Element.prototype.setAttribute;
-Element.prototype.setAttribute = function(name, value) {
-    if (this.closest('.card .card-body') && 
-        (this.classList.contains('alert-info') || this.classList.contains('alert-warning'))) {
-        
-        const text = this.textContent.toLowerCase();
-        if (text.includes('guidelines') || text.includes('tips') || text.includes('important notes') || 
-            text.includes('meeting guidelines') || text.includes('effective meetings')) {
-            
-            if (name === 'style' && (value.includes('display: none') || value.includes('visibility: hidden') || value.includes('opacity: 0'))) {
-                console.log('BLOCKED: Attempted to hide guideline element via setAttribute');
-                return;
-            }
-        }
-    }
-    return originalSetAttribute.call(this, name, value);
-};
 
 // Global helper functions for backward compatibility
 function showToast(message, type = 'info', duration = 5000) {
