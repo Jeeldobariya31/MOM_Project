@@ -125,33 +125,28 @@ namespace MOM.Controllers
 
                 if (model.MeetingTypeID == 0)
                 {
-                    // Add new meeting type
-                    var newId = _dataService.GetNextId(_dataService.MeetingTypes, "MeetingTypeID");
-                    _dataService.MeetingTypes.Rows.Add(
-                        newId,
-                        model.MeetingTypeName.Trim(),
-                        model.Remarks.Trim(),
-                        DateTime.Now,
-                        DateTime.Now
-                    );
-                    TempData["SuccessMessage"] = "Meeting type added successfully.";
+                    // Add new meeting type using stored procedure
+                    if (_dataService.InsertMeetingType(model.MeetingTypeName.Trim(), model.Remarks?.Trim() ?? ""))
+                    {
+                        TempData["SuccessMessage"] = "Meeting type added successfully.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to save meeting type to database.";
+                        return View(model);
+                    }
                 }
                 else
                 {
-                    // Update existing meeting type
-                    var row = _dataService.MeetingTypes.AsEnumerable()
-                                .FirstOrDefault(r => r.Field<int>("MeetingTypeID") == model.MeetingTypeID);
-
-                    if (row != null)
+                    // Update existing meeting type using stored procedure
+                    if (_dataService.UpdateMeetingType(model.MeetingTypeID, model.MeetingTypeName.Trim(), model.Remarks?.Trim() ?? ""))
                     {
-                        row["MeetingTypeName"] = model.MeetingTypeName.Trim();
-                        row["Remarks"] = model.Remarks.Trim();
-                        row["Modified"] = DateTime.Now;
                         TempData["SuccessMessage"] = "Meeting type updated successfully.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Meeting type not found for update.";
+                        TempData["ErrorMessage"] = "Failed to update meeting type in database.";
+                        return View(model);
                     }
                 }
 
@@ -178,17 +173,14 @@ namespace MOM.Controllers
                     return Json(new { success = false, message = "Cannot delete meeting type. It has associated meetings." });
                 }
 
-                var row = _dataService.MeetingTypes.AsEnumerable()
-                            .FirstOrDefault(r => r.Field<int>("MeetingTypeID") == id);
-
-                if (row != null)
+                // Delete using stored procedure
+                if (_dataService.DeleteMeetingType(id))
                 {
-                    _dataService.MeetingTypes.Rows.Remove(row);
                     return Json(new { success = true, message = "Meeting type deleted successfully." });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Meeting type not found." });
+                    return Json(new { success = false, message = "Failed to delete meeting type." });
                 }
             }
             catch (Exception ex)

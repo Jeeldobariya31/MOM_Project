@@ -390,7 +390,10 @@ CREATE OR ALTER PROCEDURE [dbo].[PR_Meetings_Insert]
 @MeetingTypeID      INT,
 @DepartmentID       INT,
 @MeetingDescription NVARCHAR(250),
-@DocumentPath       NVARCHAR(250)
+@DocumentPath       NVARCHAR(250),
+@IsCancelled        BIT = 0,
+@CancellationDateTime DATETIME = NULL,
+@CancellationReason NVARCHAR(250) = NULL
 AS
 BEGIN
     INSERT INTO [dbo].[MOM_Meetings]
@@ -401,6 +404,9 @@ BEGIN
         DepartmentID,
         MeetingDescription,
         DocumentPath,
+        IsCancelled,
+        CancellationDateTime,
+        CancellationReason,
         Modified
     )
     VALUES
@@ -411,6 +417,9 @@ BEGIN
         @DepartmentID,
         @MeetingDescription,
         @DocumentPath,
+        @IsCancelled,
+        @CancellationDateTime,
+        @CancellationReason,
         GETDATE()
     )
 END
@@ -424,7 +433,10 @@ CREATE OR ALTER PROCEDURE [dbo].[PR_Meetings_UpdateByPK]
 @MeetingTypeID      INT,
 @DepartmentID       INT,
 @MeetingDescription NVARCHAR(250),
-@DocumentPath       NVARCHAR(250)
+@DocumentPath       NVARCHAR(250),
+@IsCancelled        BIT = 0,
+@CancellationDateTime DATETIME = NULL,
+@CancellationReason NVARCHAR(250) = NULL
 AS
 BEGIN
     UPDATE [dbo].[MOM_Meetings]
@@ -435,6 +447,9 @@ BEGIN
         DepartmentID = @DepartmentID,
         MeetingDescription = @MeetingDescription,
         DocumentPath = @DocumentPath,
+        IsCancelled = @IsCancelled,
+        CancellationDateTime = @CancellationDateTime,
+        CancellationReason = @CancellationReason,
         Modified = GETDATE()
     WHERE MeetingID = @MeetingID
 END

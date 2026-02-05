@@ -131,31 +131,28 @@ namespace MOM.Controllers
 
                 if (model.DepartmentID == 0)
                 {
-                    // Add new department
-                    var newId = _dataService.GetNextId(_dataService.Departments, "DepartmentID");
-                    _dataService.Departments.Rows.Add(
-                        newId,
-                        model.DepartmentName.Trim(),
-                        DateTime.Now,
-                        DateTime.Now
-                    );
-                    TempData["SuccessMessage"] = "Department added successfully.";
+                    // Add new department using stored procedure
+                    if (_dataService.InsertDepartment(model.DepartmentName.Trim()))
+                    {
+                        TempData["SuccessMessage"] = "Department added successfully.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to save department to database.";
+                        return View(model);
+                    }
                 }
                 else
                 {
-                    // Update existing department
-                    var row = _dataService.Departments.AsEnumerable()
-                                .FirstOrDefault(r => r.Field<int>("DepartmentID") == model.DepartmentID);
-
-                    if (row != null)
+                    // Update existing department using stored procedure
+                    if (_dataService.UpdateDepartment(model.DepartmentID, model.DepartmentName.Trim()))
                     {
-                        row["DepartmentName"] = model.DepartmentName.Trim();
-                        row["Modified"] = DateTime.Now;
                         TempData["SuccessMessage"] = "Department updated successfully.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Department not found for update.";
+                        TempData["ErrorMessage"] = "Failed to update department in database.";
+                        return View(model);
                     }
                 }
 
@@ -191,17 +188,14 @@ namespace MOM.Controllers
                     return Json(new { success = false, message = "Cannot delete department. It has associated meetings." });
                 }
 
-                var row = _dataService.Departments.AsEnumerable()
-                            .FirstOrDefault(r => r.Field<int>("DepartmentID") == id);
-
-                if (row != null)
+                // Delete using stored procedure
+                if (_dataService.DeleteDepartment(id))
                 {
-                    _dataService.Departments.Rows.Remove(row);
                     return Json(new { success = true, message = "Department deleted successfully." });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Department not found." });
+                    return Json(new { success = false, message = "Failed to delete department." });
                 }
             }
             catch (Exception ex)
@@ -289,6 +283,63 @@ namespace MOM.Controllers
             catch (Exception ex)
             {
                 return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult TestDatabaseConnection()
+        {
+            try
+            {
+                // Force refresh data from database
+                _dataService.RefreshData();
+                
+                var departmentCount = _dataService.Departments.Rows.Count;
+                var staffCount = _dataService.Staff.Rows.Count;
+                var meetingCount = _dataService.Meetings.Rows.Count;
+                var userCount = _dataService.Users.Rows.Count;
+
+                // Get sample data to verify content
+                var sampleDepartments = _dataService.Departments.AsEnumerable()
+                    .Take(3)
+                    .Select(r => new {
+                        ID = r.Field<int>("DepartmentID"),
+                        Name = r.Field<string>("DepartmentName")
+                    }).ToList();
+
+                var sampleUsers = _dataService.Users.AsEnumerable()
+                    .Take(3)
+                    .Select(r => new {
+                        ID = r.Field<int>("UserID"),
+                        Username = r.Field<string>("Username"),
+                        FullName = r.Field<string>("FullName")
+                    }).ToList();
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "DataService connection successful",
+                    data = new
+                    {
+                        Counts = new
+                        {
+                            DepartmentCount = departmentCount,
+                            StaffCount = staffCount,
+                            MeetingCount = meetingCount,
+                            UserCount = userCount
+                        },
+                        SampleData = new
+                        {
+                            Departments = sampleDepartments,
+                            Users = sampleUsers
+                        },
+                        LastRefresh = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt")
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"DataService connection failed: {ex.Message}" });
             }
         }
     }

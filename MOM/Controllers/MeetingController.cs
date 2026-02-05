@@ -94,7 +94,7 @@ namespace MOM.Controllers
             {
                 filteredRows = filteredRows.Where(row =>
                 {
-                    bool isCancelled = row.Field<bool>("IsCancelled");
+                    bool isCancelled = row["IsCancelled"] != DBNull.Value ? row.Field<bool>("IsCancelled") : false;
                     DateTime meetingDate = row.Field<DateTime>("MeetingDate");
                     
                     return statusFilter switch
@@ -159,7 +159,7 @@ namespace MOM.Controllers
                     model.MeetingVenueID = row.Field<int>("MeetingVenueID");
                     model.MeetingDescription = row.Field<string>("MeetingDescription") ?? "";
                     model.DocumentPath = row.Field<string>("DocumentPath");
-                    model.IsCancelled = row.Field<bool>("IsCancelled");
+                    model.IsCancelled = row["IsCancelled"] != DBNull.Value ? row.Field<bool>("IsCancelled") : false;
                     model.CancellationDateTime = row.Field<DateTime?>("CancellationDateTime");
                     model.CancellationReason = row.Field<string>("CancellationReason");
                     model.Created = row.Field<DateTime>("Created");
@@ -259,53 +259,41 @@ namespace MOM.Controllers
             {
                 if (model.MeetingID == 0)
                 {
-                    // Add new meeting
-                    int newId = _dataService.GetNextId(_dataService.Meetings, "MeetingID");
-                    _dataService.Meetings.Rows.Add(
-                        newId,
-                        model.MeetingDate,
-                        model.MeetingVenueID,
-                        model.MeetingTypeID,
-                        model.DepartmentID,
-                        model.MeetingDescription ?? "",
-                        model.DocumentPath ?? "",
-                        DateTime.Now,
-                        DateTime.Now,
-                        model.IsCancelled,
-                        model.IsCancelled ? (model.CancellationDateTime ?? DateTime.Now) : (object)DBNull.Value,
-                        model.IsCancelled ? (model.CancellationReason ?? "") : ""
-                    );
-                    
-                    TempData["SuccessMessage"] = "Meeting scheduled successfully!";
-                }
-                else
-                {
-                    // Update existing meeting
-                    var row = _dataService.Meetings.AsEnumerable()
-                        .FirstOrDefault(x => x.Field<int>("MeetingID") == model.MeetingID);
-                    
-                    if (row != null)
+                    // Add new meeting using stored procedure
+                    if (_dataService.InsertMeeting(model.MeetingDate, model.MeetingVenueID, model.MeetingTypeID, 
+                                                  model.DepartmentID, model.MeetingDescription ?? "", model.DocumentPath ?? "", 
+                                                  model.IsCancelled, model.CancellationDateTime, model.CancellationReason))
                     {
-                        row["MeetingDate"] = model.MeetingDate;
-                        row["MeetingVenueID"] = model.MeetingVenueID;
-                        row["MeetingTypeID"] = model.MeetingTypeID;
-                        row["DepartmentID"] = model.DepartmentID;
-                        row["MeetingDescription"] = model.MeetingDescription ?? "";
-                        if (!string.IsNullOrEmpty(model.DocumentPath))
-                            row["DocumentPath"] = model.DocumentPath;
-                        row["Modified"] = DateTime.Now;
-                        row["IsCancelled"] = model.IsCancelled;
-                        row["CancellationDateTime"] = model.IsCancelled ? 
-                            (model.CancellationDateTime ?? DateTime.Now) : (object)DBNull.Value;
-                        row["CancellationReason"] = model.IsCancelled ? (model.CancellationReason ?? "") : "";
+                        TempData["SuccessMessage"] = "Meeting scheduled successfully!";
+                        return RedirectToAction("MeetingList");
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Meeting not found.";
+                        TempData["ErrorMessage"] = "Failed to save meeting to database.";
+                        ViewBag.Departments = _dataService.Departments;
+                        ViewBag.MeetingTypes = _dataService.MeetingTypes;
+                        ViewBag.MeetingVenues = _dataService.MeetingVenues;
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    // Update existing meeting using stored procedure
+                    if (_dataService.UpdateMeeting(model.MeetingID, model.MeetingDate, model.MeetingVenueID, 
+                                                  model.MeetingTypeID, model.DepartmentID, model.MeetingDescription ?? "", model.DocumentPath ?? "", 
+                                                  model.IsCancelled, model.CancellationDateTime, model.CancellationReason))
+                    {
+                        TempData["SuccessMessage"] = "Meeting updated successfully!";
                         return RedirectToAction("MeetingList");
                     }
-                    
-                    TempData["SuccessMessage"] = "Meeting updated successfully!";
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to update meeting in database.";
+                        ViewBag.Departments = _dataService.Departments;
+                        ViewBag.MeetingTypes = _dataService.MeetingTypes;
+                        ViewBag.MeetingVenues = _dataService.MeetingVenues;
+                        return View(model);
+                    }
                 }
             }
             catch (Exception ex)
@@ -316,8 +304,6 @@ namespace MOM.Controllers
                 ViewBag.MeetingVenues = _dataService.MeetingVenues;
                 return View(model);
             }
-
-            return RedirectToAction("MeetingList");
         }
 
         [HttpPost]
@@ -325,14 +311,6 @@ namespace MOM.Controllers
         {
             try
             {
-                var row = _dataService.Meetings.AsEnumerable()
-                    .FirstOrDefault(x => x.Field<int>("MeetingID") == id);
-                
-                if (row == null)
-                {
-                    return Json(new { success = false, message = "Meeting not found." });
-                }
-
                 // Check if meeting has members
                 var hasMembers = _dataService.MeetingMembers.AsEnumerable()
                     .Any(m => m.Field<int>("MeetingID") == id);
@@ -342,8 +320,15 @@ namespace MOM.Controllers
                     return Json(new { success = false, message = "Cannot delete meeting with assigned members. Please remove members first." });
                 }
 
-                _dataService.Meetings.Rows.Remove(row);
-                return Json(new { success = true, message = "Meeting deleted successfully!" });
+                // Delete using stored procedure
+                if (_dataService.DeleteMeeting(id))
+                {
+                    return Json(new { success = true, message = "Meeting deleted successfully!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to delete meeting." });
+                }
             }
             catch (Exception ex)
             {
@@ -353,10 +338,7 @@ namespace MOM.Controllers
 
         public IActionResult DeleteMeeting(int id)
         {
-            var row = _dataService.Meetings.AsEnumerable()
-                .FirstOrDefault(x => x.Field<int>("MeetingID") == id);
-            
-            if (row != null)
+            try
             {
                 // Check if meeting has members
                 var hasMembers = _dataService.MeetingMembers.AsEnumerable()
@@ -368,13 +350,20 @@ namespace MOM.Controllers
                 }
                 else
                 {
-                    _dataService.Meetings.Rows.Remove(row);
-                    TempData["SuccessMessage"] = "Meeting deleted successfully!";
+                    // Delete using stored procedure
+                    if (_dataService.DeleteMeeting(id))
+                    {
+                        TempData["SuccessMessage"] = "Meeting deleted successfully!";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to delete meeting.";
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Meeting not found.";
+                TempData["ErrorMessage"] = $"Error deleting meeting: {ex.Message}";
             }
 
             return RedirectToAction("MeetingList");
@@ -385,26 +374,42 @@ namespace MOM.Controllers
         {
             try
             {
-                var row = _dataService.Meetings.AsEnumerable()
-                    .FirstOrDefault(x => x.Field<int>("MeetingID") == id);
+                bool success = _dataService.CancelMeeting(id, reason ?? "Meeting cancelled");
                 
-                if (row != null)
+                if (success)
                 {
-                    row["IsCancelled"] = true;
-                    row["CancellationDateTime"] = DateTime.Now;
-                    row["CancellationReason"] = reason ?? "";
-                    row["Modified"] = DateTime.Now;
-                    
                     return Json(new { success = true, message = "Meeting cancelled successfully!" });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Meeting not found." });
+                    return Json(new { success = false, message = "Failed to cancel meeting." });
                 }
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = $"Error cancelling meeting: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ReactivateMeeting(int id)
+        {
+            try
+            {
+                bool success = _dataService.ReactivateMeeting(id);
+                
+                if (success)
+                {
+                    return Json(new { success = true, message = "Meeting reactivated successfully!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to reactivate meeting." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error reactivating meeting: {ex.Message}" });
             }
         }
 
@@ -439,7 +444,7 @@ namespace MOM.Controllers
                 var presentCount = members.Count(m => m.Field<bool>("IsPresent"));
 
                 // Determine status
-                bool isCancelled = row.Field<bool>("IsCancelled");
+                bool isCancelled = row["IsCancelled"] != DBNull.Value ? row.Field<bool>("IsCancelled") : false;
                 DateTime meetingDate = row.Field<DateTime>("MeetingDate");
                 string status = isCancelled ? "Cancelled" :
                                meetingDate.Date == DateTime.Today ? "Today" :

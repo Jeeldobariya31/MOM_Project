@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = Model.StaffID > 0 ? "Edit Staff Member" : "Add Staff Member";
     bool isEdit = Model.StaffID > 0;
-    var departments = ViewBag.Departments as List<dynamic> ?? new List<dynamic>();
 }
 
 <!-- Page Header -->
@@ -105,12 +104,22 @@
                                         </label>
                                         <select asp-for="DepartmentID" class="form-select">
                                             <option value="">Select Department</option>
-                                            @foreach (var dept in departments)
+                                            @if (ViewBag.Departments != null)
                                             {
-                                                <option value="@dept.Value">@dept.Text</option>
+                                                @foreach (var dept in (List<dynamic>)ViewBag.Departments)
+                                                {
+                                                    <option value="@dept.Value">@dept.Text</option>
+                                                }
                                             }
                                         </select>
                                         <span asp-validation-for="DepartmentID" class="text-danger small"></span>
+                                        @if (ViewBag.Departments == null || ((List<dynamic>)ViewBag.Departments).Count == 0)
+                                        {
+                                            <div class="form-text text-warning">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                No departments available. Please contact administrator.
+                                            </div>
+                                        }
                                     </div>
                                 </div>
 

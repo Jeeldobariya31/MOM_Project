@@ -2,16 +2,19 @@
 using MOM.Models;
 using MOM.Services;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace MOM.Controllers
 {
     public class StaffController : Controller
     {
         private readonly DataService _dataService;
+        private readonly IConfiguration _configuration;
 
-        public StaffController()
+        public StaffController(IConfiguration configuration)
         {
             _dataService = DataService.Instance;
+            _configuration = configuration;
         }
 
         public IActionResult StaffList(string searchTerm = "", string departmentFilter = "", string sortBy = "StaffName", string sortOrder = "asc")
@@ -137,19 +140,121 @@ namespace MOM.Controllers
                         .Count(r => r.Field<int>("StaffID") == id.Value);
                 }
 
-                // Get departments for dropdown
-                ViewBag.Departments = _dataService.Departments.AsEnumerable()
-                    .Select(d => new { Value = d.Field<int>("DepartmentID"), Text = d.Field<string>("DepartmentName") })
-                    .OrderBy(d => d.Text)
-                    .ToList();
+                // Get departments for dropdown - with better error handling
+                var departmentsList = new List<dynamic>();
+                
+                if (_dataService.Departments != null && _dataService.Departments.Rows.Count > 0)
+                {
+                    departmentsList = _dataService.Departments.AsEnumerable()
+                        .Select(d => new { 
+                            Value = d.Field<int>("DepartmentID"), 
+                            Text = d.Field<string>("DepartmentName") ?? "Unknown Department" 
+                        })
+                        .OrderBy(d => d.Text)
+                        .ToList<dynamic>();
+                }
+                else
+                {
+                    // Fallback: Load departments directly from database if DataService failed
+                    try
+                    {
+                        var fallbackDepts = GetDepartmentsFromDatabase();
+                        departmentsList = fallbackDepts.Select(d => new { Value = d.Value, Text = d.Text }).ToList<dynamic>();
+                    }
+                    catch (Exception dbEx)
+                    {
+                        Console.WriteLine($"Error loading departments from database: {dbEx.Message}");
+                        // Last resort: Add some default departments
+                        departmentsList = new List<dynamic>
+                        {
+                            new { Value = 1, Text = "Human Resources" },
+                            new { Value = 2, Text = "Information Technology" },
+                            new { Value = 3, Text = "Finance & Accounts" }
+                        };
+                    }
+                }
+
+                ViewBag.Departments = departmentsList;
 
                 return View(model);
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error loading staff member: {ex.Message}";
-                return RedirectToAction("StaffList");
+                
+                // Still try to provide departments for the view
+                ViewBag.Departments = new List<dynamic>
+                {
+                    new { Value = 1, Text = "Human Resources" },
+                    new { Value = 2, Text = "Information Technology" },
+                    new { Value = 3, Text = "Finance & Accounts" }
+                };
+                
+                return View(new StaffModel());
             }
+        }
+
+        private List<dynamic> GetDepartmentsFromDatabase()
+        {
+            var departments = new List<dynamic>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("PR_Department_SelectAll", connection);
+                command.CommandType = CommandType.StoredProcedure;
+                
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        departments.Add(new { 
+                            Value = reader.GetInt32("DepartmentID"), 
+                            Text = reader.GetString("DepartmentName") 
+                        });
+                    }
+                }
+            }
+            
+            return departments;
+        }
+
+        private List<dynamic> LoadDepartmentsForDropdown()
+        {
+            var departmentsList = new List<dynamic>();
+            
+            if (_dataService.Departments != null && _dataService.Departments.Rows.Count > 0)
+            {
+                departmentsList = _dataService.Departments.AsEnumerable()
+                    .Select(d => new { 
+                        Value = d.Field<int>("DepartmentID"), 
+                        Text = d.Field<string>("DepartmentName") ?? "Unknown Department" 
+                    })
+                    .OrderBy(d => d.Text)
+                    .ToList<dynamic>();
+            }
+            else
+            {
+                // Fallback: Load departments directly from database
+                try
+                {
+                    var fallbackDepts = GetDepartmentsFromDatabase();
+                    departmentsList = fallbackDepts.Select(d => new { Value = d.Value, Text = d.Text }).ToList<dynamic>();
+                }
+                catch (Exception)
+                {
+                    // Last resort: Add some default departments
+                    departmentsList = new List<dynamic>
+                    {
+                        new { Value = 1, Text = "Human Resources" },
+                        new { Value = 2, Text = "Information Technology" },
+                        new { Value = 3, Text = "Finance & Accounts" }
+                    };
+                }
+            }
+            
+            return departmentsList;
         }
 
         [HttpPost]
@@ -190,50 +295,75 @@ namespace MOM.Controllers
                             .Count(r => r.Field<int>("StaffID") == model.StaffID);
                     }
 
-                    // Reload departments for dropdown
-                    ViewBag.Departments = _dataService.Departments.AsEnumerable()
-                        .Select(d => new { Value = d.Field<int>("DepartmentID"), Text = d.Field<string>("DepartmentName") })
-                        .OrderBy(d => d.Text)
-                        .ToList();
+                    // Reload departments for dropdown - with better error handling
+                    var departmentsList = new List<dynamic>();
+                    
+                    if (_dataService.Departments != null && _dataService.Departments.Rows.Count > 0)
+                    {
+                        departmentsList = _dataService.Departments.AsEnumerable()
+                            .Select(d => new { 
+                                Value = d.Field<int>("DepartmentID"), 
+                                Text = d.Field<string>("DepartmentName") ?? "Unknown Department" 
+                            })
+                            .OrderBy(d => d.Text)
+                            .ToList<dynamic>();
+                    }
+                    else
+                    {
+                        // Fallback: Load departments directly from database
+                        try
+                        {
+                            var fallbackDepts = GetDepartmentsFromDatabase();
+                            departmentsList = fallbackDepts.Select(d => new { Value = d.Value, Text = d.Text }).ToList<dynamic>();
+                        }
+                        catch (Exception)
+                        {
+                            // Last resort: Add some default departments
+                            departmentsList = new List<dynamic>
+                            {
+                                new { Value = 1, Text = "Human Resources" },
+                                new { Value = 2, Text = "Information Technology" },
+                                new { Value = 3, Text = "Finance & Accounts" }
+                            };
+                        }
+                    }
 
+                    ViewBag.Departments = departmentsList;
                     return View(model);
                 }
 
                 if (model.StaffID == 0)
                 {
-                    // Add new staff
-                    var newId = _dataService.GetNextId(_dataService.Staff, "StaffID");
-                    _dataService.Staff.Rows.Add(
-                        newId,
-                        model.DepartmentID,
-                        model.StaffName.Trim(),
-                        model.MobileNo.Trim(),
-                        model.EmailAddress.Trim().ToLower(),
-                        model.Remarks?.Trim() ?? "",
-                        DateTime.Now,
-                        DateTime.Now
-                    );
-                    TempData["SuccessMessage"] = "Staff member added successfully.";
+                    // Add new staff using stored procedure
+                    if (_dataService.InsertStaff(model.DepartmentID, model.StaffName.Trim(), model.MobileNo.Trim(), 
+                                               model.EmailAddress.Trim().ToLower(), model.Remarks?.Trim() ?? ""))
+                    {
+                        TempData["SuccessMessage"] = "Staff member added successfully.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to save staff member to database.";
+                        
+                        // Reload departments for dropdown with error handling
+                        ViewBag.Departments = LoadDepartmentsForDropdown();
+                        return View(model);
+                    }
                 }
                 else
                 {
-                    // Update existing staff
-                    var row = _dataService.Staff.AsEnumerable()
-                                .FirstOrDefault(r => r.Field<int>("StaffID") == model.StaffID);
-
-                    if (row != null)
+                    // Update existing staff using stored procedure
+                    if (_dataService.UpdateStaff(model.StaffID, model.DepartmentID, model.StaffName.Trim(), 
+                                               model.MobileNo.Trim(), model.EmailAddress.Trim().ToLower(), model.Remarks?.Trim() ?? ""))
                     {
-                        row["DepartmentID"] = model.DepartmentID;
-                        row["StaffName"] = model.StaffName.Trim();
-                        row["MobileNo"] = model.MobileNo.Trim();
-                        row["EmailAddress"] = model.EmailAddress.Trim().ToLower();
-                        row["Remarks"] = model.Remarks?.Trim() ?? "";
-                        row["Modified"] = DateTime.Now;
                         TempData["SuccessMessage"] = "Staff member updated successfully.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Staff member not found for update.";
+                        TempData["ErrorMessage"] = "Failed to update staff member in database.";
+                        
+                        // Reload departments for dropdown with error handling
+                        ViewBag.Departments = LoadDepartmentsForDropdown();
+                        return View(model);
                     }
                 }
 
@@ -267,17 +397,14 @@ namespace MOM.Controllers
                     return Json(new { success = false, message = "Cannot delete staff member. They have associated meeting memberships." });
                 }
 
-                var row = _dataService.Staff.AsEnumerable()
-                            .FirstOrDefault(r => r.Field<int>("StaffID") == id);
-
-                if (row != null)
+                // Delete using stored procedure
+                if (_dataService.DeleteStaff(id))
                 {
-                    _dataService.Staff.Rows.Remove(row);
                     return Json(new { success = true, message = "Staff member deleted successfully." });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Staff member not found." });
+                    return Json(new { success = false, message = "Failed to delete staff member." });
                 }
             }
             catch (Exception ex)

@@ -125,31 +125,28 @@ namespace MOM.Controllers
 
                 if (model.MeetingVenueID == 0)
                 {
-                    // Add new venue
-                    var newId = _dataService.GetNextId(_dataService.MeetingVenues, "MeetingVenueID");
-                    _dataService.MeetingVenues.Rows.Add(
-                        newId,
-                        model.MeetingVenueName.Trim(),
-                        DateTime.Now,
-                        DateTime.Now
-                    );
-                    TempData["SuccessMessage"] = "Meeting venue added successfully.";
+                    // Add new venue using stored procedure
+                    if (_dataService.InsertMeetingVenue(model.MeetingVenueName.Trim()))
+                    {
+                        TempData["SuccessMessage"] = "Meeting venue added successfully.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to save meeting venue to database.";
+                        return View(model);
+                    }
                 }
                 else
                 {
-                    // Update existing venue
-                    var row = _dataService.MeetingVenues.AsEnumerable()
-                                .FirstOrDefault(r => r.Field<int>("MeetingVenueID") == model.MeetingVenueID);
-
-                    if (row != null)
+                    // Update existing venue using stored procedure
+                    if (_dataService.UpdateMeetingVenue(model.MeetingVenueID, model.MeetingVenueName.Trim()))
                     {
-                        row["MeetingVenueName"] = model.MeetingVenueName.Trim();
-                        row["Modified"] = DateTime.Now;
                         TempData["SuccessMessage"] = "Meeting venue updated successfully.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Meeting venue not found for update.";
+                        TempData["ErrorMessage"] = "Failed to update meeting venue in database.";
+                        return View(model);
                     }
                 }
 
@@ -176,17 +173,14 @@ namespace MOM.Controllers
                     return Json(new { success = false, message = "Cannot delete meeting venue. It has associated meetings." });
                 }
 
-                var row = _dataService.MeetingVenues.AsEnumerable()
-                            .FirstOrDefault(r => r.Field<int>("MeetingVenueID") == id);
-
-                if (row != null)
+                // Delete using stored procedure
+                if (_dataService.DeleteMeetingVenue(id))
                 {
-                    _dataService.MeetingVenues.Rows.Remove(row);
                     return Json(new { success = true, message = "Meeting venue deleted successfully." });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Meeting venue not found." });
+                    return Json(new { success = false, message = "Failed to delete meeting venue." });
                 }
             }
             catch (Exception ex)

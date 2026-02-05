@@ -454,12 +454,243 @@ namespace MOM.Services
             LoadDataFromDatabase();
         }
 
-        // Method to save a new record to database using stored procedures
-        public bool SaveToDatabase(string tableName, Dictionary<string, object> values)
+        // ========== GENERALIZED CRUD METHODS ==========
+
+        /// <summary>
+        /// Generic method to execute any stored procedure with parameters
+        /// </summary>
+        public DataTable ExecuteStoredProcedure(string procedureName, Dictionary<string, object>? parameters = null)
+        {
+            var resultTable = new DataTable();
+            
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                Console.WriteLine("No database connection available.");
+                return resultTable;
+            }
+
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand(procedureName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        
+                        if (parameters != null)
+                        {
+                            foreach (var param in parameters)
+                            {
+                                command.Parameters.AddWithValue("@" + param.Key, param.Value ?? DBNull.Value);
+                            }
+                        }
+                        
+                        using (var adapter = new SqlDataAdapter(command))
+                        {
+                            adapter.Fill(resultTable);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing stored procedure {procedureName}: {ex.Message}");
+            }
+            
+            return resultTable;
+        }
+
+        /// <summary>
+        /// Generic method to execute non-query stored procedures (Insert, Update, Delete)
+        /// </summary>
+        public bool ExecuteNonQueryStoredProcedure(string procedureName, Dictionary<string, object>? parameters = null)
         {
             if (string.IsNullOrEmpty(_connectionString))
             {
-                Console.WriteLine("No database connection available. Cannot save to database.");
+                Console.WriteLine("No database connection available.");
+                return false;
+            }
+
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand(procedureName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        
+                        if (parameters != null)
+                        {
+                            foreach (var param in parameters)
+                            {
+                                command.Parameters.AddWithValue("@" + param.Key, param.Value ?? DBNull.Value);
+                            }
+                        }
+                        
+                        command.ExecuteNonQuery();
+                    }
+                }
+                
+                // Refresh data after modification
+                RefreshData();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing stored procedure {procedureName}: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ========== ENTITY-SPECIFIC CRUD METHODS ==========
+
+        // Department CRUD Methods
+        public DataTable GetAllDepartments() => ExecuteStoredProcedure("PR_Department_SelectAll");
+        public DataTable GetDepartmentById(int departmentId) => ExecuteStoredProcedure("PR_Department_SelectByPK", new Dictionary<string, object> { { "DepartmentID", departmentId } });
+        public bool InsertDepartment(string departmentName) => ExecuteNonQueryStoredProcedure("PR_Department_Insert", new Dictionary<string, object> { { "DepartmentName", departmentName } });
+        public bool UpdateDepartment(int departmentId, string departmentName) => ExecuteNonQueryStoredProcedure("PR_Department_UpdateByPK", new Dictionary<string, object> { { "DepartmentID", departmentId }, { "DepartmentName", departmentName } });
+        public bool DeleteDepartment(int departmentId) => ExecuteNonQueryStoredProcedure("PR_Department_DeleteByPK", new Dictionary<string, object> { { "DepartmentID", departmentId } });
+
+        // MeetingType CRUD Methods
+        public DataTable GetAllMeetingTypes() => ExecuteStoredProcedure("PR_MeetingType_SelectAll");
+        public DataTable GetMeetingTypeById(int meetingTypeId) => ExecuteStoredProcedure("PR_MeetingType_SelectByPK", new Dictionary<string, object> { { "MeetingTypeID", meetingTypeId } });
+        public bool InsertMeetingType(string meetingTypeName, string remarks) => ExecuteNonQueryStoredProcedure("PR_MeetingType_Insert", new Dictionary<string, object> { { "MeetingTypeName", meetingTypeName }, { "Remarks", remarks } });
+        public bool UpdateMeetingType(int meetingTypeId, string meetingTypeName, string remarks) => ExecuteNonQueryStoredProcedure("PR_MeetingType_UpdateByPK", new Dictionary<string, object> { { "MeetingTypeID", meetingTypeId }, { "MeetingTypeName", meetingTypeName }, { "Remarks", remarks } });
+        public bool DeleteMeetingType(int meetingTypeId) => ExecuteNonQueryStoredProcedure("PR_MeetingType_DeleteByPK", new Dictionary<string, object> { { "MeetingTypeID", meetingTypeId } });
+
+        // MeetingVenue CRUD Methods
+        public DataTable GetAllMeetingVenues() => ExecuteStoredProcedure("PR_MeetingVenue_SelectAll");
+        public DataTable GetMeetingVenueById(int meetingVenueId) => ExecuteStoredProcedure("PR_MeetingVenue_SelectByPK", new Dictionary<string, object> { { "MeetingVenueID", meetingVenueId } });
+        public bool InsertMeetingVenue(string meetingVenueName) => ExecuteNonQueryStoredProcedure("PR_MeetingVenue_Insert", new Dictionary<string, object> { { "MeetingVenueName", meetingVenueName } });
+        public bool UpdateMeetingVenue(int meetingVenueId, string meetingVenueName) => ExecuteNonQueryStoredProcedure("PR_MeetingVenue_UpdateByPK", new Dictionary<string, object> { { "MeetingVenueID", meetingVenueId }, { "MeetingVenueName", meetingVenueName } });
+        public bool DeleteMeetingVenue(int meetingVenueId) => ExecuteNonQueryStoredProcedure("PR_MeetingVenue_DeleteByPK", new Dictionary<string, object> { { "MeetingVenueID", meetingVenueId } });
+
+        // Staff CRUD Methods
+        public DataTable GetAllStaff() => ExecuteStoredProcedure("PR_Staff_SelectAll");
+        public DataTable GetStaffById(int staffId) => ExecuteStoredProcedure("PR_Staff_SelectByPK", new Dictionary<string, object> { { "StaffID", staffId } });
+        public bool InsertStaff(int departmentId, string staffName, string mobileNo, string emailAddress, string remarks) => ExecuteNonQueryStoredProcedure("PR_Staff_Insert", new Dictionary<string, object> { { "DepartmentID", departmentId }, { "StaffName", staffName }, { "MobileNo", mobileNo }, { "EmailAddress", emailAddress }, { "Remarks", remarks } });
+        public bool UpdateStaff(int staffId, int departmentId, string staffName, string mobileNo, string emailAddress, string remarks) => ExecuteNonQueryStoredProcedure("PR_Staff_UpdateByPK", new Dictionary<string, object> { { "StaffID", staffId }, { "DepartmentID", departmentId }, { "StaffName", staffName }, { "MobileNo", mobileNo }, { "EmailAddress", emailAddress }, { "Remarks", remarks } });
+        public bool DeleteStaff(int staffId) => ExecuteNonQueryStoredProcedure("PR_Staff_DeleteByPK", new Dictionary<string, object> { { "StaffID", staffId } });
+
+        // Meeting CRUD Methods
+        public DataTable GetAllMeetings() => ExecuteStoredProcedure("PR_Meetings_SelectAll");
+        public DataTable GetMeetingById(int meetingId) => ExecuteStoredProcedure("PR_Meetings_SelectByPK", new Dictionary<string, object> { { "MeetingID", meetingId } });
+        public bool InsertMeeting(DateTime meetingDate, int meetingVenueId, int meetingTypeId, int departmentId, string meetingDescription, string documentPath, bool isCancelled = false, DateTime? cancellationDateTime = null, string cancellationReason = null) => ExecuteNonQueryStoredProcedure("PR_Meetings_Insert", new Dictionary<string, object> { { "MeetingDate", meetingDate }, { "MeetingVenueID", meetingVenueId }, { "MeetingTypeID", meetingTypeId }, { "DepartmentID", departmentId }, { "MeetingDescription", meetingDescription }, { "DocumentPath", documentPath ?? "" }, { "IsCancelled", isCancelled }, { "CancellationDateTime", cancellationDateTime }, { "CancellationReason", cancellationReason } });
+        public bool UpdateMeeting(int meetingId, DateTime meetingDate, int meetingVenueId, int meetingTypeId, int departmentId, string meetingDescription, string documentPath, bool isCancelled = false, DateTime? cancellationDateTime = null, string cancellationReason = null) => ExecuteNonQueryStoredProcedure("PR_Meetings_UpdateByPK", new Dictionary<string, object> { { "MeetingID", meetingId }, { "MeetingDate", meetingDate }, { "MeetingVenueID", meetingVenueId }, { "MeetingTypeID", meetingTypeId }, { "DepartmentID", departmentId }, { "MeetingDescription", meetingDescription }, { "DocumentPath", documentPath ?? "" }, { "IsCancelled", isCancelled }, { "CancellationDateTime", cancellationDateTime }, { "CancellationReason", cancellationReason } });
+        public bool DeleteMeeting(int meetingId) => ExecuteNonQueryStoredProcedure("PR_Meetings_DeleteByPK", new Dictionary<string, object> { { "MeetingID", meetingId } });
+
+        // MeetingMember CRUD Methods
+        public DataTable GetAllMeetingMembers() => ExecuteStoredProcedure("PR_MeetingMember_SelectAll");
+        public DataTable GetMeetingMemberById(int meetingMemberId) => ExecuteStoredProcedure("PR_MeetingMember_SelectByPK", new Dictionary<string, object> { { "MeetingMemberID", meetingMemberId } });
+        public DataTable GetMeetingMembersByMeetingId(int meetingId) => ExecuteStoredProcedure("PR_MeetingMember_SelectByMeetingID", new Dictionary<string, object> { { "MeetingID", meetingId } });
+        public bool InsertMeetingMember(int meetingId, int staffId, bool isPresent, string remarks) => ExecuteNonQueryStoredProcedure("PR_MeetingMember_Insert", new Dictionary<string, object> { { "MeetingID", meetingId }, { "StaffID", staffId }, { "IsPresent", isPresent }, { "Remarks", remarks } });
+        public bool UpdateMeetingMember(int meetingMemberId, int meetingId, int staffId, bool isPresent, string remarks) => ExecuteNonQueryStoredProcedure("PR_MeetingMember_UpdateByPK", new Dictionary<string, object> { { "MeetingMemberID", meetingMemberId }, { "MeetingID", meetingId }, { "StaffID", staffId }, { "IsPresent", isPresent }, { "Remarks", remarks } });
+        public bool DeleteMeetingMember(int meetingMemberId) => ExecuteNonQueryStoredProcedure("PR_MeetingMember_DeleteByPK", new Dictionary<string, object> { { "MeetingMemberID", meetingMemberId } });
+
+        // ========== BULK OPERATIONS ==========
+
+        /// <summary>
+        /// Bulk assign staff members to a meeting
+        /// </summary>
+        public bool BulkAssignStaffToMeeting(int meetingId, List<int> staffIds, string remarks = "")
+        {
+            bool success = true;
+            foreach (int staffId in staffIds)
+            {
+                if (!InsertMeetingMember(meetingId, staffId, false, remarks))
+                {
+                    success = false;
+                    Console.WriteLine($"Failed to assign staff {staffId} to meeting {meetingId}");
+                }
+            }
+            return success;
+        }
+
+        /// <summary>
+        /// Bulk update attendance for multiple meeting members
+        /// </summary>
+        public bool BulkUpdateAttendance(Dictionary<int, bool> memberAttendance, string remarks = "")
+        {
+            bool success = true;
+            foreach (var attendance in memberAttendance)
+            {
+                int meetingMemberId = attendance.Key;
+                bool isPresent = attendance.Value;
+                
+                // Get existing meeting member data
+                var memberData = GetMeetingMemberById(meetingMemberId);
+                if (memberData.Rows.Count > 0)
+                {
+                    var row = memberData.Rows[0];
+                    int meetingId = Convert.ToInt32(row["MeetingID"]);
+                    int staffId = Convert.ToInt32(row["StaffID"]);
+                    
+                    if (!UpdateMeetingMember(meetingMemberId, meetingId, staffId, isPresent, remarks))
+                    {
+                        success = false;
+                        Console.WriteLine($"Failed to update attendance for meeting member {meetingMemberId}");
+                    }
+                }
+            }
+            return success;
+        }
+
+        /// <summary>
+        /// Mark all assigned members as present for a meeting
+        /// </summary>
+        public bool BulkMarkAllPresent(int meetingId, string remarks = "Bulk marked present")
+        {
+            var members = GetMeetingMembersByMeetingId(meetingId);
+            bool success = true;
+            
+            foreach (DataRow row in members.Rows)
+            {
+                int meetingMemberId = Convert.ToInt32(row["MeetingMemberID"]);
+                int staffId = Convert.ToInt32(row["StaffID"]);
+                
+                if (!UpdateMeetingMember(meetingMemberId, meetingId, staffId, true, remarks))
+                {
+                    success = false;
+                    Console.WriteLine($"Failed to mark member {meetingMemberId} as present");
+                }
+            }
+            return success;
+        }
+
+        /// <summary>
+        /// Mark all assigned members as absent for a meeting
+        /// </summary>
+        public bool BulkMarkAllAbsent(int meetingId, string remarks = "Bulk marked absent")
+        {
+            var members = GetMeetingMembersByMeetingId(meetingId);
+            bool success = true;
+            
+            foreach (DataRow row in members.Rows)
+            {
+                int meetingMemberId = Convert.ToInt32(row["MeetingMemberID"]);
+                int staffId = Convert.ToInt32(row["StaffID"]);
+                
+                if (!UpdateMeetingMember(meetingMemberId, meetingId, staffId, false, remarks))
+                {
+                    success = false;
+                    Console.WriteLine($"Failed to mark member {meetingMemberId} as absent");
+                }
+            }
+            return success;
+        }
+
+        // ========== MEETING MANAGEMENT ==========
+
+        /// <summary>
+        /// Cancel a meeting with reason
+        /// </summary>
+        public bool CancelMeeting(int meetingId, string cancellationReason)
+        {
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                Console.WriteLine("No database connection available.");
                 return false;
             }
 
@@ -469,134 +700,166 @@ namespace MOM.Services
                 {
                     connection.Open();
                     
-                    string procedureName = GetInsertProcedureName(tableName);
-                    if (string.IsNullOrEmpty(procedureName))
+                    // Update meeting to set as cancelled
+                    string sql = @"UPDATE MOM_Meetings 
+                                  SET IsCancelled = 1, 
+                                      CancellationDateTime = GETDATE(), 
+                                      CancellationReason = @CancellationReason,
+                                      Modified = GETDATE()
+                                  WHERE MeetingID = @MeetingID";
+                    
+                    using (var command = new SqlCommand(sql, connection))
                     {
-                        Console.WriteLine($"No insert procedure found for table: {tableName}");
-                        return false;
-                    }
-
-                    using (var command = new SqlCommand(procedureName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        
-                        foreach (var kvp in values)
-                        {
-                            command.Parameters.AddWithValue("@" + kvp.Key, kvp.Value ?? DBNull.Value);
-                        }
-                        
+                        command.Parameters.AddWithValue("@MeetingID", meetingId);
+                        command.Parameters.AddWithValue("@CancellationReason", cancellationReason);
                         command.ExecuteNonQuery();
                     }
                 }
                 
-                // Refresh the specific table data
                 RefreshData();
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving to database: {ex.Message}");
+                Console.WriteLine($"Error cancelling meeting: {ex.Message}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Reactivate a cancelled meeting
+        /// </summary>
+        public bool ReactivateMeeting(int meetingId)
+        {
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                Console.WriteLine("No database connection available.");
+                return false;
+            }
+
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    
+                    string sql = @"UPDATE MOM_Meetings 
+                                  SET IsCancelled = 0, 
+                                      CancellationDateTime = NULL, 
+                                      CancellationReason = NULL,
+                                      Modified = GETDATE()
+                                  WHERE MeetingID = @MeetingID";
+                    
+                    using (var command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@MeetingID", meetingId);
+                        command.ExecuteNonQuery();
+                    }
+                }
+                
+                RefreshData();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reactivating meeting: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ========== DASHBOARD METHODS ==========
+
+        /// <summary>
+        /// Get dashboard statistics
+        /// </summary>
+        public Dictionary<string, int> GetDashboardStats()
+        {
+            var stats = new Dictionary<string, int>();
+            
+            try
+            {
+                stats["TotalDepartments"] = Departments.Rows.Count;
+                stats["TotalStaff"] = Staff.Rows.Count;
+                stats["TotalMeetings"] = Meetings.Rows.Count;
+                stats["TotalMeetingTypes"] = MeetingTypes.Rows.Count;
+                stats["TotalMeetingVenues"] = MeetingVenues.Rows.Count;
+                
+                // Count cancelled meetings
+                int cancelledMeetings = 0;
+                foreach (DataRow row in Meetings.Rows)
+                {
+                    if (Convert.ToBoolean(row["IsCancelled"]))
+                        cancelledMeetings++;
+                }
+                stats["CancelledMeetings"] = cancelledMeetings;
+                stats["ActiveMeetings"] = stats["TotalMeetings"] - cancelledMeetings;
+                
+                // Count present/absent members
+                int presentMembers = 0;
+                int absentMembers = 0;
+                foreach (DataRow row in MeetingMembers.Rows)
+                {
+                    if (Convert.ToBoolean(row["IsPresent"]))
+                        presentMembers++;
+                    else
+                        absentMembers++;
+                }
+                stats["PresentMembers"] = presentMembers;
+                stats["AbsentMembers"] = absentMembers;
+                stats["TotalMeetingMembers"] = MeetingMembers.Rows.Count;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calculating dashboard stats: {ex.Message}");
+            }
+            
+            return stats;
+        }
+
+        // ========== LEGACY METHODS (for backward compatibility) ==========
+
+        // Method to save a new record to database using stored procedures
+        public bool SaveToDatabase(string tableName, Dictionary<string, object> values)
+        {
+            string procedureName = GetInsertProcedureName(tableName);
+            if (string.IsNullOrEmpty(procedureName))
+            {
+                Console.WriteLine($"No insert procedure found for table: {tableName}");
+                return false;
+            }
+            return ExecuteNonQueryStoredProcedure(procedureName, values);
         }
 
         // Method to update a record in database using stored procedures
         public bool UpdateInDatabase(string tableName, Dictionary<string, object> values, string whereClause, Dictionary<string, object> whereParameters)
         {
-            if (string.IsNullOrEmpty(_connectionString))
+            string procedureName = GetUpdateProcedureName(tableName);
+            if (string.IsNullOrEmpty(procedureName))
             {
-                Console.WriteLine("No database connection available. Cannot update database.");
+                Console.WriteLine($"No update procedure found for table: {tableName}");
                 return false;
             }
-
-            try
+            
+            // Combine where parameters and values
+            var allParameters = new Dictionary<string, object>(whereParameters);
+            foreach (var kvp in values)
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    connection.Open();
-                    
-                    string procedureName = GetUpdateProcedureName(tableName);
-                    if (string.IsNullOrEmpty(procedureName))
-                    {
-                        Console.WriteLine($"No update procedure found for table: {tableName}");
-                        return false;
-                    }
-
-                    using (var command = new SqlCommand(procedureName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        
-                        // Add WHERE parameters first (usually the ID)
-                        foreach (var kvp in whereParameters)
-                        {
-                            command.Parameters.AddWithValue("@" + kvp.Key, kvp.Value ?? DBNull.Value);
-                        }
-                        
-                        // Add SET parameters
-                        foreach (var kvp in values)
-                        {
-                            command.Parameters.AddWithValue("@" + kvp.Key, kvp.Value ?? DBNull.Value);
-                        }
-                        
-                        command.ExecuteNonQuery();
-                    }
-                }
-                
-                // Refresh the specific table data
-                RefreshData();
-                return true;
+                allParameters[kvp.Key] = kvp.Value;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error updating database: {ex.Message}");
-                return false;
-            }
+            
+            return ExecuteNonQueryStoredProcedure(procedureName, allParameters);
         }
 
         // Method to delete a record from database using stored procedures
         public bool DeleteFromDatabase(string tableName, Dictionary<string, object> whereParameters)
         {
-            if (string.IsNullOrEmpty(_connectionString))
+            string procedureName = GetDeleteProcedureName(tableName);
+            if (string.IsNullOrEmpty(procedureName))
             {
-                Console.WriteLine("No database connection available. Cannot delete from database.");
+                Console.WriteLine($"No delete procedure found for table: {tableName}");
                 return false;
             }
-
-            try
-            {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    connection.Open();
-                    
-                    string procedureName = GetDeleteProcedureName(tableName);
-                    if (string.IsNullOrEmpty(procedureName))
-                    {
-                        Console.WriteLine($"No delete procedure found for table: {tableName}");
-                        return false;
-                    }
-
-                    using (var command = new SqlCommand(procedureName, connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        
-                        foreach (var kvp in whereParameters)
-                        {
-                            command.Parameters.AddWithValue("@" + kvp.Key, kvp.Value ?? DBNull.Value);
-                        }
-                        
-                        command.ExecuteNonQuery();
-                    }
-                }
-                
-                // Refresh the specific table data
-                RefreshData();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error deleting from database: {ex.Message}");
-                return false;
-            }
+            return ExecuteNonQueryStoredProcedure(procedureName, whereParameters);
         }
 
         private string GetInsertProcedureName(string tableName)

@@ -264,3 +264,11 @@ PRINT '';
 PRINT 'Static data insertion script completed successfully!';
 PRINT 'You can now use your application with this sample data.';
 
+
+
+SELECT * FROM MOM_Department
+SELECT * FROM MOM_MeetingType
+SELECT * FROM MOM_MeetingVenue
+SELECT * FROM MOM_Staff
+SELECT *  FROM MOM_Meetings
+SELECT * FROM MOM_MeetingMember

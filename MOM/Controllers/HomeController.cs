@@ -19,30 +19,41 @@ namespace MOM.Controllers
         {
             try
             {
+                // Use the new DataService dashboard method
+                var stats = _dataService.GetDashboardStats();
+                
                 var now = DateTime.Now;
                 var startOfWeek = now.AddDays(-(int)now.DayOfWeek);
                 var startOfMonth = new DateTime(now.Year, now.Month, 1);
-                var startOfYear = new DateTime(now.Year, 1, 1);
 
-                // Basic Statistics
-                var totalMeetings = _dataService.Meetings?.Rows?.Count ?? 0;
-                var totalDepartments = _dataService.Departments?.Rows?.Count ?? 0;
-                var totalStaff = _dataService.Staff?.Rows?.Count ?? 0;
-                var totalVenues = _dataService.MeetingVenues?.Rows?.Count ?? 0;
+                // Get basic statistics from the new method
+                var totalMeetings = stats.GetValueOrDefault("TotalMeetings", 0);
+                var totalDepartments = stats.GetValueOrDefault("TotalDepartments", 0);
+                var totalStaff = stats.GetValueOrDefault("TotalStaff", 0);
+                var totalVenues = stats.GetValueOrDefault("TotalMeetingVenues", 0);
+                var cancelledMeetings = stats.GetValueOrDefault("CancelledMeetings", 0);
+                var activeMeetings = stats.GetValueOrDefault("ActiveMeetings", 0);
+                var presentMembers = stats.GetValueOrDefault("PresentMembers", 0);
+                var absentMembers = stats.GetValueOrDefault("AbsentMembers", 0);
+                var totalMeetingMembers = stats.GetValueOrDefault("TotalMeetingMembers", 0);
 
-                // Meeting Analytics
+                // Calculate attendance rate
+                var attendanceRate = totalMeetingMembers > 0 ? (double)presentMembers / totalMeetingMembers * 100 : 0;
+
+                // Meeting Analytics using DataService data
                 var meetings = _dataService.Meetings?.AsEnumerable() ?? Enumerable.Empty<System.Data.DataRow>();
                 
                 var upcomingMeetings = meetings
-                    .Where(m => m.Field<DateTime>("MeetingDate") > now && !m.Field<bool>("IsCancelled"))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        bool isCancelled = isCancelledValue != DBNull.Value && Convert.ToBoolean(isCancelledValue);
+                        return m.Field<DateTime>("MeetingDate") > now && !isCancelled;
+                    })
                     .Count();
 
                 var recentMeetings = meetings
                     .Where(m => m.Field<DateTime>("MeetingDate") >= startOfWeek && m.Field<DateTime>("MeetingDate") <= now)
-                    .Count();
-
-                var cancelledMeetings = meetings
-                    .Where(m => m.Field<bool>("IsCancelled"))
                     .Count();
 
                 var thisMonthMeetings = meetings
@@ -51,7 +62,11 @@ namespace MOM.Controllers
 
                 // Department-wise meeting distribution
                 var departmentMeetings = meetings
-                    .Where(m => !m.Field<bool>("IsCancelled"))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        return isCancelledValue == DBNull.Value || !Convert.ToBoolean(isCancelledValue);
+                    })
                     .GroupBy(m => m.Field<int>("DepartmentID"))
                     .Select(g => new {
                         DepartmentID = g.Key,
@@ -65,7 +80,11 @@ namespace MOM.Controllers
 
                 // Meeting type distribution
                 var meetingTypeDistribution = meetings
-                    .Where(m => !m.Field<bool>("IsCancelled"))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        return isCancelledValue == DBNull.Value || !Convert.ToBoolean(isCancelledValue);
+                    })
                     .GroupBy(m => m.Field<int>("MeetingTypeID"))
                     .Select(g => new {
                         MeetingTypeID = g.Key,
@@ -85,9 +104,14 @@ namespace MOM.Controllers
                     var monthEnd = monthStart.AddMonths(1).AddDays(-1);
                     
                     var monthMeetings = meetings
-                        .Where(m => m.Field<DateTime>("MeetingDate") >= monthStart && 
+                        .Where(m => 
+                        {
+                            var isCancelledValue = m["IsCancelled"];
+                            bool isCancelled = isCancelledValue != DBNull.Value && Convert.ToBoolean(isCancelledValue);
+                            return m.Field<DateTime>("MeetingDate") >= monthStart && 
                                    m.Field<DateTime>("MeetingDate") <= monthEnd &&
-                                   !m.Field<bool>("IsCancelled"))
+                                   !isCancelled;
+                        })
                         .Count();
 
                     monthlyTrends.Add(new {
@@ -98,7 +122,11 @@ namespace MOM.Controllers
 
                 // Venue utilization
                 var venueUtilization = meetings
-                    .Where(m => !m.Field<bool>("IsCancelled"))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        return isCancelledValue == DBNull.Value || !Convert.ToBoolean(isCancelledValue);
+                    })
                     .GroupBy(m => m.Field<int>("MeetingVenueID"))
                     .Select(g => new {
                         VenueID = g.Key,
@@ -115,13 +143,6 @@ namespace MOM.Controllers
                     ?.Select(m => m.Field<int>("StaffID"))
                     ?.Distinct()
                     ?.Count() ?? 0;
-
-                // Attendance statistics
-                var totalMeetingMembers = _dataService.MeetingMembers?.Rows?.Count ?? 0;
-                var presentMembers = _dataService.MeetingMembers?.AsEnumerable()
-                    ?.Where(m => m.Field<bool>("IsPresent"))
-                    ?.Count() ?? 0;
-                var attendanceRate = totalMeetingMembers > 0 ? (double)presentMembers / totalMeetingMembers * 100 : 0;
 
                 // Recent meetings for display
                 var recentMeetingsData = meetings
@@ -141,13 +162,18 @@ namespace MOM.Controllers
                         MeetingTypeName = _dataService.MeetingTypes?.AsEnumerable()
                             .FirstOrDefault(mt => mt.Field<int>("MeetingTypeID") == m.Field<int>("MeetingTypeID"))
                             ?.Field<string>("MeetingTypeName") ?? "Unknown",
-                        IsCancelled = m.Field<bool>("IsCancelled")
+                        IsCancelled = m["IsCancelled"] != DBNull.Value && Convert.ToBoolean(m["IsCancelled"])
                     })
                     .ToArray();
 
                 // Upcoming meetings for display
                 var upcomingMeetingsData = meetings
-                    .Where(m => m.Field<DateTime>("MeetingDate") > now && !m.Field<bool>("IsCancelled"))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        bool isCancelled = isCancelledValue != DBNull.Value && Convert.ToBoolean(isCancelledValue);
+                        return m.Field<DateTime>("MeetingDate") > now && !isCancelled;
+                    })
                     .OrderBy(m => m.Field<DateTime>("MeetingDate"))
                     .Take(5)
                     .Select(m => new {
@@ -166,10 +192,10 @@ namespace MOM.Controllers
                     })
                     .ToArray();
 
-                // Create a strongly typed view model instead of anonymous object
+                // Create dashboard data using the new DataService stats
                 var dashboardData = new
                 {
-                    // Basic Stats
+                    // Basic Stats from DataService
                     TotalMeetings = totalMeetings,
                     TotalDepartments = totalDepartments,
                     TotalStaff = totalStaff,
@@ -177,9 +203,13 @@ namespace MOM.Controllers
                     UpcomingMeetings = upcomingMeetings,
                     RecentMeetings = recentMeetings,
                     CancelledMeetings = cancelledMeetings,
+                    ActiveMeetings = activeMeetings,
                     ThisMonthMeetings = thisMonthMeetings,
                     ActiveMembers = activeMembers,
                     AttendanceRate = Math.Round(attendanceRate, 1),
+                    PresentMembers = presentMembers,
+                    AbsentMembers = absentMembers,
+                    TotalMeetingMembers = totalMeetingMembers,
 
                     // Chart Data
                     DepartmentMeetings = departmentMeetings.ToArray(),
@@ -192,12 +222,12 @@ namespace MOM.Controllers
                     UpcomingMeetingsData = upcomingMeetingsData
                 };
 
-                // Pass data using ViewData instead of ViewBag for better debugging
+                // Pass data using ViewData and ViewBag for compatibility
                 ViewData["DashboardData"] = dashboardData;
                 ViewBag.DashboardData = dashboardData;
                 
                 // Add debug information
-                ViewBag.DebugInfo = $"Data loaded: Meetings={totalMeetings}, Departments={totalDepartments}, Staff={totalStaff}";
+                ViewBag.DebugInfo = $"Data loaded: Meetings={totalMeetings}, Departments={totalDepartments}, Staff={totalStaff}, Present={presentMembers}, Absent={absentMembers}";
                 
                 return View();
             }
@@ -213,9 +243,13 @@ namespace MOM.Controllers
                     UpcomingMeetings = 0,
                     RecentMeetings = 0,
                     CancelledMeetings = 0,
+                    ActiveMeetings = 0,
                     ThisMonthMeetings = 0,
                     ActiveMembers = 0,
                     AttendanceRate = 0.0,
+                    PresentMembers = 0,
+                    AbsentMembers = 0,
+                    TotalMeetingMembers = 0,
                     DepartmentMeetings = new object[0],
                     MeetingTypeDistribution = new object[0],
                     MonthlyTrends = new object[0],
@@ -226,7 +260,7 @@ namespace MOM.Controllers
                 
                 ViewBag.DashboardData = fallbackData;
                 ViewBag.ErrorMessage = $"Unable to load dashboard statistics: {ex.Message}";
-                ViewBag.DebugInfo = $"Exception occurred: {ex.GetType().Name}";
+                ViewBag.DebugInfo = $"Exception occurred: {ex.GetType().Name} - {ex.Message}";
                 return View();
             }
         }

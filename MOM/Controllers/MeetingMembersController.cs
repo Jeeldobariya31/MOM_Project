@@ -105,7 +105,12 @@ namespace MOM.Controllers
             if (!string.IsNullOrEmpty(attendanceFilter))
             {
                 bool isPresent = attendanceFilter == "Present";
-                filteredRows = filteredRows.Where(row => row.Field<bool>("IsPresent") == isPresent);
+                filteredRows = filteredRows.Where(row => 
+                {
+                    var isPresentValue = row["IsPresent"];
+                    if (isPresentValue == DBNull.Value) return false;
+                    return Convert.ToBoolean(isPresentValue) == isPresent;
+                });
             }
 
             // Order by meeting date descending, then by staff name
@@ -130,7 +135,12 @@ namespace MOM.Controllers
             
             // Prepare data for JavaScript serialization
             var meetingsForJs = _dataService.Meetings.AsEnumerable()
-                .Where(m => !m.Field<bool>("IsCancelled")) // Only active meetings
+                .Where(m => 
+                {
+                    var isCancelledValue = m["IsCancelled"];
+                    if (isCancelledValue == DBNull.Value) return true; // Include if NULL
+                    return !Convert.ToBoolean(isCancelledValue); // Only active meetings
+                })
                 .Select(m => new {
                     MeetingID = m.Field<int>("MeetingID"),
                     MeetingDescription = m.Field<string>("MeetingDescription"),
@@ -181,7 +191,11 @@ namespace MOM.Controllers
                     model.MeetingMemberID = row.Field<int>("MeetingMemberID");
                     model.MeetingID = row.Field<int>("MeetingID");
                     model.StaffID = row.Field<int>("StaffID");
-                    model.IsPresent = row.Field<bool>("IsPresent");
+                    
+                    // Safe boolean conversion
+                    var isPresentValue = row["IsPresent"];
+                    model.IsPresent = isPresentValue == DBNull.Value ? false : Convert.ToBoolean(isPresentValue);
+                    
                     model.Remarks = row.Field<string>("Remarks") ?? "";
                     model.Created = row.Field<DateTime>("Created");
                     model.Modified = row.Field<DateTime>("Modified");
@@ -190,7 +204,12 @@ namespace MOM.Controllers
 
             // Pass dropdown data to view
             ViewBag.Meetings = _dataService.Meetings.AsEnumerable()
-                .Where(m => !m.Field<bool>("IsCancelled") && m.Field<DateTime>("MeetingDate") >= DateTime.Now.AddDays(-30))
+                .Where(m => 
+                {
+                    var isCancelledValue = m["IsCancelled"];
+                    if (isCancelledValue == DBNull.Value) return true; // Include if NULL
+                    return !Convert.ToBoolean(isCancelledValue) && m.Field<DateTime>("MeetingDate") >= DateTime.Now.AddDays(-30);
+                })
                 .OrderBy(m => m.Field<DateTime>("MeetingDate"));
             
             // Create staff data with department names
@@ -237,16 +256,26 @@ namespace MOM.Controllers
                 // Check if meeting is cancelled
                 var meeting = _dataService.Meetings.AsEnumerable()
                     .FirstOrDefault(m => m.Field<int>("MeetingID") == model.MeetingID);
-                if (meeting != null && meeting.Field<bool>("IsCancelled"))
+                if (meeting != null)
                 {
-                    ModelState.AddModelError("MeetingID", "Cannot assign members to a cancelled meeting.");
+                    var isCancelledValue = meeting["IsCancelled"];
+                    bool isCancelled = isCancelledValue != DBNull.Value && Convert.ToBoolean(isCancelledValue);
+                    if (isCancelled)
+                    {
+                        ModelState.AddModelError("MeetingID", "Cannot assign members to a cancelled meeting.");
+                    }
                 }
             }
 
             if (!ModelState.IsValid)
             {
                 ViewBag.Meetings = _dataService.Meetings.AsEnumerable()
-                    .Where(m => !m.Field<bool>("IsCancelled") && m.Field<DateTime>("MeetingDate") >= DateTime.Now.AddDays(-30))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        if (isCancelledValue == DBNull.Value) return true; // Include if NULL
+                        return !Convert.ToBoolean(isCancelledValue) && m.Field<DateTime>("MeetingDate") >= DateTime.Now.AddDays(-30);
+                    })
                     .OrderBy(m => m.Field<DateTime>("MeetingDate"));
                 
                 // Create staff data with department names
@@ -276,48 +305,41 @@ namespace MOM.Controllers
             {
                 if (model.MeetingMemberID == 0)
                 {
-                    // Add new meeting member
-                    int newId = _dataService.GetNextId(_dataService.MeetingMembers, "MeetingMemberID");
-                    _dataService.MeetingMembers.Rows.Add(
-                        newId,
-                        model.MeetingID,
-                        model.StaffID,
-                        model.IsPresent,
-                        model.Remarks ?? "",
-                        DateTime.Now,
-                        DateTime.Now
-                    );
-                    
-                    TempData["SuccessMessage"] = "Meeting member assigned successfully!";
-                }
-                else
-                {
-                    // Update existing meeting member
-                    var row = _dataService.MeetingMembers.AsEnumerable()
-                        .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == model.MeetingMemberID);
-                    
-                    if (row != null)
+                    // Add new meeting member using stored procedure
+                    if (_dataService.InsertMeetingMember(model.MeetingID, model.StaffID, model.IsPresent, model.Remarks ?? ""))
                     {
-                        row["MeetingID"] = model.MeetingID;
-                        row["StaffID"] = model.StaffID;
-                        row["IsPresent"] = model.IsPresent;
-                        row["Remarks"] = model.Remarks ?? "";
-                        row["Modified"] = DateTime.Now;
+                        TempData["SuccessMessage"] = "Meeting member assigned successfully!";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = "Meeting member not found.";
-                        return RedirectToAction("MeetingMemberList");
+                        TempData["ErrorMessage"] = "Failed to assign meeting member.";
+                        return View(model);
                     }
-                    
-                    TempData["SuccessMessage"] = "Meeting member updated successfully!";
+                }
+                else
+                {
+                    // Update existing meeting member using stored procedure
+                    if (_dataService.UpdateMeetingMember(model.MeetingMemberID, model.MeetingID, model.StaffID, model.IsPresent, model.Remarks ?? ""))
+                    {
+                        TempData["SuccessMessage"] = "Meeting member updated successfully!";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to update meeting member.";
+                        return View(model);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
                 ViewBag.Meetings = _dataService.Meetings.AsEnumerable()
-                    .Where(m => !m.Field<bool>("IsCancelled") && m.Field<DateTime>("MeetingDate") >= DateTime.Now.AddDays(-30))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        if (isCancelledValue == DBNull.Value) return true; // Include if NULL
+                        return !Convert.ToBoolean(isCancelledValue) && m.Field<DateTime>("MeetingDate") >= DateTime.Now.AddDays(-30);
+                    })
                     .OrderBy(m => m.Field<DateTime>("MeetingDate"));
                 
                 // Create staff data with department names
@@ -350,17 +372,13 @@ namespace MOM.Controllers
         {
             try
             {
-                var row = _dataService.MeetingMembers.AsEnumerable()
-                    .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == id);
-                
-                if (row != null)
+                if (_dataService.DeleteMeetingMember(id))
                 {
-                    _dataService.MeetingMembers.Rows.Remove(row);
                     TempData["SuccessMessage"] = "Meeting member removed successfully!";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Meeting member not found.";
+                    TempData["ErrorMessage"] = "Failed to delete meeting member.";
                 }
             }
             catch (Exception ex)
@@ -381,52 +399,33 @@ namespace MOM.Controllers
                     return Json(new { success = false, message = "Please select at least one staff member." });
                 }
 
-                // Check if meeting exists and is not cancelled
-                var meeting = _dataService.Meetings.AsEnumerable()
-                    .FirstOrDefault(m => m.Field<int>("MeetingID") == meetingId);
-                if (meeting == null)
+                // Check if meeting exists and is not cancelled using new DataService method
+                var meetingData = _dataService.GetMeetingById(meetingId);
+                if (meetingData.Rows.Count == 0)
                 {
                     return Json(new { success = false, message = "Meeting not found." });
                 }
-                if (meeting.Field<bool>("IsCancelled"))
+                
+                var meetingRow = meetingData.Rows[0];
+                var isCancelledValue = meetingRow["IsCancelled"];
+                bool isCancelled = isCancelledValue != DBNull.Value && Convert.ToBoolean(isCancelledValue);
+                if (isCancelled)
                 {
                     return Json(new { success = false, message = "Cannot assign members to a cancelled meeting." });
                 }
 
-                int assignedCount = 0;
-                int skippedCount = 0;
-
-                foreach (int staffId in staffIds)
+                // Use the new DataService bulk assign method
+                var staffIdsList = staffIds.ToList();
+                bool success = _dataService.BulkAssignStaffToMeeting(meetingId, staffIdsList, "Bulk assigned");
+                
+                if (success)
                 {
-                    // Check if already assigned
-                    var existingMember = _dataService.MeetingMembers.AsEnumerable()
-                        .Any(m => m.Field<int>("MeetingID") == meetingId && m.Field<int>("StaffID") == staffId);
-
-                    if (!existingMember)
-                    {
-                        int newId = _dataService.GetNextId(_dataService.MeetingMembers, "MeetingMemberID");
-                        _dataService.MeetingMembers.Rows.Add(
-                            newId,
-                            meetingId,
-                            staffId,
-                            false, // Default to absent
-                            "",
-                            DateTime.Now,
-                            DateTime.Now
-                        );
-                        assignedCount++;
-                    }
-                    else
-                    {
-                        skippedCount++;
-                    }
+                    return Json(new { success = true, message = $"Successfully assigned {staffIds.Length} members to the meeting." });
                 }
-
-                string message = $"Successfully assigned {assignedCount} members.";
-                if (skippedCount > 0)
-                    message += $" {skippedCount} members were already assigned.";
-
-                return Json(new { success = true, message = message });
+                else
+                {
+                    return Json(new { success = false, message = "Failed to assign some members. Please check for duplicates." });
+                }
             }
             catch (Exception ex)
             {
@@ -439,17 +438,13 @@ namespace MOM.Controllers
         {
             try
             {
-                var row = _dataService.MeetingMembers.AsEnumerable()
-                    .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == id);
-                
-                if (row != null)
+                if (_dataService.DeleteMeetingMember(id))
                 {
-                    _dataService.MeetingMembers.Rows.Remove(row);
                     return Json(new { success = true, message = "Meeting member removed successfully!" });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Meeting member not found." });
+                    return Json(new { success = false, message = "Failed to delete meeting member." });
                 }
             }
             catch (Exception ex)
@@ -502,7 +497,7 @@ namespace MOM.Controllers
                         MeetingDate = meeting?.Field<DateTime>("MeetingDate").ToString("dd/MM/yyyy hh:mm tt") ?? "Unknown",
                         MeetingTypeName = meetingType?.Field<string>("MeetingTypeName") ?? "Unknown",
                         VenueName = venue?.Field<string>("MeetingVenueName") ?? "Unknown",
-                        IsPresent = row.Field<bool>("IsPresent"),
+                        IsPresent = row["IsPresent"] == DBNull.Value ? false : Convert.ToBoolean(row["IsPresent"]),
                         Remarks = row.Field<string>("Remarks") ?? "",
                         Created = row.Field<DateTime>("Created").ToString("dd/MM/yyyy hh:mm tt"),
                         Modified = row.Field<DateTime>("Modified").ToString("dd/MM/yyyy hh:mm tt")
@@ -536,7 +531,12 @@ namespace MOM.Controllers
             try
             {
                 var meetings = _dataService.Meetings.AsEnumerable()
-                    .Where(m => !m.Field<bool>("IsCancelled"))
+                    .Where(m => 
+                    {
+                        var isCancelledValue = m["IsCancelled"];
+                        if (isCancelledValue == DBNull.Value) return true; // Include if NULL
+                        return !Convert.ToBoolean(isCancelledValue);
+                    })
                     .Select(m => new {
                         MeetingID = m.Field<int>("MeetingID"),
                         MeetingDescription = m.Field<string>("MeetingDescription"),
@@ -622,17 +622,26 @@ namespace MOM.Controllers
         {
             try
             {
-                var row = _dataService.MeetingMembers.AsEnumerable()
-                    .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == id);
-                
-                if (row != null)
+                // Get the meeting member data using new DataService method
+                var memberData = _dataService.GetMeetingMemberById(id);
+                if (memberData.Rows.Count == 0)
                 {
-                    bool currentStatus = row.Field<bool>("IsPresent");
-                    bool newStatus = !currentStatus;
-                    
-                    row["IsPresent"] = newStatus;
-                    row["Modified"] = DateTime.Now;
-                    
+                    return Json(new { success = false, message = "Meeting member not found." });
+                }
+                
+                var row = memberData.Rows[0];
+                bool currentStatus = row["IsPresent"] == DBNull.Value ? false : Convert.ToBoolean(row["IsPresent"]);
+                bool newStatus = !currentStatus;
+                
+                int meetingId = Convert.ToInt32(row["MeetingID"]);
+                int staffId = Convert.ToInt32(row["StaffID"]);
+                string remarks = row["Remarks"]?.ToString() ?? "";
+                
+                // Update using new DataService method
+                bool success = _dataService.UpdateMeetingMember(id, meetingId, staffId, newStatus, remarks);
+                
+                if (success)
+                {
                     return Json(new { 
                         success = true, 
                         message = $"Attendance marked as {(newStatus ? "Present" : "Absent")}", 
@@ -641,7 +650,7 @@ namespace MOM.Controllers
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Meeting member not found." });
+                    return Json(new { success = false, message = "Failed to update attendance." });
                 }
             }
             catch (Exception ex)
@@ -655,48 +664,89 @@ namespace MOM.Controllers
         {
             try
             {
-                int updatedCount = 0;
+                var attendanceUpdates = new Dictionary<int, bool>();
                 
-                // Mark selected members as present
+                // Add present members
                 if (presentIds != null && presentIds.Length > 0)
                 {
                     foreach (int memberId in presentIds)
                     {
-                        var row = _dataService.MeetingMembers.AsEnumerable()
-                            .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == memberId && 
-                                                x.Field<int>("MeetingID") == meetingId);
-                        
-                        if (row != null && !row.Field<bool>("IsPresent"))
-                        {
-                            row["IsPresent"] = true;
-                            row["Modified"] = DateTime.Now;
-                            updatedCount++;
-                        }
+                        attendanceUpdates[memberId] = true;
                     }
                 }
                 
-                // Mark selected members as absent
+                // Add absent members
                 if (absentIds != null && absentIds.Length > 0)
                 {
                     foreach (int memberId in absentIds)
                     {
-                        var row = _dataService.MeetingMembers.AsEnumerable()
-                            .FirstOrDefault(x => x.Field<int>("MeetingMemberID") == memberId && 
-                                                x.Field<int>("MeetingID") == meetingId);
-                        
-                        if (row != null && row.Field<bool>("IsPresent"))
-                        {
-                            row["IsPresent"] = false;
-                            row["Modified"] = DateTime.Now;
-                            updatedCount++;
-                        }
+                        attendanceUpdates[memberId] = false;
                     }
                 }
                 
-                return Json(new { 
-                    success = true, 
-                    message = $"Successfully updated attendance for {updatedCount} member(s)" 
-                });
+                if (attendanceUpdates.Count == 0)
+                {
+                    return Json(new { success = false, message = "No attendance updates specified." });
+                }
+                
+                // Use the new DataService bulk update method
+                bool success = _dataService.BulkUpdateAttendance(attendanceUpdates, "Bulk attendance update");
+                
+                if (success)
+                {
+                    return Json(new { 
+                        success = true, 
+                        message = $"Successfully updated attendance for {attendanceUpdates.Count} member(s)" 
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to update some attendance records." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult BulkMarkAllPresent(int meetingId)
+        {
+            try
+            {
+                bool success = _dataService.BulkMarkAllPresent(meetingId, "Bulk marked all present");
+                
+                if (success)
+                {
+                    return Json(new { success = true, message = "Successfully marked all members as present." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to update attendance for some members." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult BulkMarkAllAbsent(int meetingId)
+        {
+            try
+            {
+                bool success = _dataService.BulkMarkAllAbsent(meetingId, "Bulk marked all absent");
+                
+                if (success)
+                {
+                    return Json(new { success = true, message = "Successfully marked all members as absent." });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to update attendance for some members." });
+                }
             }
             catch (Exception ex)
             {
@@ -726,7 +776,7 @@ namespace MOM.Controllers
                             staffID = m.Field<int>("StaffID"),
                             staffName = staff?.Field<string>("StaffName") ?? "Unknown Staff",
                             departmentName = dept?.Field<string>("DepartmentName") ?? "Unknown Dept",
-                            isPresent = m.Field<bool>("IsPresent"),
+                            isPresent = m["IsPresent"] == DBNull.Value ? false : Convert.ToBoolean(m["IsPresent"]),
                             remarks = m.Field<string>("Remarks") ?? ""
                         };
                     })
@@ -767,7 +817,7 @@ namespace MOM.Controllers
                 DepartmentName = department?.Field<string>("DepartmentName"),
                 MeetingTypeName = meetingType?.Field<string>("MeetingTypeName"),
                 VenueName = venue?.Field<string>("MeetingVenueName"),
-                IsCancelled = meeting.Field<bool>("IsCancelled")
+                IsCancelled = meeting["IsCancelled"] == DBNull.Value ? false : Convert.ToBoolean(meeting["IsCancelled"])
             });
         }
     }
