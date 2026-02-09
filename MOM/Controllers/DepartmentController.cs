@@ -244,27 +244,6 @@ namespace MOM.Controllers
         }
 
         [HttpGet]
-        public IActionResult TestDepartmentData()
-        {
-            try
-            {
-                var departments = _dataService.Departments.AsEnumerable().Select(r => new
-                {
-                    DepartmentID = r.Field<int>("DepartmentID"),
-                    DepartmentName = r.Field<string>("DepartmentName"),
-                    Created = r.Field<DateTime>("Created"),
-                    Modified = r.Field<DateTime>("Modified")
-                }).ToList();
-
-                return Json(new { success = true, count = departments.Count, data = departments });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpGet]
         public JsonResult GetDepartments()
         {
             try
@@ -283,63 +262,6 @@ namespace MOM.Controllers
             catch (Exception ex)
             {
                 return Json(new { error = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public IActionResult TestDatabaseConnection()
-        {
-            try
-            {
-                // Force refresh data from database
-                _dataService.RefreshData();
-                
-                var departmentCount = _dataService.Departments.Rows.Count;
-                var staffCount = _dataService.Staff.Rows.Count;
-                var meetingCount = _dataService.Meetings.Rows.Count;
-                var userCount = _dataService.Users.Rows.Count;
-
-                // Get sample data to verify content
-                var sampleDepartments = _dataService.Departments.AsEnumerable()
-                    .Take(3)
-                    .Select(r => new {
-                        ID = r.Field<int>("DepartmentID"),
-                        Name = r.Field<string>("DepartmentName")
-                    }).ToList();
-
-                var sampleUsers = _dataService.Users.AsEnumerable()
-                    .Take(3)
-                    .Select(r => new {
-                        ID = r.Field<int>("UserID"),
-                        Username = r.Field<string>("Username"),
-                        FullName = r.Field<string>("FullName")
-                    }).ToList();
-
-                return Json(new 
-                { 
-                    success = true, 
-                    message = "DataService connection successful",
-                    data = new
-                    {
-                        Counts = new
-                        {
-                            DepartmentCount = departmentCount,
-                            StaffCount = staffCount,
-                            MeetingCount = meetingCount,
-                            UserCount = userCount
-                        },
-                        SampleData = new
-                        {
-                            Departments = sampleDepartments,
-                            Users = sampleUsers
-                        },
-                        LastRefresh = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt")
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = $"DataService connection failed: {ex.Message}" });
             }
         }
     }
