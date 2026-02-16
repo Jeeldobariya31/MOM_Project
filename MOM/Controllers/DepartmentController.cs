@@ -132,13 +132,26 @@ namespace MOM.Controllers
                 if (model.DepartmentID == 0)
                 {
                     // Add new department using stored procedure
-                    if (_dataService.InsertDepartment(model.DepartmentName.Trim()))
+                    try
                     {
-                        TempData["SuccessMessage"] = "Department added successfully.";
+                        Console.WriteLine($"Attempting to insert department: {model.DepartmentName}");
+                        bool result = _dataService.InsertDepartment(model.DepartmentName.Trim());
+                        Console.WriteLine($"Insert result: {result}");
+                        
+                        if (result)
+                        {
+                            TempData["SuccessMessage"] = "Department added successfully.";
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = "Failed to save department to database. Please check the database connection and stored procedure.";
+                            return View(model);
+                        }
                     }
-                    else
+                    catch (Exception insertEx)
                     {
-                        TempData["ErrorMessage"] = "Failed to save department to database.";
+                        Console.WriteLine($"Insert exception: {insertEx.Message}");
+                        TempData["ErrorMessage"] = $"Error inserting department: {insertEx.Message}";
                         return View(model);
                     }
                 }
