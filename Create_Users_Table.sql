@@ -1,0 +1,13 @@
+-- Create Users Table
+CREATE TABLE [dbo].[MOM_Users] (
+    [UserID] INT IDENTITY(1,1) NOT NULL,
+    [Username] NVARCHAR(50) NOT NULL UNIQUE,
+    [Password] NVARCHAR(255) NOT NULL,
+    [FullName] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(100) NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [LastLogin] DATETIME NULL,
+    [Created] DATETIME NOT NULL DEFAULT GETDATE(),
+    [Modified] DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT [PK_MOM_Users] PRIMARY KEY CLUSTERED ([UserID] ASC)
+);

@@ -74,14 +74,14 @@
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" data-bs-toggle="dropdown">
                         <img src="~/assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
                         <span class="d-none d-md-block dropdown-toggle ps-2">
-                            @User.Identity?.Name ?? "Admin"
+                            @Context.Session.GetString("FullName") ?? "User"
                         </span>
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                         <li class="dropdown-header">
-                            <h6>@User.Identity?.Name ?? "Admin"</h6>
-                            <span>Administrator</span>
+                            <h6>@Context.Session.GetString("FullName") ?? "User"</h6>
+                            <span>@Context.Session.GetString("Username") ?? "user"</span>
                         </li>
 
                         <li><hr class="dropdown-divider"></li>
@@ -105,11 +105,12 @@
                         <li><hr class="dropdown-divider"></li>
 
                         <li>
-                            <a class="dropdown-item d-flex align-items-center text-danger"
-                               asp-controller="Auth" asp-action="Logout">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Logout</span>
-                            </a>
+                            <form asp-controller="Auth" asp-action="Logout" method="post" style="display: inline;">
+                                <button type="submit" class="dropdown-item d-flex align-items-center text-danger" style="border: none; background: none; width: 100%; text-align: left;">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </li>

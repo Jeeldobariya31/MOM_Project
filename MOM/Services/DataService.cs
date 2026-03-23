@@ -396,8 +396,38 @@ namespace MOM.Services
 
         private void LoadUsers()
         {
-            // Users table doesn't exist in database yet, use static data
-            LoadStaticUsers();
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    var command = new SqlCommand("PR_Users_SelectAll", connection);
+                    command.CommandType = CommandType.StoredProcedure;
+                    
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var row = Users.NewRow();
+                            row["UserID"] = reader["UserID"];
+                            row["Username"] = reader["Username"];
+                            row["Password"] = reader["Password"];
+                            row["FullName"] = reader["FullName"];
+                            row["Email"] = reader["Email"];
+                            row["IsActive"] = reader["IsActive"];
+                            row["LastLogin"] = reader["LastLogin"] == DBNull.Value ? DBNull.Value : reader["LastLogin"];
+                            row["Created"] = reader["Created"];
+                            row["Modified"] = reader["Modified"];
+                            Users.Rows.Add(row);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading Users: {ex.Message}");
+                LoadStaticUsers();
+            }
         }
 
         private void LoadStaticUsers()
@@ -588,6 +618,31 @@ namespace MOM.Services
         public bool InsertMeetingMember(int meetingId, int staffId, bool isPresent, string remarks) => ExecuteNonQueryStoredProcedure("PR_MeetingMember_Insert", new Dictionary<string, object> { { "MeetingID", meetingId }, { "StaffID", staffId }, { "IsPresent", isPresent }, { "Remarks", remarks } });
         public bool UpdateMeetingMember(int meetingMemberId, int meetingId, int staffId, bool isPresent, string remarks) => ExecuteNonQueryStoredProcedure("PR_MeetingMember_UpdateByPK", new Dictionary<string, object> { { "MeetingMemberID", meetingMemberId }, { "MeetingID", meetingId }, { "StaffID", staffId }, { "IsPresent", isPresent }, { "Remarks", remarks } });
         public bool DeleteMeetingMember(int meetingMemberId) => ExecuteNonQueryStoredProcedure("PR_MeetingMember_DeleteByPK", new Dictionary<string, object> { { "MeetingMemberID", meetingMemberId } });
+
+        // ========== USER AUTHENTICATION METHODS ==========
+
+        public DataTable ValidateUser(string username, string password)
+        {
+            return ExecuteStoredProcedure("PR_Users_Login", new Dictionary<string, object> 
+            { 
+                { "Username", username }, 
+                { "Password", password } 
+            });
+        }
+
+        public bool UpdateLastLogin(int userId)
+        {
+            return ExecuteNonQueryStoredProcedure("PR_Users_UpdateLastLogin", new Dictionary<string, object> 
+            { 
+                { "UserID", userId } 
+            });
+        }
+
+        public DataTable GetAllUsers() => ExecuteStoredProcedure("PR_Users_SelectAll");
+        public DataTable GetUserById(int userId) => ExecuteStoredProcedure("PR_Users_SelectByPK", new Dictionary<string, object> { { "UserID", userId } });
+        public bool InsertUser(string username, string password, string fullName, string email, bool isActive = true) => ExecuteNonQueryStoredProcedure("PR_Users_Insert", new Dictionary<string, object> { { "Username", username }, { "Password", password }, { "FullName", fullName }, { "Email", email }, { "IsActive", isActive } });
+        public bool UpdateUser(int userId, string username, string password, string fullName, string email, bool isActive) => ExecuteNonQueryStoredProcedure("PR_Users_UpdateByPK", new Dictionary<string, object> { { "UserID", userId }, { "Username", username }, { "Password", password }, { "FullName", fullName }, { "Email", email }, { "IsActive", isActive } });
+        public bool DeleteUser(int userId) => ExecuteNonQueryStoredProcedure("PR_Users_DeleteByPK", new Dictionary<string, object> { { "UserID", userId } });
 
         // ========== BULK OPERATIONS ==========
 
